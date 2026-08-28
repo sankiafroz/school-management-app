@@ -6,221 +6,635 @@
 <title>SchoolHub</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-body{background:#f4f7fb;color:#172033}
-button{cursor:pointer}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+font-family:Arial,sans-serif
+}
+
+body{
+background:#f4f7fb;
+color:#172033
+}
+
+button{
+cursor:pointer
+}
+
+/* ================= LOGIN ================= */
 
 .login-page{
- min-height:100vh;background:linear-gradient(135deg,#1769ff,#6546e8);
- display:flex;align-items:center;justify-content:center;padding:20px
-}
-.login-box{
- width:100%;max-width:430px;background:white;padding:30px;
- border-radius:24px;box-shadow:0 20px 60px #0004
-}
-.logo{
- width:65px;height:65px;background:#1769ff;color:white;border-radius:18px;
- display:flex;align-items:center;justify-content:center;
- font-size:32px;font-weight:bold;margin:auto
-}
-.login-title{text-align:center;font-size:28px;font-weight:bold;margin-top:15px}
-.login-subtitle{text-align:center;color:#777;margin:7px 0 25px}
-.form-group{margin-bottom:15px}
-.form-group label{display:block;font-size:14px;font-weight:bold;margin-bottom:7px}
-input,select{
- width:100%;height:47px;border:1px solid #dce2eb;border-radius:11px;
- padding:0 13px;font-size:15px;outline:none;background:white
-}
-.btn{
- width:100%;height:48px;border:0;border-radius:11px;
- font-size:16px;font-weight:bold
-}
-.btn-primary{background:#1769ff;color:white}
-.btn-outline{
- background:white;color:#1769ff;border:1px solid #1769ff;margin-top:10px
-}
-.demo{
- margin-top:18px;background:#f3f6fb;padding:13px;border-radius:12px;
- font-size:13px;line-height:1.6
+min-height:100vh;
+background:linear-gradient(135deg,#1769ff,#6546e8);
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px
 }
 
-.app{display:none;min-height:100vh}
+.login-box{
+width:100%;
+max-width:430px;
+background:white;
+padding:30px;
+border-radius:24px;
+box-shadow:0 20px 60px #0004
+}
+
+.logo{
+width:65px;
+height:65px;
+background:#1769ff;
+color:white;
+border-radius:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:32px;
+font-weight:bold;
+margin:auto
+}
+
+.login-title{
+text-align:center;
+font-size:28px;
+font-weight:bold;
+margin-top:15px
+}
+
+.login-subtitle{
+text-align:center;
+color:#777;
+margin:7px 0 25px
+}
+
+.form-group{
+margin-bottom:15px
+}
+
+.form-group label{
+display:block;
+font-size:14px;
+font-weight:bold;
+margin-bottom:7px
+}
+
+input,select{
+width:100%;
+height:47px;
+border:1px solid #dce2eb;
+border-radius:11px;
+padding:0 13px;
+font-size:15px;
+outline:none;
+background:white
+}
+
+.btn{
+width:100%;
+height:48px;
+border:0;
+border-radius:11px;
+font-size:16px;
+font-weight:bold
+}
+
+.btn-primary{
+background:#1769ff;
+color:white
+}
+
+.btn-outline{
+background:white;
+color:#1769ff;
+border:1px solid #1769ff;
+margin-top:10px
+}
+
+.demo{
+margin-top:18px;
+background:#f3f6fb;
+padding:13px;
+border-radius:12px;
+font-size:13px;
+line-height:1.6
+}
+
+/* ================= APP ================= */
+
+.app{
+display:none;
+min-height:100vh
+}
+
+/* ================= SIDEBAR ================= */
 
 .sidebar{
- position:fixed;left:0;top:0;bottom:0;width:250px;
- background:#101828;color:white;padding:20px 15px;z-index:100;
- overflow-y:auto
+position:fixed;
+left:0;
+top:0;
+bottom:0;
+width:250px;
+background:#101828;
+color:white;
+padding:20px 15px;
+z-index:100;
+overflow-y:auto
 }
-.brand{
- display:flex;align-items:center;gap:10px;font-size:22px;font-weight:bold;
- margin-bottom:22px
-}
-.brand-icon{
- width:40px;height:40px;background:#1769ff;border-radius:12px;
- display:flex;align-items:center;justify-content:center
-}
-.school-box{
- background:#1c2638;padding:13px;border-radius:13px;margin-bottom:18px;
- color:#b8c2d0;font-size:13px
-}
-.school-box strong{display:block;color:white;font-size:15px;margin-bottom:4px}
-.menu{list-style:none}
-.menu li{
- padding:12px;border-radius:10px;margin-bottom:5px;color:#c6cfdb;
- font-size:14px;cursor:pointer
-}
-.menu li:hover,.menu li.active{background:#1769ff;color:white}
-.menu .logout{color:#ff9999;margin-top:15px}
 
-.main{margin-left:250px;min-height:100vh}
+.brand{
+display:flex;
+align-items:center;
+gap:10px;
+font-size:22px;
+font-weight:bold;
+margin-bottom:22px
+}
+
+.brand-icon{
+width:40px;
+height:40px;
+background:#1769ff;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center
+}
+
+.school-box{
+background:#1c2638;
+padding:13px;
+border-radius:13px;
+margin-bottom:18px;
+color:#b8c2d0;
+font-size:13px
+}
+
+.school-box strong{
+display:block;
+color:white;
+font-size:15px;
+margin-bottom:4px
+}
+
+.menu{
+list-style:none
+}
+
+.menu li{
+padding:12px;
+border-radius:10px;
+margin-bottom:5px;
+color:#c6cfdb;
+font-size:14px;
+cursor:pointer
+}
+
+.menu li:hover,
+.menu li.active{
+background:#1769ff;
+color:white
+}
+
+.menu .logout{
+color:#ff9999;
+margin-top:15px
+}
+
+/* ================= MAIN ================= */
+
+.main{
+margin-left:250px;
+min-height:100vh
+}
+
 .topbar{
- height:72px;background:white;border-bottom:1px solid #e7ebf0;
- display:flex;align-items:center;justify-content:space-between;
- padding:0 28px;position:sticky;top:0;z-index:50
+height:72px;
+background:white;
+border-bottom:1px solid #e7ebf0;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 28px;
+position:sticky;
+top:0;
+z-index:50
 }
-.page-title{font-size:22px;font-weight:bold}
-.user{display:flex;align-items:center;gap:10px}
+
+.page-title{
+font-size:22px;
+font-weight:bold
+}
+
+.user{
+display:flex;
+align-items:center;
+gap:10px
+}
+
 .avatar{
- width:40px;height:40px;background:#1769ff;color:white;border-radius:50%;
- display:flex;align-items:center;justify-content:center;font-weight:bold
+width:40px;
+height:40px;
+background:#1769ff;
+color:white;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold
 }
+
 .mobile-menu{
- display:none;background:none;border:0;font-size:25px
+display:none;
+background:none;
+border:0;
+font-size:25px
 }
-.content{padding:25px}
+
+.content{
+padding:25px
+}
+
+/* ================= DASHBOARD ================= */
 
 .welcome{
- background:linear-gradient(110deg,#1769ff,#6046e8);
- color:white;padding:25px;border-radius:20px;margin-bottom:22px
+background:linear-gradient(110deg,#1769ff,#6046e8);
+color:white;
+padding:25px;
+border-radius:20px;
+margin-bottom:22px
 }
-.welcome h2{margin-bottom:7px}
+
+.welcome h2{
+margin-bottom:7px
+}
 
 .stats{
- display:grid;grid-template-columns:repeat(4,1fr);
- gap:16px;margin-bottom:22px
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:16px;
+margin-bottom:22px
 }
+
 .stat-card{
- background:white;border:1px solid #e9edf3;border-radius:17px;padding:20px
+background:white;
+border:1px solid #e9edf3;
+border-radius:17px;
+padding:20px
 }
-.stat-number{font-size:27px;font-weight:bold;margin-top:12px}
-.stat-label{color:#777;font-size:13px;margin-top:4px}
+
+.stat-number{
+font-size:27px;
+font-weight:bold;
+margin-top:12px
+}
+
+.stat-label{
+color:#777;
+font-size:13px;
+margin-top:4px
+}
+
+/* ================= CARD ================= */
 
 .card{
- background:white;border:1px solid #e9edf3;border-radius:17px;
- overflow:hidden;margin-bottom:20px
+background:white;
+border:1px solid #e9edf3;
+border-radius:17px;
+overflow:hidden;
+margin-bottom:20px
 }
+
 .card-header{
- padding:18px 20px;border-bottom:1px solid #edf0f4;
- display:flex;justify-content:space-between;align-items:center
+padding:18px 20px;
+border-bottom:1px solid #edf0f4;
+display:flex;
+justify-content:space-between;
+align-items:center
 }
-.card-header h3{font-size:17px}
+
+.card-header h3{
+font-size:17px
+}
+
 .small-btn{
- border:0;background:#1769ff;color:white;padding:9px 13px;
- border-radius:9px;font-weight:bold
+border:0;
+background:#1769ff;
+color:white;
+padding:9px 13px;
+border-radius:9px;
+font-weight:bold
 }
 
 .two-column{
- display:grid;grid-template-columns:1fr 1fr;gap:20px
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px
 }
-.notice{
- padding:15px 20px;border-bottom:1px solid #edf0f4
-}
-.notice strong{display:block;margin-bottom:5px}
-.notice span{color:#777;font-size:12px}
 
-.table-container{overflow-x:auto}
-table{width:100%;min-width:700px;border-collapse:collapse}
-th,td{
- padding:14px 18px;text-align:left;border-bottom:1px solid #edf0f4;
- font-size:14px
+.notice{
+padding:15px 20px;
+border-bottom:1px solid #edf0f4
 }
-th{background:#fafbfd;color:#667085}
+
+.notice strong{
+display:block;
+margin-bottom:5px
+}
+
+.notice span{
+color:#777;
+font-size:12px
+}
+
+/* ================= TABLE ================= */
+
+.table-container{
+overflow-x:auto
+}
+
+table{
+width:100%;
+min-width:750px;
+border-collapse:collapse
+}
+
+th,td{
+padding:14px 18px;
+text-align:left;
+border-bottom:1px solid #edf0f4;
+font-size:14px
+}
+
+th{
+background:#fafbfd;
+color:#667085
+}
 
 .badge{
- padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold
+padding:5px 9px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold
 }
-.green{background:#e6f8ed;color:#15803d}
-.red{background:#feecec;color:#dc2626}
-.yellow{background:#fff5d9;color:#b77900}
+
+.green{
+background:#e6f8ed;
+color:#15803d
+}
+
+.red{
+background:#feecec;
+color:#dc2626
+}
+
+.yellow{
+background:#fff5d9;
+color:#b77900
+}
+
+/* ================= BACK ================= */
 
 .back-btn{
- border:0;background:#eef4ff;color:#1769ff;
- padding:10px 15px;border-radius:10px;font-weight:bold;
- margin-bottom:18px
+border:0;
+background:#eef4ff;
+color:#1769ff;
+padding:10px 15px;
+border-radius:10px;
+font-weight:bold;
+margin-bottom:18px
 }
 
-/* CLASS CARDS */
+/* ================= CLASS ================= */
 
-.class-grid{
- display:grid;grid-template-columns:repeat(4,1fr);gap:15px
+.class-section{
+margin-bottom:28px
 }
+
+.class-heading{
+font-size:18px;
+font-weight:bold;
+margin-bottom:5px
+}
+
+/* SUMMARY OUTSIDE CARD */
+
+.class-summary{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+margin-bottom:10px;
+font-size:14px
+}
+
+.summary-item{
+font-weight:bold
+}
+
+.summary-total{
+color:#1769ff
+}
+
+.summary-green{
+color:#15803d
+}
+
+.summary-red{
+color:#dc2626
+}
+
+.summary-yellow{
+color:#b77900
+}
+
 .class-card{
- background:white;border:1px solid #e5eaf1;border-radius:17px;
- padding:20px;cursor:pointer;transition:.2s
+background:white;
+border:1px solid #e5eaf1;
+border-radius:17px;
+padding:20px;
+cursor:pointer;
+transition:.2s
 }
+
 .class-card:hover{
- transform:translateY(-3px);box-shadow:0 8px 25px #0001
+transform:translateY(-3px);
+box-shadow:0 8px 25px #0001
 }
+
 .class-number{
- font-size:25px;font-weight:bold;color:#1769ff
+font-size:25px;
+font-weight:bold;
+color:#1769ff
 }
-.class-info{color:#777;font-size:13px;margin-top:7px}
 
-.stream-grid{
- display:grid;grid-template-columns:repeat(3,1fr);gap:16px
+.class-info{
+color:#777;
+font-size:13px;
+margin-top:7px
 }
+
+.open-text{
+margin-top:12px;
+color:#1769ff;
+font-weight:bold
+}
+
+/* ================= STREAM ================= */
+
+.stream-section{
+margin-bottom:25px
+}
+
+.stream-heading{
+font-size:18px;
+font-weight:bold;
+margin-bottom:6px
+}
+
+.stream-summary{
+display:flex;
+gap:18px;
+flex-wrap:wrap;
+font-size:14px;
+margin-bottom:10px
+}
+
 .stream-card{
- background:white;border:1px solid #e5eaf1;border-radius:17px;
- padding:25px;cursor:pointer;text-align:center
+background:white;
+border:1px solid #e5eaf1;
+border-radius:17px;
+padding:25px;
+cursor:pointer;
+text-align:center;
+transition:.2s
 }
-.stream-card:hover{box-shadow:0 8px 25px #0001}
-.stream-icon{font-size:35px;margin-bottom:10px}
-.stream-card h3{font-size:18px}
-.stream-card p{color:#777;font-size:13px;margin-top:5px}
 
-/* MODAL */
+.stream-card:hover{
+box-shadow:0 8px 25px #0001;
+transform:translateY(-3px)
+}
+
+.stream-icon{
+font-size:35px;
+margin-bottom:10px
+}
+
+.stream-card h3{
+font-size:18px
+}
+
+.stream-card p{
+color:#777;
+font-size:13px;
+margin-top:5px
+}
+
+/* ================= MODAL ================= */
 
 .modal-bg{
- display:none;position:fixed;inset:0;background:#0008;z-index:300;
- align-items:center;justify-content:center;padding:20px
-}
-.modal{
- width:100%;max-width:500px;background:white;border-radius:20px;
- padding:25px;max-height:90vh;overflow-y:auto
-}
-.modal-header{
- display:flex;justify-content:space-between;align-items:center;margin-bottom:20px
-}
-.close-btn{
- border:0;width:35px;height:35px;border-radius:50%;font-size:20px
+display:none;
+position:fixed;
+inset:0;
+background:#0008;
+z-index:300;
+align-items:center;
+justify-content:center;
+padding:20px
 }
 
+.modal{
+width:100%;
+max-width:500px;
+background:white;
+border-radius:20px;
+padding:25px;
+max-height:90vh;
+overflow-y:auto
+}
+
+.modal-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px
+}
+
+.close-btn{
+border:0;
+width:35px;
+height:35px;
+border-radius:50%;
+font-size:20px
+}
+
+/* ================= MOBILE ================= */
+
 @media(max-width:1000px){
- .stats{grid-template-columns:repeat(2,1fr)}
- .class-grid{grid-template-columns:repeat(3,1fr)}
+
+.stats{
+grid-template-columns:repeat(2,1fr)
 }
+
+}
+
 @media(max-width:700px){
- .sidebar{transform:translateX(-100%);transition:.25s}
- .sidebar.open{transform:translateX(0)}
- .main{margin-left:0}
- .mobile-menu{display:block}
- .topbar{padding:0 15px}
- .content{padding:15px}
- .stats{grid-template-columns:1fr 1fr}
- .two-column{grid-template-columns:1fr}
- .class-grid{grid-template-columns:repeat(2,1fr)}
- .stream-grid{grid-template-columns:1fr}
- .user-name{display:none}
+
+.sidebar{
+transform:translateX(-100%);
+transition:.25s
 }
-@media(max-width:420px){
- .class-grid{grid-template-columns:1fr 1fr}
+
+.sidebar.open{
+transform:translateX(0)
 }
+
+.main{
+margin-left:0
+}
+
+.mobile-menu{
+display:block
+}
+
+.topbar{
+padding:0 15px
+}
+
+.content{
+padding:15px
+}
+
+.stats{
+grid-template-columns:1fr 1fr
+}
+
+.two-column{
+grid-template-columns:1fr
+}
+
+.user-name{
+display:none
+}
+
+.class-summary,
+.stream-summary{
+gap:10px;
+font-size:13px
+}
+
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
+
+<!-- =========================================================
+LOGIN
+========================================================= -->
 
 <div class="login-page" id="loginPage">
 
@@ -228,459 +642,1634 @@ th{background:#fafbfd;color:#667085}
 
 <div class="logo">S</div>
 
-<div class="login-title">SchoolHub</div>
-<div class="login-subtitle">Multi-School Management System</div>
-
-<div class="form-group">
-<label>Login As</label>
-<select id="loginRole">
-<option value="school_admin">School Admin</option>
-<option value="teacher">Teacher</option>
-<option value="parent">Parent</option>
-<option value="student">Student</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Email / Mobile</label>
-<input id="loginEmail" placeholder="Enter email or mobile">
-</div>
-
-<div class="form-group">
-<label>Password</label>
-<input id="loginPassword" type="password" placeholder="Enter password">
-</div>
-
-<button class="btn btn-primary" onclick="loginUser()">Login</button>
-
-<button class="btn btn-outline" onclick="openRegister()">
-+ Register New School
-</button>
-
-<div class="demo">
-<strong>Demo Login</strong><br>
-Email: <b>admin@school.com</b><br>
-Password: <b>123456</b>
-</div>
-
-</div>
-</div>
-
-
-<!-- APP -->
-
-<div class="app" id="app">
-
-<aside class="sidebar" id="sidebar">
-
-<div class="brand">
-<div class="brand-icon">S</div>
+<div class="login-title">
 SchoolHub
 </div>
 
-<div class="school-box">
-<strong id="displaySchool">ABC Public School</strong>
-<span id="displayRole">School Administrator</span>
+<div class="login-subtitle">
+Multi-School Management System
 </div>
+
+<div class="form-group">
+
+<label>Login As</label>
+
+<select id="loginRole">
+
+<option value="school_admin">
+School Admin
+</option>
+
+<option value="teacher">
+Teacher
+</option>
+
+<option value="parent">
+Parent
+</option>
+
+<option value="student">
+Student
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Email / Mobile
+</label>
+
+<input
+id="loginEmail"
+placeholder="Enter email or mobile"
+>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Password
+</label>
+
+<input
+id="loginPassword"
+type="password"
+placeholder="Enter password"
+>
+
+</div>
+
+
+<button
+class="btn btn-primary"
+onclick="loginUser()"
+>
+Login
+</button>
+
+
+<button
+class="btn btn-outline"
+onclick="openRegister()"
+>
++ Register New School
+</button>
+
+
+<div class="demo">
+
+<strong>Demo Login</strong>
+
+<br>
+
+Email:
+<b>admin@school.com</b>
+
+<br>
+
+Password:
+<b>123456</b>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+APP
+========================================================= -->
+
+<div class="app" id="app">
+
+
+<!-- SIDEBAR -->
+
+<aside
+class="sidebar"
+id="sidebar"
+>
+
+<div class="brand">
+
+<div class="brand-icon">
+S
+</div>
+
+SchoolHub
+
+</div>
+
+
+<div class="school-box">
+
+<strong id="displaySchool">
+ABC Public School
+</strong>
+
+<span id="displayRole">
+School Administrator
+</span>
+
+</div>
+
 
 <ul class="menu">
 
-<li class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</li>
-<li onclick="showPage('students',this)">👨‍🎓 Students</li>
-<li onclick="showPage('teachers',this)">👨‍🏫 Teachers</li>
-<li onclick="showPage('attendance',this)">📅 Attendance</li>
-<li onclick="showPage('fees',this)">💰 Fees</li>
-<li onclick="showPage('exams',this)">📝 Exam / Result</li>
-<li onclick="showPage('homework',this)">📚 Homework</li>
-<li onclick="showPage('timetable',this)">🕐 Timetable</li>
-<li onclick="showPage('notices',this)">📢 Notices</li>
-<li onclick="showPage('reports',this)">📊 Reports</li>
-<li onclick="showPage('settings',this)">⚙️ Settings</li>
-<li class="logout" onclick="logoutUser()">🚪 Logout</li>
+
+<li
+class="active"
+onclick="showPage('dashboard',this)"
+>
+🏠 Dashboard
+</li>
+
+
+<li
+onclick="showPage('students',this)"
+>
+👨‍🎓 Students
+</li>
+
+
+<li
+onclick="showPage('teachers',this)"
+>
+👨‍🏫 Teachers
+</li>
+
+
+<li
+onclick="showPage('attendance',this)"
+>
+📅 Attendance
+</li>
+
+
+<li
+onclick="showPage('fees',this)"
+>
+💰 Fees
+</li>
+
+
+<li
+onclick="showPage('exams',this)"
+>
+📝 Exam / Result
+</li>
+
+
+<li
+onclick="showPage('homework',this)"
+>
+📚 Homework
+</li>
+
+
+<li
+onclick="showPage('timetable',this)"
+>
+🕐 Timetable
+</li>
+
+
+<li
+onclick="showPage('notices',this)"
+>
+📢 Notices
+</li>
+
+
+<li
+onclick="showPage('reports',this)"
+>
+📊 Reports
+</li>
+
+
+<li
+onclick="showPage('settings',this)"
+>
+⚙️ Settings
+</li>
+
+
+<li
+class="logout"
+onclick="logoutUser()"
+>
+🚪 Logout
+</li>
+
 
 </ul>
+
 </aside>
 
 
+<!-- MAIN -->
+
 <main class="main">
+
 
 <header class="topbar">
 
 <div style="display:flex;align-items:center;gap:15px">
 
-<button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+<button
+class="mobile-menu"
+onclick="toggleSidebar()"
+>
+☰
+</button>
 
-<div class="page-title" id="pageTitle">Dashboard</div>
+<div
+class="page-title"
+id="pageTitle"
+>
+Dashboard
+</div>
 
 </div>
 
+
 <div class="user">
-<span class="user-name" id="topUser">School Admin</span>
-<div class="avatar">A</div>
+
+<span
+class="user-name"
+id="topUser"
+>
+School Admin
+</span>
+
+<div class="avatar">
+A
+</div>
+
 </div>
 
 </header>
 
+
 <div class="content">
+
+
+<!-- DASHBOARD -->
 
 <div id="dashboardPage">
 
+
 <div class="welcome">
-<h2>Welcome 👋</h2>
-<p>Manage your school from one place.</p>
+
+<h2>
+Welcome 👋
+</h2>
+
+<p>
+Manage your school from one place.
+</p>
+
 </div>
+
 
 <div class="stats">
 
-<div class="stat-card">
-<div class="stat-number">1,248</div>
-<div class="stat-label">Total Students</div>
-</div>
 
 <div class="stat-card">
-<div class="stat-number">68</div>
-<div class="stat-label">Total Teachers</div>
+
+<div class="stat-number">
+1,248
 </div>
 
-<div class="stat-card">
-<div class="stat-number">94%</div>
-<div class="stat-label">Today's Attendance</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">₹8.4L</div>
-<div class="stat-label">Fee Collection</div>
+<div class="stat-label">
+Total Students
 </div>
 
 </div>
+
+
+<div class="stat-card">
+
+<div class="stat-number">
+68
+</div>
+
+<div class="stat-label">
+Total Teachers
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-number">
+94%
+</div>
+
+<div class="stat-label">
+Today's Attendance
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-number">
+₹8.4L
+</div>
+
+<div class="stat-label">
+Fee Collection
+</div>
+
+</div>
+
+
+</div>
+
 
 <div class="two-column">
 
-<div class="card">
-
-<div class="card-header">
-<h3>Recent Notices</h3>
-<button class="small-btn" onclick="showPage('notices')">View</button>
-</div>
-
-<div class="notice">
-<strong>Independence Day Holiday</strong>
-<span>School holiday notice</span>
-</div>
-
-<div class="notice">
-<strong>Parent Teacher Meeting</strong>
-<span>PTM scheduled Saturday</span>
-</div>
-
-<div class="notice">
-<strong>Annual Examination</strong>
-<span>Exam schedule published</span>
-</div>
-
-</div>
 
 <div class="card">
 
 <div class="card-header">
-<h3>Today's Attendance</h3>
-<button class="small-btn" onclick="showPage('attendance')">View</button>
-</div>
 
-<div class="notice">
-<strong>Present</strong>
-<span>1,174 Students</span>
-</div>
+<h3>
+Recent Notices
+</h3>
 
-<div class="notice">
-<strong>Absent</strong>
-<span>52 Students</span>
-</div>
-
-<div class="notice">
-<strong>Leave</strong>
-<span>22 Students</span>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div id="otherPage" style="display:none"></div>
-
-</div>
-</main>
-</div>
-
-
-<!-- REGISTER MODAL -->
-
-<div class="modal-bg" id="registerModal">
-
-<div class="modal">
-
-<div class="modal-header">
-<h2>Register New School</h2>
-<button class="close-btn" onclick="closeRegister()">×</button>
-</div>
-
-<div class="form-group">
-<label>School Name</label>
-<input id="regSchoolName" placeholder="Enter school name">
-</div>
-
-<div class="form-group">
-<label>School Email</label>
-<input id="regSchoolEmail" type="email" placeholder="school@example.com">
-</div>
-
-<div class="form-group">
-<label>Mobile Number</label>
-<input id="regSchoolMobile" placeholder="Enter mobile number">
-</div>
-
-<div class="form-group">
-<label>City</label>
-<input id="regSchoolCity" placeholder="Enter city">
-</div>
-
-<div class="form-group">
-<label>Create Password</label>
-<input id="regSchoolPassword" type="password" placeholder="Minimum 6 characters">
-</div>
-
-<button class="btn btn-primary" onclick="registerSchool()">
-Register School
+<button
+class="small-btn"
+onclick="showPage('notices')"
+>
+View
 </button>
 
 </div>
+
+
+<div class="notice">
+
+<strong>
+Independence Day Holiday
+</strong>
+
+<span>
+School holiday notice
+</span>
+
+</div>
+
+
+<div class="notice">
+
+<strong>
+Parent Teacher Meeting
+</strong>
+
+<span>
+PTM scheduled Saturday
+</span>
+
+</div>
+
+
+<div class="notice">
+
+<strong>
+Annual Examination
+</strong>
+
+<span>
+Exam schedule published
+</span>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-header">
+
+<h3>
+Today's Attendance
+</h3>
+
+<button
+class="small-btn"
+onclick="showPage('attendance')"
+>
+View
+</button>
+
+</div>
+
+
+<div class="notice">
+
+<strong>
+Present
+</strong>
+
+<span>
+1,174 Students
+</span>
+
+</div>
+
+
+<div class="notice">
+
+<strong>
+Absent
+</strong>
+
+<span>
+52 Students
+</span>
+
+</div>
+
+
+<div class="notice">
+
+<strong>
+Leave
+</strong>
+
+<span>
+22 Students
+</span>
+
+</div>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<!-- OTHER PAGES -->
+
+<div
+id="otherPage"
+style="display:none"
+>
+</div>
+
+
+</div>
+
+</main>
+
+</div>
+
+
+<!-- =========================================================
+REGISTER MODAL
+========================================================= -->
+
+<div
+class="modal-bg"
+id="registerModal"
+>
+
+<div class="modal">
+
+
+<div class="modal-header">
+
+<h2>
+Register New School
+</h2>
+
+<button
+class="close-btn"
+onclick="closeRegister()"
+>
+×
+</button>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+School Name
+</label>
+
+<input
+id="regSchoolName"
+placeholder="Enter school name"
+>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+School Email
+</label>
+
+<input
+id="regSchoolEmail"
+type="email"
+placeholder="school@example.com"
+>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Mobile Number
+</label>
+
+<input
+id="regSchoolMobile"
+placeholder="Enter mobile number"
+>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+City
+</label>
+
+<input
+id="regSchoolCity"
+placeholder="Enter city"
+>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Create Password
+</label>
+
+<input
+id="regSchoolPassword"
+type="password"
+placeholder="Minimum 6 characters"
+>
+
+</div>
+
+
+<button
+class="btn btn-primary"
+onclick="registerSchool()"
+>
+Register School
+</button>
+
+
+</div>
+
 </div>
 
 
 <script>
 
-/* =========================
+/* =========================================================
 LOGIN
-========================= */
+========================================================= */
 
 function loginUser(){
 
-let email=document.getElementById("loginEmail").value.trim();
-let password=document.getElementById("loginPassword").value;
+let email=document
+.getElementById("loginEmail")
+.value
+.trim();
+
+let password=document
+.getElementById("loginPassword")
+.value;
+
 
 if(!email){
+
 alert("Please enter Email / Mobile");
+
 return;
+
 }
+
 
 if(!password){
+
 alert("Please enter Password");
-return;
-}
 
-if(email==="admin@school.com" && password==="123456"){
-
-openApplication("ABC Public School","School Administrator");
 return;
 
 }
 
-let savedEmail=localStorage.getItem("schoolEmail");
-let savedPassword=localStorage.getItem("schoolPassword");
-let savedSchool=localStorage.getItem("schoolName");
 
-if(email===savedEmail && password===savedPassword){
+/* DEMO LOGIN */
 
-openApplication(savedSchool,"School Administrator");
+if(
+email==="admin@school.com"
+&&
+password==="123456"
+){
+
+openApplication(
+"ABC Public School",
+"School Administrator"
+);
+
 return;
 
 }
 
-alert("Invalid Login Details.\n\nDemo:\nadmin@school.com\n123456");
+
+/* REGISTERED SCHOOL LOGIN */
+
+let savedEmail=
+localStorage.getItem("schoolEmail");
+
+let savedPassword=
+localStorage.getItem("schoolPassword");
+
+let savedSchool=
+localStorage.getItem("schoolName");
+
+
+if(
+email===savedEmail
+&&
+password===savedPassword
+){
+
+openApplication(
+savedSchool,
+"School Administrator"
+);
+
+return;
 
 }
 
 
-/* =========================
-OPEN APP
-========================= */
+alert(
+"Invalid Login Details.\n\n"+
+"Demo:\n"+
+"admin@school.com\n"+
+"123456"
+);
+
+}
+
+
+/* =========================================================
+OPEN APPLICATION
+========================================================= */
 
 function openApplication(school,role){
 
-document.getElementById("loginPage").style.display="none";
-document.getElementById("app").style.display="block";
+document
+.getElementById("loginPage")
+.style.display="none";
 
-document.getElementById("displaySchool").innerText=school;
-document.getElementById("displayRole").innerText=role;
-document.getElementById("topUser").innerText=role;
+document
+.getElementById("app")
+.style.display="block";
+
+
+document
+.getElementById("displaySchool")
+.innerText=school;
+
+
+document
+.getElementById("displayRole")
+.innerText=role;
+
+
+document
+.getElementById("topUser")
+.innerText=role;
 
 }
 
 
-/* =========================
+/* =========================================================
 LOGOUT
-========================= */
+========================================================= */
 
 function logoutUser(){
 
-document.getElementById("app").style.display="none";
-document.getElementById("loginPage").style.display="flex";
+document
+.getElementById("app")
+.style.display="none";
+
+document
+.getElementById("loginPage")
+.style.display="flex";
 
 }
 
 
-/* =========================
+/* =========================================================
 REGISTER
-========================= */
+========================================================= */
 
 function openRegister(){
-document.getElementById("registerModal").style.display="flex";
+
+document
+.getElementById("registerModal")
+.style.display="flex";
+
 }
 
+
 function closeRegister(){
-document.getElementById("registerModal").style.display="none";
+
+document
+.getElementById("registerModal")
+.style.display="none";
+
 }
+
 
 function registerSchool(){
 
-let school=document.getElementById("regSchoolName").value.trim();
-let email=document.getElementById("regSchoolEmail").value.trim();
-let mobile=document.getElementById("regSchoolMobile").value.trim();
-let city=document.getElementById("regSchoolCity").value.trim();
-let password=document.getElementById("regSchoolPassword").value;
+let school=
+document.getElementById("regSchoolName")
+.value.trim();
 
-if(!school){alert("Enter School Name");return}
-if(!email){alert("Enter School Email");return}
-if(!mobile){alert("Enter Mobile Number");return}
-if(!city){alert("Enter City");return}
-if(password.length<6){alert("Password must be at least 6 characters");return}
+let email=
+document.getElementById("regSchoolEmail")
+.value.trim();
 
-localStorage.setItem("schoolName",school);
-localStorage.setItem("schoolEmail",email);
-localStorage.setItem("schoolMobile",mobile);
-localStorage.setItem("schoolCity",city);
-localStorage.setItem("schoolPassword",password);
+let mobile=
+document.getElementById("regSchoolMobile")
+.value.trim();
+
+let city=
+document.getElementById("regSchoolCity")
+.value.trim();
+
+let password=
+document.getElementById("regSchoolPassword")
+.value;
+
+
+if(!school){
+
+alert("Enter School Name");
+return;
+
+}
+
+if(!email){
+
+alert("Enter School Email");
+return;
+
+}
+
+if(!mobile){
+
+alert("Enter Mobile Number");
+return;
+
+}
+
+if(!city){
+
+alert("Enter City");
+return;
+
+}
+
+if(password.length<6){
+
+alert(
+"Password must be at least 6 characters"
+);
+
+return;
+
+}
+
+
+localStorage.setItem(
+"schoolName",
+school
+);
+
+localStorage.setItem(
+"schoolEmail",
+email
+);
+
+localStorage.setItem(
+"schoolMobile",
+mobile
+);
+
+localStorage.setItem(
+"schoolCity",
+city
+);
+
+localStorage.setItem(
+"schoolPassword",
+password
+);
+
 
 closeRegister();
 
-document.getElementById("loginEmail").value=email;
 
-alert("School Registered Successfully!\n\nNow login with your registered Email and Password.");
+document
+.getElementById("loginEmail")
+.value=email;
+
+
+alert(
+"School Registered Successfully!\n\n"+
+"Now login with your registered Email and Password."
+);
 
 }
 
 
-/* =========================
+/* =========================================================
 SIDEBAR
-========================= */
+========================================================= */
 
 function toggleSidebar(){
-document.getElementById("sidebar").classList.toggle("open");
+
+document
+.getElementById("sidebar")
+.classList.toggle("open");
+
 }
 
 
-/* =========================
+/* =========================================================
 MAIN PAGE
-========================= */
+========================================================= */
 
 function showPage(page,element){
 
-document.querySelectorAll(".menu li").forEach(x=>{
+document
+.querySelectorAll(".menu li")
+.forEach(function(x){
+
 x.classList.remove("active");
+
 });
 
-if(element) element.classList.add("active");
 
-document.getElementById("sidebar").classList.remove("open");
+if(element){
+
+element.classList.add("active");
+
+}
+
+
+document
+.getElementById("sidebar")
+.classList.remove("open");
+
 
 let titles={
+
 dashboard:"Dashboard",
+
 students:"Students",
+
 teachers:"Teachers",
+
 attendance:"Attendance",
+
 fees:"Fees",
+
 exams:"Exam / Result",
+
 homework:"Homework",
+
 timetable:"Timetable",
+
 notices:"Notices",
+
 reports:"Reports",
+
 settings:"Settings"
+
 };
 
-document.getElementById("pageTitle").innerText=titles[page];
+
+document
+.getElementById("pageTitle")
+.innerText=titles[page];
+
 
 if(page==="dashboard"){
 
-document.getElementById("dashboardPage").style.display="block";
-document.getElementById("otherPage").style.display="none";
+document
+.getElementById("dashboardPage")
+.style.display="block";
+
+document
+.getElementById("otherPage")
+.style.display="none";
+
 return;
 
 }
 
-document.getElementById("dashboardPage").style.display="none";
-document.getElementById("otherPage").style.display="block";
+
+document
+.getElementById("dashboardPage")
+.style.display="none";
+
+document
+.getElementById("otherPage")
+.style.display="block";
+
 
 if(
+
 page==="students" ||
+
 page==="fees" ||
+
 page==="attendance" ||
+
 page==="exams" ||
+
 page==="homework"
+
 ){
 
 openClasses(page);
+
 return;
 
 }
 
-document.getElementById("otherPage").innerHTML=getOtherPage(page);
+
+document
+.getElementById("otherPage")
+.innerHTML=
+getOtherPage(page);
 
 }
 
 
-/* =========================
+/* =========================================================
+DATA
+========================================================= */
+
+const classData={
+
+1:{
+students:30,
+boys:17,
+girls:13,
+paid:24,
+pending:6,
+present:27,
+absent:3,
+pass:26,
+fail:4,
+homework:5,
+hwPending:2
+},
+
+2:{
+students:33,
+boys:18,
+girls:15,
+paid:27,
+pending:6,
+present:30,
+absent:3,
+pass:29,
+fail:4,
+homework:6,
+hwPending:2
+},
+
+3:{
+students:36,
+boys:20,
+girls:16,
+paid:30,
+pending:6,
+present:33,
+absent:3,
+pass:32,
+fail:4,
+homework:5,
+hwPending:1
+},
+
+4:{
+students:39,
+boys:21,
+girls:18,
+paid:34,
+pending:5,
+present:36,
+absent:3,
+pass:35,
+fail:4,
+homework:7,
+hwPending:2
+},
+
+5:{
+students:42,
+boys:23,
+girls:19,
+paid:36,
+pending:6,
+present:38,
+absent:4,
+pass:37,
+fail:5,
+homework:6,
+hwPending:2
+},
+
+6:{
+students:45,
+boys:24,
+girls:21,
+paid:39,
+pending:6,
+present:41,
+absent:4,
+pass:40,
+fail:5,
+homework:7,
+hwPending:2
+},
+
+7:{
+students:48,
+boys:26,
+girls:22,
+paid:42,
+pending:6,
+present:44,
+absent:4,
+pass:43,
+fail:5,
+homework:8,
+hwPending:3
+},
+
+8:{
+students:51,
+boys:27,
+girls:24,
+paid:45,
+pending:6,
+present:47,
+absent:4,
+pass:46,
+fail:5,
+homework:7,
+hwPending:2
+},
+
+9:{
+students:54,
+boys:29,
+girls:25,
+paid:48,
+pending:6,
+present:50,
+absent:4,
+pass:49,
+fail:5,
+homework:8,
+hwPending:3
+},
+
+10:{
+students:57,
+boys:31,
+girls:26,
+paid:51,
+pending:6,
+present:53,
+absent:4,
+pass:52,
+fail:5,
+homework:9,
+hwPending:3
+},
+
+11:{
+students:83,
+boys:44,
+girls:39,
+paid:75,
+pending:8,
+present:77,
+absent:6,
+pass:75,
+fail:8,
+homework:10,
+hwPending:3
+},
+
+12:{
+students:88,
+boys:47,
+girls:41,
+paid:80,
+pending:8,
+present:82,
+absent:5,
+pass:80,
+fail:8,
+homework:11,
+hwPending:3
+}
+
+};
+
+
+/* =========================================================
 CLASS PAGE
-========================= */
+========================================================= */
 
 function openClasses(type){
 
-let names=[
-"Class 1","Class 2","Class 3","Class 4",
-"Class 5","Class 6","Class 7","Class 8",
-"Class 9","Class 10","Class 11","Class 12"
-];
+let html="";
 
-let html=`
+
+html+=`
 
 <div class="card">
 
 <div class="card-header">
-<h3>${getTypeTitle(type)} - Select Class</h3>
+
+<h3>
+${getTypeTitle(type)} - Select Class
+</h3>
+
 </div>
 
-<div style="padding:20px">
-
-<div class="class-grid">
+</div>
 `;
 
-names.forEach((name,index)=>{
 
-let students=30+(index*3);
+for(let i=1;i<=12;i++){
+
+let d=classData[i];
 
 html+=`
 
-<div class="class-card" onclick="openClass('${type}',${index+1})">
+<div class="class-section">
 
-<div class="class-number">${name}</div>
 
-<div class="class-info">
-${students} Students
+<div class="class-heading">
+Class ${i}
+</div>
+`;
+
+
+/* SUMMARY OUTSIDE CARD */
+
+html+=`
+
+<div class="class-summary">
+`;
+
+
+if(type==="students"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item">
+👦 Boys: ${d.boys}
+</span>
+
+<span class="summary-item">
+👧 Girls: ${d.girls}
+</span>
+
+`;
+
+}
+
+
+if(type==="fees"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+✅ Paid: ${d.paid}
+</span>
+
+<span class="summary-item summary-yellow">
+⏳ Pending: ${d.pending}
+</span>
+
+`;
+
+}
+
+
+if(type==="attendance"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+🟢 Present: ${d.present}
+</span>
+
+<span class="summary-item summary-red">
+🔴 Absent: ${d.absent}
+</span>
+
+`;
+
+}
+
+
+if(type==="exams"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+✅ Pass: ${d.pass}
+</span>
+
+<span class="summary-item summary-red">
+❌ Fail: ${d.fail}
+</span>
+
+`;
+
+}
+
+
+if(type==="homework"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+📚 Homework: ${d.homework}
+</span>
+
+<span class="summary-item summary-yellow">
+⏳ Pending: ${d.hwPending}
+</span>
+
+`;
+
+}
+
+
+html+=`
+
+</div>
+`;
+
+
+/* CLASS CARD */
+
+html+=`
+
+<div
+class="class-card"
+onclick="openClass('${type}',${i})"
+>
+
+<div class="class-number">
+Class ${i}
 </div>
 
-<div style="margin-top:12px;color:#1769ff;font-weight:bold">
-Open →
+<div class="class-info">
+
+Click to view complete
+${getTypeTitle(type)} data
+
+</div>
+
+<div class="open-text">
+Open Class →
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+document
+.getElementById("otherPage")
+.innerHTML=html;
+
+}
+
+
+/* =========================================================
+CLASS CLICK
+========================================================= */
+
+function openClass(type,classNo){
+
+if(
+classNo===11 ||
+classNo===12
+){
+
+openStreams(type,classNo);
+
+return;
+
+}
+
+
+openStudentsData(
+type,
+classNo,
+""
+);
+
+}
+
+
+/* =========================================================
+STREAM PAGE
+========================================================= */
+
+function openStreams(type,classNo){
+
+let base=classData[classNo];
+
+let streams={
+
+Science:{
+students:Math.round(base.students*.4),
+paid:Math.round(base.paid*.4),
+pending:Math.round(base.pending*.4),
+present:Math.round(base.present*.4),
+absent:Math.round(base.absent*.4),
+pass:Math.round(base.pass*.4),
+fail:Math.round(base.fail*.4),
+homework:Math.round(base.homework*.4),
+hwPending:Math.round(base.hwPending*.4)
+},
+
+Commerce:{
+students:Math.round(base.students*.34),
+paid:Math.round(base.paid*.34),
+pending:Math.round(base.pending*.34),
+present:Math.round(base.present*.34),
+absent:Math.round(base.absent*.34),
+pass:Math.round(base.pass*.34),
+fail:Math.round(base.fail*.34),
+homework:Math.round(base.homework*.34),
+hwPending:Math.round(base.hwPending*.34)
+},
+
+Arts:{
+students:Math.round(base.students*.26),
+paid:Math.round(base.paid*.26),
+pending:Math.round(base.pending*.26),
+present:Math.round(base.present*.26),
+absent:Math.round(base.absent*.26),
+pass:Math.round(base.pass*.26),
+fail:Math.round(base.fail*.26),
+homework:Math.round(base.homework*.26),
+hwPending:Math.round(base.hwPending*.26)
+}
+
+};
+
+
+let html=`
+
+
+<button
+class="back-btn"
+onclick="openClasses('${type}')"
+>
+← Back to Classes
+</button>
+
+
+<div class="card">
+
+<div class="card-header">
+
+<h3>
+Class ${classNo} - Select Stream
+</h3>
+
+</div>
+
+</div>
+
+`;
+
+
+Object.keys(streams).forEach(function(stream){
+
+let d=streams[stream];
+
+let icon=
+stream==="Science"
+?"🔬"
+:
+stream==="Commerce"
+?"💼"
+:
+"🎨";
+
+
+html+=`
+
+<div class="stream-section">
+
+
+<div class="stream-heading">
+${stream}
+</div>
+
+
+<div class="stream-summary">
+`;
+
+
+if(type==="students"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+`;
+
+}
+
+
+if(type==="fees"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+✅ Paid: ${d.paid}
+</span>
+
+<span class="summary-item summary-yellow">
+⏳ Pending: ${d.pending}
+</span>
+
+`;
+
+}
+
+
+if(type==="attendance"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+🟢 Present: ${d.present}
+</span>
+
+<span class="summary-item summary-red">
+🔴 Absent: ${d.absent}
+</span>
+
+`;
+
+}
+
+
+if(type==="exams"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+✅ Pass: ${d.pass}
+</span>
+
+<span class="summary-item summary-red">
+❌ Fail: ${d.fail}
+</span>
+
+`;
+
+}
+
+
+if(type==="homework"){
+
+html+=`
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${d.students}
+</span>
+
+<span class="summary-item summary-green">
+📚 Homework: ${d.homework}
+</span>
+
+<span class="summary-item summary-yellow">
+⏳ Pending: ${d.hwPending}
+</span>
+
+`;
+
+}
+
+
+html+=`
+
+</div>
+
+
+<div
+class="stream-card"
+onclick="openStudentsData('${type}',${classNo},'${stream}')"
+>
+
+<div class="stream-icon">
+${icon}
+</div>
+
+<h3>
+${stream}
+</h3>
+
+<p>
+Click to view complete data →
+</p>
+
 </div>
 
 </div>
@@ -689,168 +2278,325 @@ Open →
 
 });
 
-html+=`
 
-</div>
-
-</div>
-
-</div>
-
-`;
-
-document.getElementById("otherPage").innerHTML=html;
+document
+.getElementById("otherPage")
+.innerHTML=html;
 
 }
 
 
-/* =========================
-CLASS CLICK
-========================= */
-
-function openClass(type,classNo){
-
-if(classNo===11 || classNo===12){
-
-openStreams(type,classNo);
-return;
-
-}
-
-openStudentsData(type,classNo,"");
-
-}
-
-
-/* =========================
-STREAM PAGE
-========================= */
-
-function openStreams(type,classNo){
-
-let html=`
-
-<button class="back-btn" onclick="openClasses('${type}')">
-← Back to Classes
-</button>
-
-<div class="card">
-
-<div class="card-header">
-<h3>Class ${classNo} - Select Stream</h3>
-</div>
-
-<div style="padding:20px">
-
-<div class="stream-grid">
-
-<div class="stream-card" onclick="openStudentsData('${type}',${classNo},'Science')">
-<div class="stream-icon">🔬</div>
-<h3>Science</h3>
-<p>Physics • Chemistry • Biology / Maths</p>
-</div>
-
-<div class="stream-card" onclick="openStudentsData('${type}',${classNo},'Commerce')">
-<div class="stream-icon">💼</div>
-<h3>Commerce</h3>
-<p>Accounts • Business • Economics</p>
-</div>
-
-<div class="stream-card" onclick="openStudentsData('${type}',${classNo},'Arts')">
-<div class="stream-icon">🎨</div>
-<h3>Arts / Humanities</h3>
-<p>History • Political Science • Geography</p>
-</div>
-
-</div>
-
-</div>
-</div>
-`;
-
-document.getElementById("otherPage").innerHTML=html;
-
-}
-
-
-/* =========================
+/* =========================================================
 STUDENT DATA
-========================= */
+========================================================= */
 
 function openStudentsData(type,classNo,stream){
 
 let title=`Class ${classNo}`;
 
-if(stream) title+=` - ${stream}`;
+if(stream){
 
-let backFunction=stream
-?`openStreams('${type}',${classNo})`
-:`openClasses('${type}')`;
+title+=` - ${stream}`;
+
+}
+
+
+let backFunction=
+
+stream
+?
+`openStreams('${type}',${classNo})`
+:
+`openClasses('${type}')`;
+
+
+let d=classData[classNo];
+
 
 let html=`
 
-<button class="back-btn" onclick="${backFunction}">
+
+<button
+class="back-btn"
+onclick="${backFunction}"
+>
 ← Back
 </button>
 
+
 <div class="card">
+
 
 <div class="card-header">
 
 <div>
-<h3>${title}</h3>
-<p style="color:#777;font-size:12px;margin-top:4px">
+
+<h3>
+${title}
+</h3>
+
+<p
+style="color:#777;font-size:12px;margin-top:4px"
+>
 ${getTypeTitle(type)}
 </p>
+
 </div>
 
-<button class="small-btn" onclick="alert('Add Student form next step me database ke saath connect hoga.')">
+
+<button
+class="small-btn"
+onclick="alert('Add Student form next version me database ke saath connect hoga.')"
+>
 + Add Student
 </button>
 
 </div>
+
+
+`;
+
+
+/* SUMMARY */
+
+html+=`
+
+<div
+style="
+padding:18px;
+background:#f8faff;
+border-bottom:1px solid #edf0f4;
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+"
+>
+
+<span>
+👨‍🎓 <strong>Students:</strong> ${d.students}
+</span>
+
+`;
+
+
+if(type==="students"){
+
+html+=`
+
+<span>
+👦 <strong>Boys:</strong> ${d.boys}
+</span>
+
+<span>
+👧 <strong>Girls:</strong> ${d.girls}
+</span>
+
+`;
+
+}
+
+
+if(type==="fees"){
+
+html+=`
+
+<span class="summary-green">
+✅ <strong>Paid:</strong> ${d.paid}
+</span>
+
+<span class="summary-yellow">
+⏳ <strong>Pending:</strong> ${d.pending}
+</span>
+
+`;
+
+}
+
+
+if(type==="attendance"){
+
+html+=`
+
+<span class="summary-green">
+🟢 <strong>Present:</strong> ${d.present}
+</span>
+
+<span class="summary-red">
+🔴 <strong>Absent:</strong> ${d.absent}
+</span>
+
+`;
+
+}
+
+
+if(type==="exams"){
+
+html+=`
+
+<span class="summary-green">
+✅ <strong>Pass:</strong> ${d.pass}
+</span>
+
+<span class="summary-red">
+❌ <strong>Fail:</strong> ${d.fail}
+</span>
+
+`;
+
+}
+
+
+if(type==="homework"){
+
+html+=`
+
+<span class="summary-green">
+📚 <strong>Homework:</strong> ${d.homework}
+</span>
+
+<span class="summary-yellow">
+⏳ <strong>Pending:</strong> ${d.hwPending}
+</span>
+
+`;
+
+}
+
+
+html+=`
+
+</div>
+
 
 <div class="table-container">
 
 <table>
 
 <thead>
+
 <tr>
-<th>Roll</th>
-<th>Student Name</th>
-<th>Father Name</th>
-<th>Mobile</th>
-<th>Section</th>
+
+<th>
+Roll
+</th>
+
+<th>
+Student Name
+</th>
+
+<th>
+Father Name
+</th>
+
+<th>
+Mobile
+</th>
+
+<th>
+Section
+</th>
 `;
+
+
+if(type==="students"){
+
+html+=`
+
+<th>
+Gender
+</th>
+
+`;
+
+}
+
 
 if(type==="fees"){
+
 html+=`
-<th>Total Fee</th>
-<th>Paid</th>
-<th>Due</th>
-<th>Status</th>
+
+<th>
+Total Fee
+</th>
+
+<th>
+Paid
+</th>
+
+<th>
+Due
+</th>
+
+<th>
+Status
+</th>
+
 `;
+
 }
+
 
 if(type==="attendance"){
-html+=`<th>Attendance</th>`;
+
+html+=`
+
+<th>
+Attendance
+</th>
+
+`;
+
 }
+
 
 if(type==="exams"){
-html+=`
-<th>Total</th>
-<th>Percentage</th>
-<th>Result</th>
-`;
-}
 
 html+=`
+
+<th>
+Maths
+</th>
+
+<th>
+Science
+</th>
+
+<th>
+English
+</th>
+
+<th>
+Total
+</th>
+
+<th>
+Percentage
+</th>
+
+<th>
+Result
+</th>
+
+`;
+
+}
+
+
+html+=`
+
 </tr>
+
 </thead>
+
 <tbody>
 `;
 
+
+/* SAMPLE STUDENTS */
+
 let studentNames=[
+
 "Rahul Sharma",
 "Priya Singh",
 "Arjun Kumar",
@@ -858,24 +2604,17 @@ let studentNames=[
 "Rohit Gupta",
 "Neha Sharma",
 "Aman Khan",
-"Simran Kaur"
+"Simran Kaur",
+"Vikas Yadav",
+"Pooja Meena",
+"Aditya Singh",
+"Kajal Sharma"
+
 ];
 
-studentNames.forEach((student,i)=>{
 
-let totalFee=35000;
-let paid=i%3===0?35000:(i%3===1?20000:28000);
-let due=totalFee-paid;
+let fatherNames=[
 
-html+=`
-
-<tr>
-
-<td>${i+1}</td>
-
-<td><strong>${student}</strong></td>
-
-<td>${[
 "Rakesh Sharma",
 "Mahesh Singh",
 "Suresh Kumar",
@@ -883,97 +2622,248 @@ html+=`
 "Manoj Gupta",
 "Ajay Sharma",
 "Salim Khan",
-"Harpreet Kaur"
-][i]}</td>
+"Harpreet Kaur",
+"Vijay Yadav",
+"Ramesh Meena",
+"Sunil Singh",
+"Deepak Sharma"
 
-<td>98${7654321-i}</td>
+];
 
-<td>${i%2===0?"A":"B"}</td>
+
+/* Show 12 students as sample */
+
+for(let i=0;i<12;i++){
+
+let student=
+studentNames[i];
+
+let father=
+fatherNames[i];
+
+let totalFee=35000;
+
+let paid=
+i%3===0
+?
+35000
+:
+i%3===1
+?
+20000
+:
+28000;
+
+let due=
+totalFee-paid;
+
+
+html+=`
+
+<tr>
+
+<td>
+${i+1}
+</td>
+
+<td>
+<strong>
+${student}
+</strong>
+</td>
+
+<td>
+${father}
+</td>
+
+<td>
+98${7654321-i}
+</td>
+
+<td>
+${i%2===0?"A":"B"}
+</td>
 `;
+
+
+/* STUDENTS */
+
+if(type==="students"){
+
+html+=`
+
+<td>
+${i%2===0?"Boy":"Girl"}
+</td>
+
+`;
+
+}
+
+
+/* FEES */
 
 if(type==="fees"){
 
 html+=`
 
-<td>₹${totalFee.toLocaleString("en-IN")}</td>
-
-<td>₹${paid.toLocaleString("en-IN")}</td>
-
-<td>₹${due.toLocaleString("en-IN")}</td>
+<td>
+₹${totalFee.toLocaleString("en-IN")}
+</td>
 
 <td>
-<span class="badge ${due===0?"green":"yellow"}">
+₹${paid.toLocaleString("en-IN")}
+</td>
+
+<td>
+₹${due.toLocaleString("en-IN")}
+</td>
+
+<td>
+
+<span
+class="badge ${due===0?"green":"yellow"}"
+>
 ${due===0?"Paid":"Pending"}
 </span>
+
 </td>
+
 `;
 
 }
 
+
+/* ATTENDANCE */
+
 if(type==="attendance"){
 
-let present=i%4!==1;
+let present=
+i%4!==1;
+
 
 html+=`
 
 <td>
 
-<span class="badge ${present?"green":"red"}">
+<span
+class="badge ${present?"green":"red"}"
+>
 ${present?"Present":"Absent"}
 </span>
 
+
 <button
-style="margin-left:8px;border:0;padding:6px 9px;border-radius:7px"
+style="
+margin-left:8px;
+border:0;
+padding:6px 9px;
+border-radius:7px
+"
 onclick="toggleAttendance(this)"
 >
 Change
 </button>
 
 </td>
+
 `;
 
 }
 
+
+/* EXAM */
+
 if(type==="exams"){
 
-let marks=390+i*9;
-let percentage=(marks/5).toFixed(1);
+let maths=70+i%20;
+
+let science=75+i%15;
+
+let english=68+i%22;
+
+let total=maths+science+english;
+
+let percentage=
+(total/300*100).toFixed(1);
+
+let pass=
+percentage>=33;
+
 
 html+=`
 
-<td>${marks}/500</td>
-
-<td>${percentage}%</td>
+<td>
+${maths}
+</td>
 
 <td>
-<span class="badge green">PASS</span>
+${science}
+</td>
+
+<td>
+${english}
+</td>
+
+<td>
+${total}/300
+</td>
+
+<td>
+${percentage}%
+</td>
+
+<td>
+
+<span
+class="badge ${pass?"green":"red"}"
+>
+${pass?"PASS":"FAIL"}
+</span>
+
 </td>
 
 `;
 
 }
 
-html+=`</tr>`;
 
-});
+html+=`
+
+</tr>
+
+`;
+
+}
+
 
 html+=`
 
 </tbody>
+
 </table>
 
 </div>
-
 `;
+
+
+/* ATTENDANCE SAVE */
 
 if(type==="attendance"){
 
 html+=`
 
-<div style="padding:20px;text-align:right">
+<div
+style="
+padding:20px;
+text-align:right
+"
+>
 
-<button class="small-btn"
-onclick="alert('Attendance saved successfully!')">
+<button
+class="small-btn"
+onclick="alert('Attendance saved successfully!')"
+>
 SAVE ATTENDANCE
 </button>
 
@@ -983,73 +2873,148 @@ SAVE ATTENDANCE
 
 }
 
-html+=`</div>`;
+
+/* HOMEWORK */
 
 if(type==="homework"){
 
-/* Homework needs a different layout */
-html=getHomework(classNo,stream,backFunction);
+html=getHomework(
+classNo,
+stream,
+backFunction
+);
 
 }
 
-document.getElementById("otherPage").innerHTML=html;
+
+html+=`
+
+</div>
+`;
+
+
+document
+.getElementById("otherPage")
+.innerHTML=html;
 
 }
 
 
-/* =========================
+/* =========================================================
 HOMEWORK
-========================= */
+========================================================= */
 
-function getHomework(classNo,stream,backFunction){
+function getHomework(
+classNo,
+stream,
+backFunction
+){
 
-let title=`Class ${classNo}`;
+let title=
+`Class ${classNo}`;
 
-if(stream) title+=` - ${stream}`;
+if(stream){
+
+title+=` - ${stream}`;
+
+}
+
 
 return `
 
-<button class="back-btn" onclick="${backFunction}">
+<button
+class="back-btn"
+onclick="${backFunction}"
+>
 ← Back
 </button>
 
+
 <div class="card">
+
 
 <div class="card-header">
 
 <div>
-<h3>${title}</h3>
-<p style="color:#777;font-size:12px;margin-top:4px">
+
+<h3>
+${title}
+</h3>
+
+<p
+style="
+color:#777;
+font-size:12px;
+margin-top:4px
+"
+>
 Homework
 </p>
+
 </div>
 
-<button class="small-btn"
-onclick="alert('Add Homework form next version me connect hoga.')">
+
+<button
+class="small-btn"
+onclick="alert('Add Homework form next version me connect hoga.')"
+>
 + Add Homework
 </button>
 
 </div>
 
-<div class="notice">
-<strong>Mathematics</strong>
-<span>Chapter 5 Exercise • Due: 30 August</span>
-</div>
 
 <div class="notice">
-<strong>Science</strong>
-<span>Human Body Questions • Due: 31 August</span>
+
+<strong>
+Mathematics
+</strong>
+
+<span>
+Chapter 5 Exercise • Due: 30 August
+</span>
+
 </div>
 
-<div class="notice">
-<strong>English</strong>
-<span>Write an essay • Due: 1 September</span>
-</div>
 
 <div class="notice">
-<strong>Hindi</strong>
-<span>Chapter 8 Questions • Due: 2 September</span>
+
+<strong>
+Science
+</strong>
+
+<span>
+Human Body Questions • Due: 31 August
+</span>
+
 </div>
+
+
+<div class="notice">
+
+<strong>
+English
+</strong>
+
+<span>
+Write an essay • Due: 1 September
+</span>
+
+</div>
+
+
+<div class="notice">
+
+<strong>
+Hindi
+</strong>
+
+<span>
+Chapter 8 Questions • Due: 2 September
+</span>
+
+</div>
+
 
 </div>
 
@@ -1058,24 +3023,32 @@ onclick="alert('Add Homework form next version me connect hoga.')">
 }
 
 
-/* =========================
+/* =========================================================
 ATTENDANCE CHANGE
-========================= */
+========================================================= */
 
 function toggleAttendance(btn){
 
-let badge=btn.previousElementSibling;
+let badge=
+btn.previousElementSibling;
 
-if(badge.classList.contains("green")){
+
+if(
+badge.classList.contains("green")
+){
 
 badge.classList.remove("green");
+
 badge.classList.add("red");
+
 badge.innerText="Absent";
 
 }else{
 
 badge.classList.remove("red");
+
 badge.classList.add("green");
+
 badge.innerText="Present";
 
 }
@@ -1083,18 +3056,24 @@ badge.innerText="Present";
 }
 
 
-/* =========================
-TITLES
-========================= */
+/* =========================================================
+TYPE TITLE
+========================================================= */
 
 function getTypeTitle(type){
 
 let x={
+
 students:"Students",
+
 fees:"Fees",
+
 attendance:"Attendance",
+
 exams:"Exam / Result",
+
 homework:"Homework"
+
 };
 
 return x[type];
@@ -1102,11 +3081,12 @@ return x[type];
 }
 
 
-/* =========================
+/* =========================================================
 OTHER PAGES
-========================= */
+========================================================= */
 
 function getOtherPage(page){
+
 
 if(page==="teachers"){
 
@@ -1115,41 +3095,91 @@ return `
 <div class="card">
 
 <div class="card-header">
-<h3>Teachers</h3>
-<button class="small-btn"
-onclick="alert('Add Teacher form next version me connect hoga.')">
+
+<h3>
+Teachers
+</h3>
+
+<button
+class="small-btn"
+onclick="alert('Add Teacher form next version me connect hoga.')"
+>
 + Add Teacher
 </button>
+
 </div>
+
 
 <div class="table-container">
 
 <table>
 
 <tr>
-<th>Employee ID</th>
-<th>Name</th>
-<th>Subject</th>
-<th>Mobile</th>
+
+<th>
+Employee ID
+</th>
+
+<th>
+Name
+</th>
+
+<th>
+Subject
+</th>
+
+<th>
+Mobile
+</th>
+
 </tr>
 
-<tr>
-<td>EMP001</td>
-<td>Anita Sharma</td>
-<td>Mathematics</td>
-<td>9876543210</td>
-</tr>
 
 <tr>
-<td>EMP002</td>
-<td>Rajesh Verma</td>
-<td>Science</td>
-<td>9811122233</td>
+
+<td>
+EMP001
+</td>
+
+<td>
+Anita Sharma
+</td>
+
+<td>
+Mathematics
+</td>
+
+<td>
+9876543210
+</td>
+
+</tr>
+
+
+<tr>
+
+<td>
+EMP002
+</td>
+
+<td>
+Rajesh Verma
+</td>
+
+<td>
+Science
+</td>
+
+<td>
+9811122233
+</td>
+
 </tr>
 
 </table>
 
 </div>
+
 </div>
 
 `;
@@ -1164,43 +3194,108 @@ return `
 <div class="card">
 
 <div class="card-header">
-<h3>Class Timetable</h3>
+
+<h3>
+Class Timetable
+</h3>
+
 </div>
+
 
 <div class="table-container">
 
 <table>
 
 <tr>
-<th>Time</th>
-<th>Monday</th>
-<th>Tuesday</th>
-<th>Wednesday</th>
-<th>Thursday</th>
-<th>Friday</th>
+
+<th>
+Time
+</th>
+
+<th>
+Monday
+</th>
+
+<th>
+Tuesday
+</th>
+
+<th>
+Wednesday
+</th>
+
+<th>
+Thursday
+</th>
+
+<th>
+Friday
+</th>
+
 </tr>
 
-<tr>
-<td>08:00</td>
-<td>Maths</td>
-<td>Science</td>
-<td>English</td>
-<td>Maths</td>
-<td>Hindi</td>
-</tr>
 
 <tr>
-<td>09:00</td>
-<td>English</td>
-<td>Maths</td>
-<td>Hindi</td>
-<td>Science</td>
-<td>Computer</td>
+
+<td>
+08:00
+</td>
+
+<td>
+Maths
+</td>
+
+<td>
+Science
+</td>
+
+<td>
+English
+</td>
+
+<td>
+Maths
+</td>
+
+<td>
+Hindi
+</td>
+
+</tr>
+
+
+<tr>
+
+<td>
+09:00
+</td>
+
+<td>
+English
+</td>
+
+<td>
+Maths
+</td>
+
+<td>
+Hindi
+</td>
+
+<td>
+Science
+</td>
+
+<td>
+Computer
+</td>
+
 </tr>
 
 </table>
 
 </div>
+
 </div>
 
 `;
@@ -1215,27 +3310,59 @@ return `
 <div class="card">
 
 <div class="card-header">
-<h3>Notice Board</h3>
-<button class="small-btn"
-onclick="alert('New Notice form next version me connect hoga.')">
+
+<h3>
+Notice Board
+</h3>
+
+<button
+class="small-btn"
+onclick="alert('New Notice form next version me connect hoga.')"
+>
 + New Notice
 </button>
+
 </div>
 
-<div class="notice">
-<strong>Independence Day Holiday</strong>
-<span>School holiday notice</span>
-</div>
 
 <div class="notice">
-<strong>Parent Teacher Meeting</strong>
-<span>PTM scheduled Saturday</span>
+
+<strong>
+Independence Day Holiday
+</strong>
+
+<span>
+School holiday notice
+</span>
+
 </div>
 
+
 <div class="notice">
-<strong>Annual Sports Day</strong>
-<span>All students can participate</span>
+
+<strong>
+Parent Teacher Meeting
+</strong>
+
+<span>
+PTM scheduled Saturday
+</span>
+
 </div>
+
+
+<div class="notice">
+
+<strong>
+Annual Sports Day
+</strong>
+
+<span>
+All students can participate
+</span>
+
+</div>
+
 
 </div>
 
@@ -1250,47 +3377,109 @@ return `
 
 <div class="stats">
 
-<div class="stat-card">
-<div class="stat-number">94%</div>
-<div class="stat-label">Attendance</div>
-</div>
 
 <div class="stat-card">
-<div class="stat-number">87%</div>
-<div class="stat-label">Fee Collection</div>
+
+<div class="stat-number">
+94%
 </div>
 
-<div class="stat-card">
-<div class="stat-number">78%</div>
-<div class="stat-label">Exam Performance</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">1,248</div>
-<div class="stat-label">Students</div>
+<div class="stat-label">
+Attendance
 </div>
 
 </div>
+
+
+<div class="stat-card">
+
+<div class="stat-number">
+87%
+</div>
+
+<div class="stat-label">
+Fee Collection
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-number">
+78%
+</div>
+
+<div class="stat-label">
+Exam Performance
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-number">
+1,248
+</div>
+
+<div class="stat-label">
+Students
+</div>
+
+</div>
+
+
+</div>
+
 
 <div class="card">
 
 <div class="card-header">
-<h3>Reports</h3>
+
+<h3>
+Reports
+</h3>
+
 </div>
 
-<div class="notice">
-<strong>Student Report</strong>
-<span>Complete student report</span>
-</div>
 
 <div class="notice">
-<strong>Attendance Report</strong>
-<span>Monthly attendance report</span>
+
+<strong>
+Student Report
+</strong>
+
+<span>
+Complete student report
+</span>
+
 </div>
 
+
 <div class="notice">
-<strong>Fee Report</strong>
-<span>Monthly fee collection report</span>
+
+<strong>
+Attendance Report
+</strong>
+
+<span>
+Monthly attendance report
+</span>
+
+</div>
+
+
+<div class="notice">
+
+<strong>
+Fee Report
+</strong>
+
+<span>
+Monthly fee collection report
+</span>
+
 </div>
 
 </div>
@@ -1302,33 +3491,68 @@ return `
 
 if(page==="settings"){
 
-let school=localStorage.getItem("schoolName")||"ABC Public School";
-let email=localStorage.getItem("schoolEmail")||"abcschool@example.com";
+let school=
+localStorage.getItem("schoolName")
+||
+"ABC Public School";
+
+let email=
+localStorage.getItem("schoolEmail")
+||
+"abcschool@example.com";
+
 
 return `
 
 <div class="card">
 
 <div class="card-header">
-<h3>School Settings</h3>
+
+<h3>
+School Settings
+</h3>
+
 </div>
+
 
 <div style="padding:20px">
 
-<div class="form-group">
-<label>School Name</label>
-<input id="settingsSchool" value="${school}">
-</div>
 
 <div class="form-group">
-<label>Email</label>
-<input id="settingsEmail" value="${email}">
+
+<label>
+School Name
+</label>
+
+<input
+id="settingsSchool"
+value="${school}"
+>
+
 </div>
 
-<button class="btn btn-primary"
-onclick="saveSettings()">
+
+<div class="form-group">
+
+<label>
+Email
+</label>
+
+<input
+id="settingsEmail"
+value="${email}"
+>
+
+</div>
+
+
+<button
+class="btn btn-primary"
+onclick="saveSettings()"
+>
 Save Changes
 </button>
+
 
 </div>
 
@@ -1338,26 +3562,46 @@ Save Changes
 
 }
 
+
 return "";
 
 }
 
 
-/* =========================
+/* =========================================================
 SETTINGS
-========================= */
+========================================================= */
 
 function saveSettings(){
 
-let school=document.getElementById("settingsSchool").value;
-let email=document.getElementById("settingsEmail").value;
+let school=
+document.getElementById("settingsSchool")
+.value;
 
-localStorage.setItem("schoolName",school);
-localStorage.setItem("schoolEmail",email);
+let email=
+document.getElementById("settingsEmail")
+.value;
 
-document.getElementById("displaySchool").innerText=school;
 
-alert("Settings saved successfully!");
+localStorage.setItem(
+"schoolName",
+school
+);
+
+localStorage.setItem(
+"schoolEmail",
+email
+);
+
+
+document
+.getElementById("displaySchool")
+.innerText=school;
+
+
+alert(
+"Settings saved successfully!"
+);
 
 }
 
