@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SchoolHub - School Management</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f4f7fb;
+    color:#172033;
+}
+
+/* ================= LOGIN ================= */
+
+.login-page{
+    min-height:100vh;
+    background:linear-gradient(135deg,#1769ff,#6346e8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.login-box{
+    width:100%;
+    max-width:430px;
+    background:#fff;
+    border-radius:24px;
+    padding:30px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+
+.logo{
+    width:65px;
+    height:65px;
+    background:#1769ff;
+    color:#fff;
+    border-radius:18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:32px;
+    font-weight:bold;
+    margin:0 auto 15px;
+}
+
+.login-title{
+    text-align:center;
+    font-size:28px;
+    font-weight:800;
+}
+
+.login-subtitle{
+    text-align:center;
+    color:#777;
+    margin-top:7px;
+    margin-bottom:25px;
+}
+
+.form-group{
+    margin-bottom:16px;
+}
+
+.form-group label{
+    display:block;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    height:48px;
+    border:1px solid #dce2eb;
+    border-radius:12px;
+    padding:0 14px;
+    font-size:15px;
+    outline:none;
+    background:#fff;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+    border-color:#1769ff;
+}
+
+.btn{
+    width:100%;
+    height:48px;
+    border:0;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-primary{
+    background:#1769ff;
+    color:#fff;
+}
+
+.btn-primary:hover{
+    background:#0759e8;
+}
+
+.btn-outline{
+    background:#fff;
+    color:#1769ff;
+    border:1px solid #1769ff;
+    margin-top:10px;
+}
+
+.demo-box{
+    margin-top:18px;
+    padding:13px;
+    border-radius:12px;
+    background:#f3f6fb;
+    color:#667085;
+    font-size:13px;
+    line-height:1.6;
+}
+
+/* ================= APP ================= */
+
+.app{
+    display:none;
+    min-height:100vh;
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    width:250px;
+    background:#101828;
+    color:#fff;
+    padding:20px 15px;
+    overflow-y:auto;
+    z-index:100;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:22px;
+    font-weight:800;
+    margin-bottom:25px;
+    padding:0 8px;
+}
+
+.brand-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    background:#1769ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.school-box{
+    background:#1c2638;
+    border-radius:13px;
+    padding:13px;
+    margin-bottom:18px;
+    font-size:13px;
+    color:#b8c2d0;
+}
+
+.school-box strong{
+    display:block;
+    color:#fff;
+    font-size:15px;
+    margin-bottom:4px;
+}
+
+.menu{
+    list-style:none;
+}
+
+.menu li{
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:5px;
+    cursor:pointer;
+    color:#c6cfdb;
+    font-size:14px;
+}
+
+.menu li:hover,
+.menu li.active{
+    background:#1769ff;
+    color:#fff;
+}
+
+.logout{
+    color:#ff9292!important;
+    margin-top:15px;
+}
+
+.main{
+    margin-left:250px;
+    min-height:100vh;
+}
+
+.topbar{
+    height:72px;
+    background:#fff;
+    border-bottom:1px solid #e7ebf0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    position:sticky;
+    top:0;
+    z-index:50;
+}
+
+.page-title{
+    font-size:22px;
+    font-weight:800;
+}
+
+.user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:#1769ff;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+}
+
+.mobile-menu{
+    display:none;
+    border:0;
+    background:transparent;
+    font-size:25px;
+}
+
+.content{
+    padding:25px;
+}
+
+/* ================= DASHBOARD ================= */
+
+.welcome{
+    background:linear-gradient(110deg,#1769ff,#6046e8);
+    color:#fff;
+    padding:25px;
+    border-radius:20px;
+    margin-bottom:22px;
+}
+
+.welcome h2{
+    margin-bottom:7px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:22px;
+}
+
+.stat-card{
+    background:#fff;
+    border:1px solid #e9edf3;
+    border-radius:17px;
+    padding:20px;
+}
+
+.stat-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:#667085;
+    font-size:14px;
+}
+
+.stat-icon{
+    width:43px;
+    height:43px;
+    border-radius:12px;
+    background:#edf4ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:20px;
+}
+
+.stat-number{
+    font-size:27px;
+    font-weight:800;
+    margin-top:12px;
+}
+
+.stat-label{
+    color:#777;
+    font-size:13px;
+    margin-top:4px;
+}
+
+.two-column{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.card{
+    background:#fff;
+    border:1px solid #e9edf3;
+    border-radius:17px;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+
+.card-header{
+    padding:18px 20px;
+    border-bottom:1px solid #edf0f4;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.card-header h3{
+    font-size:17px;
+}
+
+.small-btn{
+    border:0;
+    background:#1769ff;
+    color:#fff;
+    padding:9px 13px;
+    border-radius:9px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.notice{
+    padding:15px 20px;
+    border-bottom:1px solid #edf0f4;
+}
+
+.notice:last-child{
+    border-bottom:0;
+}
+
+.notice strong{
+    display:block;
+    margin-bottom:5px;
+}
+
+.notice span{
+    color:#777;
+    font-size:12px;
+}
+
+/* ================= TABLE ================= */
+
+.table-container{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    min-width:650px;
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:14px 18px;
+    text-align:left;
+    border-bottom:1px solid #edf0f4;
+    font-size:14px;
+}
+
+th{
+    background:#fafbfd;
+    color:#667085;
+}
+
+.badge{
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.green{
+    background:#e6f8ed;
+    color:#15803d;
+}
+
+.red{
+    background:#feecec;
+    color:#dc2626;
+}
+
+.yellow{
+    background:#fff5d9;
+    color:#b77900;
+}
+
+/* ================= MODAL ================= */
+
+.modal-bg{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    z-index:300;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.modal{
+    width:100%;
+    max-width:500px;
+    background:#fff;
+    border-radius:20px;
+    padding:25px;
+    max-height:90vh;
+    overflow-y:auto;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.close-btn{
+    width:35px;
+    height:35px;
+    border:0;
+    border-radius:50%;
+    background:#f1f3f6;
+    font-size:20px;
+    cursor:pointer;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:1000px){
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:700px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .mobile-menu{
+        display:block;
+    }
+
+    .topbar{
+        padding:0 15px;
+    }
+
+    .content{
+        padding:15px;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .stat-card{
+        padding:15px;
+    }
+
+    .two-column{
+        grid-template-columns:1fr;
+    }
+
+    .user-name{
+        display:none;
+    }
+
+}
+
+@media(max-width:420px){
+
+    .login-box{
+        padding:23px;
+    }
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+LOGIN PAGE
+===================================================== -->
+
+<div class="login-page" id="loginPage">
+
+    <div class="login-box">
+
+        <div class="logo">S</div>
+
+        <div class="login-title">SchoolHub</div>
+
+        <div class="login-subtitle">
+            Multi-School Management System
+        </div>
+
+        <div class="form-group">
+
+            <label>Login As</label>
+
+            <select id="loginRole">
+
+                <option value="school_admin">
+                    School Admin
+                </option>
+
+                <option value="super_admin">
+                    Super Admin
+                </option>
+
+                <option value="teacher">
+                    Teacher
+                </option>
+
+                <option value="parent">
+                    Parent
+                </option>
+
+                <option value="student">
+                    Student
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Email / Mobile</label>
+
+            <input
+                type="text"
+                id="loginEmail"
+                placeholder="Enter email or mobile"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Enter password"
+            >
+
+        </div>
+
+        <button
+            class="btn btn-primary"
+            type="button"
+            onclick="loginUser()"
+        >
+            Login
+        </button>
+
+        <button
+            class="btn btn-outline"
+            type="button"
+            onclick="openRegister()"
+        >
+            + Register New School
+        </button>
+
+        <div class="demo-box">
+
+            <strong>Demo Login</strong><br>
+
+            Email:
+            <b>admin@school.com</b><br>
+
+            Password:
+            <b>123456</b>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+MAIN APP
+===================================================== -->
+
+<div class="app" id="app">
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">S</div>
+
+            SchoolHub
+
+        </div>
+
+        <div class="school-box">
+
+            <strong id="displaySchool">
+                ABC Public School
+            </strong>
+
+            <span id="displayRole">
+                School Administrator
+            </span>
+
+        </div>
+
+        <ul class="menu">
+
+            <li
+                class="active"
+                onclick="showPage('dashboard',this)"
+            >
+                🏠 Dashboard
+            </li>
+
+            <li onclick="showPage('students',this)">
+                👨‍🎓 Students
+            </li>
+
+            <li onclick="showPage('teachers',this)">
+                👨‍🏫 Teachers
+            </li>
+
+            <li onclick="showPage('attendance',this)">
+                📅 Attendance
+            </li>
+
+            <li onclick="showPage('fees',this)">
+                💰 Fees
+            </li>
+
+            <li onclick="showPage('exams',this)">
+                📝 Exams & Results
+            </li>
+
+            <li onclick="showPage('homework',this)">
+                📚 Homework
+            </li>
+
+            <li onclick="showPage('timetable',this)">
+                🕐 Timetable
+            </li>
+
+            <li onclick="showPage('notices',this)">
+                📢 Notices
+            </li>
+
+            <li onclick="showPage('reports',this)">
+                📊 Reports
+            </li>
+
+            <li onclick="showPage('settings',this)">
+                ⚙️ Settings
+            </li>
+
+            <li
+                class="logout"
+                onclick="logoutUser()"
+            >
+                🚪 Logout
+            </li>
+
+        </ul>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div
+                style="
+                display:flex;
+                align-items:center;
+                gap:15px;
+                "
+            >
+
+                <button
+                    class="mobile-menu"
+                    onclick="toggleSidebar()"
+                >
+                    ☰
+                </button>
+
+                <div
+                    class="page-title"
+                    id="pageTitle"
+                >
+                    Dashboard
+                </div>
+
+            </div>
+
+            <div class="user">
+
+                <span
+                    class="user-name"
+                    id="topUser"
+                >
+                    School Admin
+                </span>
+
+                <div class="avatar">
+                    A
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <div class="content">
+
+            <!-- DASHBOARD -->
+
+            <div id="dashboardPage">
+
+                <div class="welcome">
+
+                    <h2>
+                        Welcome 👋
+                    </h2>
+
+                    <p>
+                        Manage your school from one place.
+                    </p>
+
+                </div>
+
+
+                <div class="stats">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span>
+                                Students
+                            </span>
+
+                            <div class="stat-icon">
+                                👨‍🎓
+                            </div>
+
+                        </div>
+
+                        <div class="stat-number">
+                            1,248
+                        </div>
+
+                        <div class="stat-label">
+                            Total Students
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span>
+                                Teachers
+                            </span>
+
+                            <div class="stat-icon">
+                                👨‍🏫
+                            </div>
+
+                        </div>
+
+                        <div class="stat-number">
+                            68
+                        </div>
+
+                        <div class="stat-label">
+                            Total Teachers
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span>
+                                Attendance
+                            </span>
+
+                            <div class="stat-icon">
+                                📅
+                            </div>
+
+                        </div>
+
+                        <div class="stat-number">
+                            94%
+                        </div>
+
+                        <div class="stat-label">
+                            Today's Attendance
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <span>
+                                Fees
+                            </span>
+
+                            <div class="stat-icon">
+                                💰
+                            </div>
+
+                        </div>
+
+                        <div class="stat-number">
+                            ₹8.4L
+                        </div>
+
+                        <div class="stat-label">
+                            This Month
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="two-column">
+
+                    <div class="card">
+
+                        <div class="card-header">
+
+                            <h3>
+                                Recent Notices
+                            </h3>
+
+                            <button
+                                class="small-btn"
+                                onclick="showPage('notices')"
+                            >
+                                View All
+                            </button>
+
+                        </div>
+
+                        <div class="notice">
+
+                            <strong>
+                                Independence Day Holiday
+                            </strong>
+
+                            <span>
+                                School will remain closed on 15 August.
+                            </span>
+
+                        </div>
+
+                        <div class="notice">
+
+                            <strong>
+                                Parent Teacher Meeting
+                            </strong>
+
+                            <span>
+                                PTM scheduled for Saturday.
+                            </span>
+
+                        </div>
+
+                        <div class="notice">
+
+                            <strong>
+                                Annual Examination
+                            </strong>
+
+                            <span>
+                                Exam schedule has been published.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="card">
+
+                        <div class="card-header">
+
+                            <h3>
+                                Today's Attendance
+                            </h3>
+
+                            <button
+                                class="small-btn"
+                                onclick="showPage('attendance')"
+                            >
+                                View
+                            </button>
+
+                        </div>
+
+                        <div class="notice">
+
+                            <strong>
+                                Present
+                            </strong>
+
+                            <span>
+                                1,174 Students
+                            </span>
+
+                        </div>
+
+                        <div class="notice">
+
+                            <strong>
+                                Absent
+                            </strong>
+
+                            <span>
+                                52 Students
+                            </span>
+
+                        </div>
+
+                        <div class="notice">
+
+                            <strong>
+                                On Leave
+                            </strong>
+
+                            <span>
+                                22 Students
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- OTHER PAGE -->
+
+            <div
+                id="otherPage"
+                style="display:none;"
+            ></div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+REGISTER MODAL
+===================================================== -->
+
+<div
+    class="modal-bg"
+    id="registerModal"
+>
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2>
+                Register New School
+            </h2>
+
+            <button
+                class="close-btn"
+                type="button"
+                onclick="closeRegister()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                School Name
+            </label>
+
+            <input
+                id="regSchoolName"
+                type="text"
+                placeholder="Enter school name"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                School Email
+            </label>
+
+            <input
+                id="regSchoolEmail"
+                type="email"
+                placeholder="school@example.com"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Mobile Number
+            </label>
+
+            <input
+                id="regSchoolMobile"
+                type="tel"
+                placeholder="Enter mobile number"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                City
+            </label>
+
+            <input
+                id="regSchoolCity"
+                type="text"
+                placeholder="Enter city"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Create Password
+            </label>
+
+            <input
+                id="regSchoolPassword"
+                type="password"
+                placeholder="Create password"
+            >
+
+        </div>
+
+
+        <button
+            class="btn btn-primary"
+            type="button"
+            onclick="registerSchool()"
+        >
+            Register School
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+function loginUser(){
+
+    var role =
+        document.getElementById("loginRole").value;
+
+    var email =
+        document.getElementById("loginEmail").value.trim();
+
+    var password =
+        document.getElementById("loginPassword").value;
+
+    if(email === ""){
+        alert("Please enter Email / Mobile.");
+        return;
+    }
+
+    if(password === ""){
+        alert("Please enter Password.");
+        return;
+    }
+
+
+    /* DEMO LOGIN */
+
+    if(
+        email === "admin@school.com" &&
+        password === "123456"
+    ){
+
+        openApplication(
+            "ABC Public School",
+            "School Administrator"
+        );
+
+        return;
+    }
+
+
+    /* REGISTERED SCHOOL LOGIN */
+
+    var savedEmail =
+        localStorage.getItem("schoolEmail");
+
+    var savedPassword =
+        localStorage.getItem("schoolPassword");
+
+    var savedSchool =
+        localStorage.getItem("schoolName");
+
+
+    if(
+        savedEmail &&
+        savedPassword &&
+        email === savedEmail &&
+        password === savedPassword
+    ){
+
+        openApplication(
+            savedSchool,
+            "School Administrator"
+        );
+
+        return;
+    }
+
+
+    alert(
+        "Invalid Login Details.\n\n" +
+        "Demo Login:\n" +
+        "admin@school.com\n" +
+        "123456"
+    );
+
+}
+
+
+/* =====================================================
+   OPEN APP
+===================================================== */
+
+function openApplication(
+    schoolName,
+    roleName
+){
+
+    document.getElementById("loginPage")
+        .style.display = "none";
+
+    document.getElementById("app")
+        .style.display = "block";
+
+    document.getElementById("displaySchool")
+        .innerText = schoolName;
+
+    document.getElementById("displayRole")
+        .innerText = roleName;
+
+    document.getElementById("topUser")
+        .innerText = roleName;
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+function logoutUser(){
+
+    document.getElementById("app")
+        .style.display = "none";
+
+    document.getElementById("loginPage")
+        .style.display = "flex";
+
+    document.getElementById("loginEmail")
+        .value = "";
+
+    document.getElementById("loginPassword")
+        .value = "";
+
+}
+
+
+/* =====================================================
+   REGISTER MODAL
+===================================================== */
+
+function openRegister(){
+
+    document.getElementById("registerModal")
+        .style.display = "flex";
+
+}
+
+
+function closeRegister(){
+
+    document.getElementById("registerModal")
+        .style.display = "none";
+
+}
+
+
+/* =====================================================
+   REGISTER SCHOOL
+===================================================== */
+
+function registerSchool(){
+
+    var school =
+        document.getElementById("regSchoolName")
+            .value.trim();
+
+    var email =
+        document.getElementById("regSchoolEmail")
+            .value.trim();
+
+    var mobile =
+        document.getElementById("regSchoolMobile")
+            .value.trim();
+
+    var city =
+        document.getElementById("regSchoolCity")
+            .value.trim();
+
+    var password =
+        document.getElementById("regSchoolPassword")
+            .value;
+
+
+    if(school === ""){
+        alert("Please enter School Name.");
+        return;
+    }
+
+    if(email === ""){
+        alert("Please enter School Email.");
+        return;
+    }
+
+    if(mobile === ""){
+        alert("Please enter Mobile Number.");
+        return;
+    }
+
+    if(city === ""){
+        alert("Please enter City.");
+        return;
+    }
+
+    if(password === ""){
+        alert("Please create a Password.");
+        return;
+    }
+
+    if(password.length < 6){
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+
+    /* SAVE SCHOOL */
+
+    localStorage.setItem(
+        "schoolName",
+        school
+    );
+
+    localStorage.setItem(
+        "schoolEmail",
+        email
+    );
+
+    localStorage.setItem(
+        "schoolMobile",
+        mobile
+    );
+
+    localStorage.setItem(
+        "schoolCity",
+        city
+    );
+
+    localStorage.setItem(
+        "schoolPassword",
+        password
+    );
+
+
+    alert(
+        "School Registered Successfully!\n\n" +
+        "School: " + school +
+        "\nEmail: " + email +
+        "\nCity: " + city
+    );
+
+
+    closeRegister();
+
+
+    /* PUT REGISTERED EMAIL IN LOGIN */
+
+    document.getElementById("loginEmail")
+        .value = email;
+
+    document.getElementById("loginPassword")
+        .value = "";
+
+
+    alert(
+        "Now login using your registered Email and Password."
+    );
+
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+function toggleSidebar(){
+
+    document.getElementById("sidebar")
+        .classList.toggle("open");
+
+}
+
+
+/* =====================================================
+   PAGE NAVIGATION
+===================================================== */
+
+function showPage(
+    page,
+    clickedElement
+){
+
+    var menuItems =
+        document.querySelectorAll(".menu li");
+
+    menuItems.forEach(function(item){
+
+        item.classList.remove("active");
+
+    });
+
+
+    if(clickedElement){
+
+        clickedElement.classList.add("active");
+
+    }
+
+
+    document.getElementById("sidebar")
+        .classList.remove("open");
+
+
+    var titles = {
+
+        dashboard:"Dashboard",
+        students:"Students",
+        teachers:"Teachers",
+        attendance:"Attendance",
+        fees:"Fees",
+        exams:"Exams & Results",
+        homework:"Homework",
+        timetable:"Timetable",
+        notices:"Notices",
+        reports:"Reports",
+        settings:"Settings"
+
+    };
+
+
+    document.getElementById("pageTitle")
+        .innerText = titles[page];
+
+
+    if(page === "dashboard"){
+
+        document.getElementById("dashboardPage")
+            .style.display = "block";
+
+        document.getElementById("otherPage")
+            .style.display = "none";
+
+        return;
+    }
+
+
+    document.getElementById("dashboardPage")
+        .style.display = "none";
+
+    document.getElementById("otherPage")
+        .style.display = "block";
+
+
+    document.getElementById("otherPage")
+        .innerHTML = getPage(page);
+
+}
+
+
+/* =====================================================
+   PAGE CONTENT
+===================================================== */
+
+function getPage(page){
+
+    if(page === "students"){
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Student Management</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="addStudent()"
+                >
+                    + Add Student
+                </button>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Admission No.</th>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Parent Mobile</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>ADM001</td>
+                            <td>Rahul Sharma</td>
+                            <td>10</td>
+                            <td>A</td>
+                            <td>9876543210</td>
+                            <td>
+                                <span class="badge green">
+                                    Active
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>ADM002</td>
+                            <td>Priya Singh</td>
+                            <td>9</td>
+                            <td>B</td>
+                            <td>9876501234</td>
+                            <td>
+                                <span class="badge green">
+                                    Active
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>ADM003</td>
+                            <td>Arjun Kumar</td>
+                            <td>8</td>
+                            <td>A</td>
+                            <td>9812345678</td>
+                            <td>
+                                <span class="badge green">
+                                    Active
+                                </span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "teachers"){
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Teacher Management</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="alert('Teacher form will be connected to database in next version.')"
+                >
+                    + Add Teacher
+                </button>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Teacher</th>
+                            <th>Subject</th>
+                            <th>Classes</th>
+                            <th>Mobile</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>EMP001</td>
+                            <td>Anita Sharma</td>
+                            <td>Mathematics</td>
+                            <td>9-A, 10-A</td>
+                            <td>9876543210</td>
+                        </tr>
+
+                        <tr>
+                            <td>EMP002</td>
+                            <td>Rajesh Verma</td>
+                            <td>Science</td>
+                            <td>8-A, 9-B</td>
+                            <td>9811122233</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "attendance"){
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Today's Attendance</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="alert('Attendance saved successfully!')"
+                >
+                    Save Attendance
+                </button>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Roll No.</th>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>01</td>
+                            <td>Rahul Sharma</td>
+                            <td>10-A</td>
+                            <td>
+                                <span class="badge green">
+                                    Present
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>02</td>
+                            <td>Priya Singh</td>
+                            <td>10-A</td>
+                            <td>
+                                <span class="badge red">
+                                    Absent
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>03</td>
+                            <td>Arjun Kumar</td>
+                            <td>10-A</td>
+                            <td>
+                                <span class="badge green">
+                                    Present
+                                </span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "fees"){
+
+        return `
+        <div class="stats">
+
+            <div class="stat-card">
+                <div class="stat-number">₹8.4L</div>
+                <div class="stat-label">Collected</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">₹2.1L</div>
+                <div class="stat-label">Pending</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">1,012</div>
+                <div class="stat-label">Paid Students</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">236</div>
+                <div class="stat-label">Pending Students</div>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Fee Records</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="alert('Fee collection form will be added with database.')"
+                >
+                    + Collect Fee
+                </button>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Total Fee</th>
+                            <th>Paid</th>
+                            <th>Due</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Rahul Sharma</td>
+                            <td>10-A</td>
+                            <td>₹35,000</td>
+                            <td>₹35,000</td>
+                            <td>₹0</td>
+                            <td>
+                                <span class="badge green">
+                                    Paid
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Priya Singh</td>
+                            <td>10-A</td>
+                            <td>₹35,000</td>
+                            <td>₹20,000</td>
+                            <td>₹15,000</td>
+                            <td>
+                                <span class="badge yellow">
+                                    Pending
+                                </span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "exams"){
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Exams & Results</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="alert('Exam creation will be added next.')"
+                >
+                    + Create Exam
+                </button>
+
+            </div>
+
+            <div class="notice">
+
+                <strong>
+                    First Term Examination
+                </strong>
+
+                <span>
+                    Classes 1 to 10 • Results pending
+                </span>
+
+            </div>
+
+            <div class="notice">
+
+                <strong>
+                    Unit Test - September
+                </strong>
+
+                <span>
+                    Classes 6 to 10 • Scheduled
+                </span>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "homework"){
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Homework</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="alert('Homework form will be added next.')"
+                >
+                    + Add Homework
+                </button>
+
+            </div>
+
+            <div class="notice">
+
+                <strong>
+                    Mathematics - Chapter 5
+                </strong>
+
+                <span>
+                    Class 10-A • Due tomorrow
+                </span>
+
+            </div>
+
+            <div class="notice">
+
+                <strong>
+                    Science - Human Body
+                </strong>
+
+                <span>
+                    Class 9-B • Due Friday
+                </span>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "timetable"){
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Class Timetable</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="alert('Timetable editor will be added next.')"
+                >
+                    Edit Timetable
+                </button>
+
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>08:00 - 09:00</td>
+                            <td>Maths</td>
+                            <td>Science</td>
+                            <td>English</td>
+                            <td>Maths</td>
+                            <td>Hindi</td>
+                        </tr>
+
+                        <tr>
+                            <td>09:00 - 10:00</td>
+                            <td>English</td>
+                            <td>Maths</td>
+                            <td>Hindi</td>
+                            <td>Science</td>
+                            <td>Computer</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "notices"){
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>Notice Board</h3>
+
+                <button
+                    class="small-btn"
+                    onclick="alert('New notice form will be added next.')"
+                >
+                    + New Notice
+                </button>
+
+            </div>
+
+            <div class="notice">
+
+                <strong>
+                    Independence Day Holiday
+                </strong>
+
+                <span>
+                    For all students and teachers
+                </span>
+
+            </div>
+
+            <div class="notice">
+
+                <strong>
+                    Parent Teacher Meeting
+                </strong>
+
+                <span>
+                    For Classes 8 to 10
+                </span>
+
+            </div>
+
+            <div class="notice">
+
+                <strong>
+                    Annual Sports Day
+                </strong>
+
+                <span>
+                    All students can participate
+                </span>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "reports"){
+
+        return `
+        <div class="stats">
+
+            <div class="stat-card">
+                <div class="stat-number">94%</div>
+                <div class="stat-label">Attendance</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">87%</div>
+                <div class="stat-label">Fee Collection</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">78%</div>
+                <div class="stat-label">Exam Performance</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">68</div>
+                <div class="stat-label">Teachers</div>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    Reports
+                </h3>
+
+            </div>
+
+            <div class="notice">
+                <strong>Student Report</strong>
+                <span>Complete student report</span>
+            </div>
+
+            <div class="notice">
+                <strong>Attendance Report</strong>
+                <span>Monthly attendance report</span>
+            </div>
+
+            <div class="notice">
+                <strong>Fee Report</strong>
+                <span>Monthly fee collection report</span>
+            </div>
+
+        </div>`;
+    }
+
+
+    if(page === "settings"){
+
+        var school =
+            localStorage.getItem("schoolName")
+            || "ABC Public School";
+
+        var email =
+            localStorage.getItem("schoolEmail")
+            || "abcschool@example.com";
+
+        var mobile =
+            localStorage.getItem("schoolMobile")
+            || "9876543210";
+
+        var city =
+            localStorage.getItem("schoolCity")
+            || "Delhi";
+
+
+        return `
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    School Settings
+                </h3>
+
+            </div>
+
+            <div style="padding:20px">
+
+                <div class="form-group">
+
+                    <label>
+                        School Name
+                    </label>
+
+                    <input
+                        id="settingsSchool"
+                        value="${school}"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        Email
+                    </label>
+
+                    <input
+                        id="settingsEmail"
+                        value="${email}"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        Mobile
+                    </label>
+
+                    <input
+                        id="settingsMobile"
+                        value="${mobile}"
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        City
+                    </label>
+
+                    <input
+                        id="settingsCity"
+                        value="${city}"
+                    >
+
+                </div>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="saveSettings()"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+        </div>`;
+    }
+
+
+    return `
+    <div class="card">
+        <div style="padding:40px;text-align:center;">
+            Page not found.
+        </div>
+    </div>`;
+
+}
+
+
+/* =====================================================
+   ADD STUDENT
+===================================================== */
+
+function addStudent(){
+
+    alert(
+        "Student form next step me database ke saath connect hoga."
+    );
+
+}
+
+
+/* =====================================================
+   SAVE SETTINGS
+===================================================== */
+
+function saveSettings(){
+
+    var school =
+        document.getElementById("settingsSchool").value;
+
+    var email =
+        document.getElementById("settingsEmail").value;
+
+    var mobile =
+        document.getElementById("settingsMobile").value;
+
+    var city =
+        document.getElementById("settingsCity").value;
+
+
+    localStorage.setItem(
+        "schoolName",
+        school
+    );
+
+    localStorage.setItem(
+        "schoolEmail",
+        email
+    );
+
+    localStorage.setItem(
+        "schoolMobile",
+        mobile
+    );
+
+    localStorage.setItem(
+        "schoolCity",
+        city
+    );
+
+
+    document.getElementById("displaySchool")
+        .innerText = school;
+
+
+    alert("School settings saved successfully.");
+
+}
+
+</script>
+
+</body>
+</html>
