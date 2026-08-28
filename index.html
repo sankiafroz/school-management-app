@@ -316,6 +316,24 @@ border-radius:9px;
 font-weight:bold
 }
 
+.edit-btn{
+background:#eef4ff;
+color:#1769ff;
+border:0;
+padding:7px 10px;
+border-radius:7px;
+font-weight:bold
+}
+
+.delete-btn{
+background:#feecec;
+color:#dc2626;
+border:0;
+padding:7px 10px;
+border-radius:7px;
+font-weight:bold
+}
+
 .two-column{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -343,7 +361,7 @@ overflow-x:auto
 
 table{
 width:100%;
-min-width:750px;
+min-width:900px;
 border-collapse:collapse
 }
 
@@ -398,7 +416,7 @@ margin-bottom:28px
 .class-heading{
 font-size:18px;
 font-weight:bold;
-margin-bottom:7px
+margin-bottom:5px
 }
 
 .class-summary{
@@ -509,6 +527,17 @@ font-size:13px;
 margin-top:5px
 }
 
+.search-box{
+display:flex;
+gap:10px;
+padding:18px;
+border-bottom:1px solid #edf0f4
+}
+
+.search-box input{
+flex:1
+}
+
 .modal-bg{
 display:none;
 position:fixed;
@@ -522,11 +551,11 @@ padding:20px
 
 .modal{
 width:100%;
-max-width:500px;
+max-width:550px;
 background:white;
 border-radius:20px;
 padding:25px;
-max-height:90vh;
+max-height:92vh;
 overflow-y:auto
 }
 
@@ -543,6 +572,23 @@ width:35px;
 height:35px;
 border-radius:50%;
 font-size:20px
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px
+}
+
+.empty{
+padding:35px;
+text-align:center;
+color:#777
+}
+
+.action-buttons{
+display:flex;
+gap:7px
 }
 
 @media(max-width:1000px){
@@ -598,6 +644,13 @@ gap:10px;
 font-size:13px
 }
 
+.form-grid{
+grid-template-columns:1fr
+}
+
+.search-box{
+flex-direction:column
+}
 }
 </style>
 </head>
@@ -621,33 +674,26 @@ Multi-School Management System
 </div>
 
 <div class="form-group">
-
 <label>Login As</label>
 
 <select id="loginRole">
-
 <option value="school_admin">School Admin</option>
 <option value="teacher">Teacher</option>
 <option value="parent">Parent</option>
 <option value="student">Student</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Email / Mobile</label>
 
 <input
 id="loginEmail"
 placeholder="Enter email or mobile"
 >
-
 </div>
 
 <div class="form-group">
-
 <label>Password</label>
 
 <input
@@ -655,7 +701,6 @@ id="loginPassword"
 type="password"
 placeholder="Enter password"
 >
-
 </div>
 
 <button
@@ -689,7 +734,6 @@ Password:
 </div>
 
 </div>
-
 </div>
 
 
@@ -701,7 +745,9 @@ Password:
 
 <div class="brand">
 
-<div class="brand-icon">S</div>
+<div class="brand-icon">
+S
+</div>
 
 SchoolHub
 
@@ -770,7 +816,6 @@ School Administrator
 </li>
 
 </ul>
-
 </aside>
 
 
@@ -807,13 +852,16 @@ A
 
 </header>
 
+
 <div class="content">
 
 <div id="dashboardPage">
 
 <div class="welcome">
 
-<h2>Welcome 👋</h2>
+<h2>
+Welcome 👋
+</h2>
 
 <p>
 Manage your school from one place.
@@ -825,8 +873,8 @@ Manage your school from one place.
 
 <div class="stat-card">
 
-<div class="stat-number">
-607
+<div class="stat-number" id="dashStudents">
+0
 </div>
 
 <div class="stat-label">
@@ -879,7 +927,9 @@ Fee Collection
 
 <div class="card-header">
 
-<h3>Recent Notices</h3>
+<h3>
+Recent Notices
+</h3>
 
 <button
 class="small-btn"
@@ -907,12 +957,13 @@ View
 
 </div>
 
-
 <div class="card">
 
 <div class="card-header">
 
-<h3>Today's Attendance</h3>
+<h3>
+Today's Attendance
+</h3>
 
 <button
 class="small-btn"
@@ -925,12 +976,17 @@ View
 
 <div class="notice">
 <strong>Present</strong>
-<span>574 Students</span>
+<span id="dashPresent">0 Students</span>
 </div>
 
 <div class="notice">
 <strong>Absent</strong>
-<span>33 Students</span>
+<span id="dashAbsent">0 Students</span>
+</div>
+
+<div class="notice">
+<strong>Leave</strong>
+<span id="dashLeave">0 Students</span>
 </div>
 
 </div>
@@ -946,13 +1002,11 @@ style="display:none"
 </div>
 
 </div>
-
 </main>
-
 </div>
 
 
-<!-- REGISTER -->
+<!-- REGISTER MODAL -->
 
 <div class="modal-bg" id="registerModal">
 
@@ -960,7 +1014,9 @@ style="display:none"
 
 <div class="modal-header">
 
-<h2>Register New School</h2>
+<h2>
+Register New School
+</h2>
 
 <button
 class="close-btn"
@@ -972,60 +1028,28 @@ onclick="closeRegister()"
 </div>
 
 <div class="form-group">
-
 <label>School Name</label>
-
-<input
-id="regSchoolName"
-placeholder="Enter school name"
->
-
+<input id="regSchoolName" placeholder="Enter school name">
 </div>
 
 <div class="form-group">
-
 <label>School Email</label>
-
-<input
-id="regSchoolEmail"
-type="email"
-placeholder="school@example.com"
->
-
+<input id="regSchoolEmail" type="email" placeholder="school@example.com">
 </div>
 
 <div class="form-group">
-
 <label>Mobile Number</label>
-
-<input
-id="regSchoolMobile"
-placeholder="Enter mobile number"
->
-
+<input id="regSchoolMobile" placeholder="Enter mobile number">
 </div>
 
 <div class="form-group">
-
 <label>City</label>
-
-<input
-id="regSchoolCity"
-placeholder="Enter city"
->
-
+<input id="regSchoolCity" placeholder="Enter city">
 </div>
 
 <div class="form-group">
-
 <label>Create Password</label>
-
-<input
-id="regSchoolPassword"
-type="password"
-placeholder="Minimum 6 characters"
->
-
+<input id="regSchoolPassword" type="password" placeholder="Minimum 6 characters">
 </div>
 
 <button
@@ -1036,15 +1060,165 @@ Register School
 </button>
 
 </div>
+</div>
 
+
+<!-- STUDENT MODAL -->
+
+<div class="modal-bg" id="studentModal">
+
+<div class="modal">
+
+<div class="modal-header">
+
+<h2 id="studentModalTitle">
+Add Student
+</h2>
+
+<button
+class="close-btn"
+onclick="closeStudentModal()"
+>
+×
+</button>
+
+</div>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>Student Name *</label>
+
+<input
+id="studentName"
+placeholder="Enter student name"
+>
+
+</div>
+
+<div class="form-group">
+
+<label>Father Name *</label>
+
+<input
+id="fatherName"
+placeholder="Enter father name"
+>
+
+</div>
+
+<div class="form-group">
+
+<label>Mobile *</label>
+
+<input
+id="studentMobile"
+placeholder="Enter mobile number"
+>
+
+</div>
+
+<div class="form-group">
+
+<label>Gender *</label>
+
+<select id="studentGender">
+
+<option value="">Select Gender</option>
+<option value="Boy">Boy</option>
+<option value="Girl">Girl</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Class *</label>
+
+<select id="studentClass">
+
+<option value="">Select Class</option>
+
+<option value="1">Class 1</option>
+<option value="2">Class 2</option>
+<option value="3">Class 3</option>
+<option value="4">Class 4</option>
+<option value="5">Class 5</option>
+<option value="6">Class 6</option>
+<option value="7">Class 7</option>
+<option value="8">Class 8</option>
+<option value="9">Class 9</option>
+<option value="10">Class 10</option>
+<option value="11">Class 11</option>
+<option value="12">Class 12</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Section</label>
+
+<select id="studentSection">
+
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Stream</label>
+
+<select id="studentStream">
+
+<option value="">Not Applicable</option>
+<option value="Science">Science</option>
+<option value="Commerce">Commerce</option>
+<option value="Arts">Arts</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Total Fee</label>
+
+<input
+id="studentFee"
+type="number"
+value="35000"
+>
+
+</div>
+
+</div>
+
+<br>
+
+<button
+class="btn btn-primary"
+onclick="saveStudent()"
+>
+Save Student
+</button>
+
+</div>
 </div>
 
 
 <script>
 
-/* =========================================================
+/* =====================================================
 LOGIN
-========================================================= */
+===================================================== */
 
 function loginUser(){
 
@@ -1069,6 +1243,7 @@ openApplication(
 );
 
 return;
+
 }
 
 let savedEmail=localStorage.getItem("schoolEmail");
@@ -1099,37 +1274,35 @@ alert(
 }
 
 
-/* =========================================================
-OPEN APP
-========================================================= */
-
 function openApplication(school,role){
 
 document.getElementById("loginPage").style.display="none";
+
 document.getElementById("app").style.display="block";
 
 document.getElementById("displaySchool").innerText=school;
+
 document.getElementById("displayRole").innerText=role;
+
 document.getElementById("topUser").innerText=role;
+
+updateDashboard();
 
 }
 
 
-/* =========================================================
-LOGOUT
-========================================================= */
-
 function logoutUser(){
 
 document.getElementById("app").style.display="none";
+
 document.getElementById("loginPage").style.display="flex";
 
 }
 
 
-/* =========================================================
+/* =====================================================
 REGISTER
-========================================================= */
+===================================================== */
 
 function openRegister(){
 
@@ -1194,9 +1367,9 @@ alert(
 }
 
 
-/* =========================================================
+/* =====================================================
 SIDEBAR
-========================================================= */
+===================================================== */
 
 function toggleSidebar(){
 
@@ -1205,263 +1378,195 @@ document.getElementById("sidebar").classList.toggle("open");
 }
 
 
-/* =========================================================
-CLASS DATA
-========================================================= */
+/* =====================================================
+STUDENT DATABASE
+===================================================== */
 
-const classData={
+function getStudents(){
 
-1:{
-students:30,
-boys:17,
-girls:13,
-paid:25,
-pending:5,
-present:27,
-absent:3,
-pass:26,
-fail:4,
-homework:28,
-hwPending:2
-},
+let data=localStorage.getItem("schoolStudents");
 
-2:{
-students:33,
-boys:18,
-girls:15,
-paid:27,
-pending:6,
-present:30,
-absent:3,
-pass:29,
-fail:4,
-homework:30,
-hwPending:3
-},
-
-3:{
-students:36,
-boys:20,
-girls:16,
-paid:30,
-pending:6,
-present:33,
-absent:3,
-pass:32,
-fail:4,
-homework:33,
-hwPending:3
-},
-
-4:{
-students:39,
-boys:21,
-girls:18,
-paid:34,
-pending:5,
-present:36,
-absent:3,
-pass:35,
-fail:4,
-homework:36,
-hwPending:3
-},
-
-5:{
-students:42,
-boys:23,
-girls:19,
-paid:36,
-pending:6,
-present:38,
-absent:4,
-pass:37,
-fail:5,
-homework:39,
-hwPending:3
-},
-
-6:{
-students:45,
-boys:24,
-girls:21,
-paid:39,
-pending:6,
-present:41,
-absent:4,
-pass:40,
-fail:5,
-homework:42,
-hwPending:3
-},
-
-7:{
-students:48,
-boys:26,
-girls:22,
-paid:42,
-pending:6,
-present:44,
-absent:4,
-pass:43,
-fail:5,
-homework:45,
-hwPending:3
-},
-
-8:{
-students:51,
-boys:27,
-girls:24,
-paid:45,
-pending:6,
-present:47,
-absent:4,
-pass:46,
-fail:5,
-homework:48,
-hwPending:3
-},
-
-9:{
-students:54,
-boys:29,
-girls:25,
-paid:48,
-pending:6,
-present:50,
-absent:4,
-pass:49,
-fail:5,
-homework:51,
-hwPending:3
-},
-
-10:{
-students:57,
-boys:31,
-girls:26,
-paid:51,
-pending:6,
-present:53,
-absent:4,
-pass:52,
-fail:5,
-homework:54,
-hwPending:3
-},
-
-11:{
-students:83,
-boys:44,
-girls:39,
-paid:75,
-pending:8,
-present:77,
-absent:6,
-pass:75,
-fail:8,
-homework:78,
-hwPending:5
-},
-
-12:{
-students:88,
-boys:47,
-girls:41,
-paid:80,
-pending:8,
-present:83,
-absent:5,
-pass:80,
-fail:8,
-homework:83,
-hwPending:5
+if(!data){
+return [];
 }
 
-};
+try{
+return JSON.parse(data);
+}
+catch(e){
+return [];
+}
+
+}
 
 
-/* =========================================================
-GET STREAM DATA
-EXACT TOTALS
-========================================================= */
+function saveStudents(data){
 
-function getStreamData(classNo){
+localStorage.setItem(
+"schoolStudents",
+JSON.stringify(data)
+);
 
-let base=classData[classNo];
+}
 
-let science=Math.floor(base.students*0.40);
-let commerce=Math.floor(base.students*0.34);
-let arts=base.students-science-commerce;
 
-let paidScience=Math.floor(base.paid*0.40);
-let paidCommerce=Math.floor(base.paid*0.34);
-let paidArts=base.paid-paidScience-paidCommerce;
+/* =====================================================
+DEMO STUDENTS
+===================================================== */
 
-let presentScience=Math.floor(base.present*0.40);
-let presentCommerce=Math.floor(base.present*0.34);
-let presentArts=base.present-presentScience-presentCommerce;
+function createDemoStudents(){
 
-let passScience=Math.floor(base.pass*0.40);
-let passCommerce=Math.floor(base.pass*0.34);
-let passArts=base.pass-passScience-passCommerce;
+let students=getStudents();
 
-let homeworkScience=Math.floor(base.homework*0.40);
-let homeworkCommerce=Math.floor(base.homework*0.34);
-let homeworkArts=base.homework-homeworkScience-homeworkCommerce;
+if(students.length>0){
+return;
+}
+
+let names=[
+"Rahul Sharma",
+"Priya Singh",
+"Arjun Kumar",
+"Anjali Verma",
+"Rohit Gupta",
+"Neha Sharma",
+"Aman Khan",
+"Simran Kaur",
+"Vikas Yadav",
+"Pooja Meena",
+"Aditya Singh",
+"Kajal Sharma"
+];
+
+let fathers=[
+"Rakesh Sharma",
+"Mahesh Singh",
+"Suresh Kumar",
+"Rajesh Verma",
+"Manoj Gupta",
+"Ajay Sharma",
+"Salim Khan",
+"Harpreet Kaur",
+"Vijay Yadav",
+"Ramesh Meena",
+"Sunil Singh",
+"Deepak Sharma"
+];
+
+for(let i=0;i<names.length;i++){
+
+students.push({
+
+id:Date.now()+i,
+
+name:names[i],
+
+father:fathers[i],
+
+mobile:"98"+String(76543210-i),
+
+gender:i%2===0?"Boy":"Girl",
+
+classNo:(i%10)+1,
+
+section:i%2===0?"A":"B",
+
+stream:"",
+
+fee:35000,
+
+paid:i%3===0?35000:i%3===1?20000:28000,
+
+attendance:i%4===1?"Absent":"Present"
+
+});
+
+}
+
+saveStudents(students);
+
+}
+
+
+createDemoStudents();
+
+
+/* =====================================================
+GET CLASS DATA
+===================================================== */
+
+function getClassStudents(classNo){
+
+return getStudents().filter(function(s){
+
+return Number(s.classNo)===Number(classNo);
+
+});
+
+}
+
+
+function getStreamStudents(classNo,stream){
+
+return getStudents().filter(function(s){
+
+return Number(s.classNo)===Number(classNo)
+&&
+s.stream===stream;
+
+});
+
+}
+
+
+/* =====================================================
+CLASS SUMMARY
+===================================================== */
+
+function getClassStats(classNo){
+
+let students=getClassStudents(classNo);
+
+let boys=students.filter(s=>s.gender==="Boy").length;
+
+let girls=students.filter(s=>s.gender==="Girl").length;
+
+let paid=students.filter(s=>Number(s.paid)>=Number(s.fee)).length;
+
+let pending=students.length-paid;
+
+let present=students.filter(s=>s.attendance==="Present").length;
+
+let absent=students.filter(s=>s.attendance==="Absent").length;
 
 return {
 
-Science:{
-students:science,
-paid:paidScience,
-pending:science-paidScience,
-present:presentScience,
-absent:science-presentScience,
-pass:passScience,
-fail:science-passScience,
-homework:homeworkScience,
-hwPending:science-homeworkScience
-},
-
-Commerce:{
-students:commerce,
-paid:paidCommerce,
-pending:commerce-paidCommerce,
-present:presentCommerce,
-absent:commerce-presentCommerce,
-pass:passCommerce,
-fail:commerce-passCommerce,
-homework:homeworkCommerce,
-hwPending:commerce-homeworkCommerce
-},
-
-Arts:{
-students:arts,
-paid:paidArts,
-pending:arts-paidArts,
-present:presentArts,
-absent:arts-presentArts,
-pass:passArts,
-fail:arts-passArts,
-homework:homeworkArts,
-hwPending:arts-homeworkArts
-}
+students:students.length,
+boys:boys,
+girls:girls,
+paid:paid,
+pending:pending,
+present:present,
+absent:absent,
+pass:students.length,
+fail:0,
+homework:students.length,
+hwPending:0
 
 };
 
 }
 
 
-/* =========================================================
+/* =====================================================
 SHOW PAGE
-========================================================= */
+===================================================== */
 
 function showPage(page,element){
 
 document.querySelectorAll(".menu li").forEach(function(x){
+
 x.classList.remove("active");
+
 });
 
 if(element){
@@ -1491,13 +1596,17 @@ document.getElementById("pageTitle").innerText=titles[page];
 if(page==="dashboard"){
 
 document.getElementById("dashboardPage").style.display="block";
+
 document.getElementById("otherPage").style.display="none";
+
+updateDashboard();
 
 return;
 
 }
 
 document.getElementById("dashboardPage").style.display="none";
+
 document.getElementById("otherPage").style.display="block";
 
 if(
@@ -1509,6 +1618,7 @@ page==="homework"
 ){
 
 openClasses(page);
+
 return;
 
 }
@@ -1518,36 +1628,13 @@ document.getElementById("otherPage").innerHTML=getOtherPage(page);
 }
 
 
-/* =========================================================
-TYPE TITLE
-========================================================= */
-
-function getTypeTitle(type){
-
-let x={
-
-students:"Students",
-fees:"Fees",
-attendance:"Attendance",
-exams:"Exam / Result",
-homework:"Homework"
-
-};
-
-return x[type];
-
-}
-
-
-/* =========================================================
+/* =====================================================
 CLASS PAGE
-========================================================= */
+===================================================== */
 
 function openClasses(type){
 
-let html="";
-
-html+=`
+let html=`
 
 <div class="card">
 
@@ -1560,12 +1647,11 @@ ${getTypeTitle(type)} - Select Class
 </div>
 
 </div>
-
 `;
 
 for(let i=1;i<=12;i++){
 
-let d=classData[i];
+let d=getClassStats(i);
 
 html+=`
 
@@ -1640,6 +1726,9 @@ html+=`
 
 if(type==="exams"){
 
+let pass=Math.round(d.students*.9);
+let fail=d.students-pass;
+
 html+=`
 
 <span class="summary-item summary-total">
@@ -1647,11 +1736,11 @@ html+=`
 </span>
 
 <span class="summary-item summary-green">
-✅ Pass: ${d.pass}
+✅ Pass: ${pass}
 </span>
 
 <span class="summary-item summary-red">
-❌ Fail: ${d.fail}
+❌ Fail: ${fail}
 </span>
 
 `;
@@ -1667,11 +1756,11 @@ html+=`
 </span>
 
 <span class="summary-item summary-green">
-📚 Completed: ${d.homework}
+📚 Homework: ${d.students}
 </span>
 
 <span class="summary-item summary-yellow">
-⏳ Pending: ${d.hwPending}
+⏳ Pending: 0
 </span>
 
 `;
@@ -1693,8 +1782,7 @@ Class ${i}
 
 <div class="class-info">
 
-Total Students:
-<strong>${d.students}</strong>
+${d.students} Students
 
 </div>
 
@@ -1715,9 +1803,9 @@ document.getElementById("otherPage").innerHTML=html;
 }
 
 
-/* =========================================================
-OPEN CLASS
-========================================================= */
+/* =====================================================
+CLASS CLICK
+===================================================== */
 
 function openClass(type,classNo){
 
@@ -1734,13 +1822,21 @@ openStudentsData(type,classNo,"");
 }
 
 
-/* =========================================================
-STREAM PAGE
-========================================================= */
+/* =====================================================
+STREAMS
+===================================================== */
 
 function openStreams(type,classNo){
 
-let streams=getStreamData(classNo);
+let all=getClassStudents(classNo);
+
+let streamNames=["Science","Commerce","Arts"];
+
+let icons={
+Science:"🔬",
+Commerce:"💼",
+Arts:"🎨"
+};
 
 let html=`
 
@@ -1762,21 +1858,11 @@ Class ${classNo} - Select Stream
 </div>
 
 </div>
-
 `;
 
-Object.keys(streams).forEach(function(stream){
+streamNames.forEach(function(stream){
 
-let d=streams[stream];
-
-let icon=
-stream==="Science"
-?"🔬"
-:
-stream==="Commerce"
-?"💼"
-:
-"🎨";
+let students=all.filter(s=>s.stream===stream);
 
 html+=`
 
@@ -1787,34 +1873,25 @@ ${stream}
 </div>
 
 <div class="stream-summary">
-`;
-
-if(type==="students"){
-
-html+=`
 
 <span class="summary-item summary-total">
-👨‍🎓 Students: ${d.students}
+👨‍🎓 Students: ${students.length}
 </span>
 
 `;
-
-}
 
 if(type==="fees"){
 
+let paid=students.filter(s=>Number(s.paid)>=Number(s.fee)).length;
+
 html+=`
 
-<span class="summary-item summary-total">
-👨‍🎓 Students: ${d.students}
-</span>
-
 <span class="summary-item summary-green">
-✅ Paid: ${d.paid}
+✅ Paid: ${paid}
 </span>
 
 <span class="summary-item summary-yellow">
-⏳ Pending: ${d.pending}
+⏳ Pending: ${students.length-paid}
 </span>
 
 `;
@@ -1823,58 +1900,16 @@ html+=`
 
 if(type==="attendance"){
 
+let present=students.filter(s=>s.attendance==="Present").length;
+
 html+=`
 
-<span class="summary-item summary-total">
-👨‍🎓 Students: ${d.students}
-</span>
-
 <span class="summary-item summary-green">
-🟢 Present: ${d.present}
+🟢 Present: ${present}
 </span>
 
 <span class="summary-item summary-red">
-🔴 Absent: ${d.absent}
-</span>
-
-`;
-
-}
-
-if(type==="exams"){
-
-html+=`
-
-<span class="summary-item summary-total">
-👨‍🎓 Students: ${d.students}
-</span>
-
-<span class="summary-item summary-green">
-✅ Pass: ${d.pass}
-</span>
-
-<span class="summary-item summary-red">
-❌ Fail: ${d.fail}
-</span>
-
-`;
-
-}
-
-if(type==="homework"){
-
-html+=`
-
-<span class="summary-item summary-total">
-👨‍🎓 Students: ${d.students}
-</span>
-
-<span class="summary-item summary-green">
-📚 Completed: ${d.homework}
-</span>
-
-<span class="summary-item summary-yellow">
-⏳ Pending: ${d.hwPending}
+🔴 Absent: ${students.length-present}
 </span>
 
 `;
@@ -1891,7 +1926,7 @@ onclick="openStudentsData('${type}',${classNo},'${stream}')"
 >
 
 <div class="stream-icon">
-${icon}
+${icons[stream]}
 </div>
 
 <h3>
@@ -1899,11 +1934,7 @@ ${stream}
 </h3>
 
 <p>
-${d.students} Students
-</p>
-
-<p>
-Click to view complete data →
+${students.length} Students
 </p>
 
 </div>
@@ -1919,108 +1950,25 @@ document.getElementById("otherPage").innerHTML=html;
 }
 
 
-/* =========================================================
-GET STUDENT NAME
-========================================================= */
-
-function getStudentName(index){
-
-let firstNames=[
-"Rahul",
-"Priya",
-"Arjun",
-"Anjali",
-"Rohit",
-"Neha",
-"Aman",
-"Simran",
-"Vikas",
-"Pooja",
-"Aditya",
-"Kajal",
-"Vivek",
-"Riya",
-"Manish",
-"Komal",
-"Deepak",
-"Shivam",
-"Muskan",
-"Ankit",
-"Payal",
-"Yash",
-"Anjali",
-"Harsh",
-"Sakshi"
-];
-
-let lastNames=[
-"Sharma",
-"Singh",
-"Kumar",
-"Verma",
-"Gupta",
-"Yadav",
-"Meena",
-"Khan",
-"Patel",
-"Jain"
-];
-
-return firstNames[index%firstNames.length]+" "+
-lastNames[Math.floor(index/firstNames.length)%lastNames.length];
-
-}
-
-
-/* =========================================================
-GET FATHER NAME
-========================================================= */
-
-function getFatherName(index){
-
-let names=[
-"Rakesh Sharma",
-"Mahesh Singh",
-"Suresh Kumar",
-"Rajesh Verma",
-"Manoj Gupta",
-"Ajay Sharma",
-"Salim Khan",
-"Harpreet Singh",
-"Vijay Yadav",
-"Ramesh Meena",
-"Sunil Singh",
-"Deepak Sharma",
-"Mohan Kumar",
-"Raj Kumar",
-"Ashok Verma"
-];
-
-return names[index%names.length];
-
-}
-
-
-/* =========================================================
+/* =====================================================
 STUDENT DATA PAGE
-========================================================= */
+===================================================== */
 
 function openStudentsData(type,classNo,stream){
 
+let students=stream
+?
+getStreamStudents(classNo,stream)
+:
+getClassStudents(classNo);
+
 let title=`Class ${classNo}`;
 
-let d=classData[classNo];
-
 if(stream){
-
 title+=` - ${stream}`;
-
-d=getStreamData(classNo)[stream];
-
 }
 
-let backFunction=
-stream
+let backFunction=stream
 ?
 `openStreams('${type}',${classNo})`
 :
@@ -2053,7 +2001,7 @@ ${getTypeTitle(type)}
 
 <button
 class="small-btn"
-onclick="alert('Add Student form next version me database ke saath connect hoga.')"
+onclick="openAddStudent(${classNo},'${stream||""}')"
 >
 + Add Student
 </button>
@@ -2071,22 +2019,25 @@ flex-wrap:wrap;
 "
 >
 
-<span class="summary-total">
-👨‍🎓 <strong>Students:</strong> ${d.students}
+<span>
+👨‍🎓 <strong>Students:</strong> ${students.length}
 </span>
 
 `;
 
 if(type==="students"){
 
+let boys=students.filter(s=>s.gender==="Boy").length;
+let girls=students.filter(s=>s.gender==="Girl").length;
+
 html+=`
 
 <span>
-👦 <strong>Boys:</strong> ${stream ? getStreamBoys(d.students) : classData[classNo].boys}
+👦 <strong>Boys:</strong> ${boys}
 </span>
 
 <span>
-👧 <strong>Girls:</strong> ${stream ? d.students-getStreamBoys(d.students) : classData[classNo].girls}
+👧 <strong>Girls:</strong> ${girls}
 </span>
 
 `;
@@ -2095,14 +2046,16 @@ html+=`
 
 if(type==="fees"){
 
+let paid=students.filter(s=>Number(s.paid)>=Number(s.fee)).length;
+
 html+=`
 
 <span class="summary-green">
-✅ <strong>Paid:</strong> ${d.paid}
+✅ <strong>Paid:</strong> ${paid}
 </span>
 
 <span class="summary-yellow">
-⏳ <strong>Pending:</strong> ${d.pending}
+⏳ <strong>Pending:</strong> ${students.length-paid}
 </span>
 
 `;
@@ -2111,46 +2064,16 @@ html+=`
 
 if(type==="attendance"){
 
+let present=students.filter(s=>s.attendance==="Present").length;
+
 html+=`
 
 <span class="summary-green">
-🟢 <strong>Present:</strong> ${d.present}
+🟢 <strong>Present:</strong> ${present}
 </span>
 
 <span class="summary-red">
-🔴 <strong>Absent:</strong> ${d.absent}
-</span>
-
-`;
-
-}
-
-if(type==="exams"){
-
-html+=`
-
-<span class="summary-green">
-✅ <strong>Pass:</strong> ${d.pass}
-</span>
-
-<span class="summary-red">
-❌ <strong>Fail:</strong> ${d.fail}
-</span>
-
-`;
-
-}
-
-if(type==="homework"){
-
-html+=`
-
-<span class="summary-green">
-📚 <strong>Completed:</strong> ${d.homework}
-</span>
-
-<span class="summary-yellow">
-⏳ <strong>Pending:</strong> ${d.hwPending}
+🔴 <strong>Absent:</strong> ${students.length-present}
 </span>
 
 `;
@@ -2160,6 +2083,59 @@ html+=`
 html+=`
 
 </div>
+
+<div class="search-box">
+
+<input
+id="studentSearch"
+placeholder="🔍 Search student name, father name or mobile..."
+oninput="filterStudentTable('${type}',${classNo},'${stream||""}')"
+>
+
+</div>
+
+<div id="studentTableArea">
+`;
+
+html+=buildStudentTable(type,classNo,stream,students);
+
+html+=`
+
+</div>
+
+</div>
+`;
+
+document.getElementById("otherPage").innerHTML=html;
+
+}
+
+
+/* =====================================================
+BUILD STUDENT TABLE
+===================================================== */
+
+function buildStudentTable(type,classNo,stream,students){
+
+if(students.length===0){
+
+return `
+
+<div class="empty">
+
+<h3>No Students Found</h3>
+
+<p style="margin-top:8px">
+Click "+ Add Student" to add a student.
+</p>
+
+</div>
+
+`;
+
+}
+
+let html=`
 
 <div class="table-container">
 
@@ -2173,57 +2149,52 @@ html+=`
 <th>Student Name</th>
 <th>Father Name</th>
 <th>Mobile</th>
+<th>Class</th>
 <th>Section</th>
-`;
-
-if(stream){
-
-html+=`
-<th>Stream</th>
-`;
-}
-
-if(type==="students"){
-
-html+=`
 <th>Gender</th>
 `;
 
+if(classNo>=11){
+html+=`<th>Stream</th>`;
 }
 
 if(type==="fees"){
 
 html+=`
+
 <th>Total Fee</th>
 <th>Paid</th>
 <th>Due</th>
 <th>Status</th>
+
 `;
 
 }
 
 if(type==="attendance"){
 
-html+=`
-<th>Attendance</th>
-`;
+html+=`<th>Attendance</th>`;
 
 }
 
 if(type==="exams"){
 
 html+=`
+
 <th>Maths</th>
 <th>Science</th>
 <th>English</th>
 <th>Total</th>
 <th>Percentage</th>
 <th>Result</th>
+
 `;
 
 }
 
 html+=`
+
+<th>Action</th>
 
 </tr>
 
@@ -2232,153 +2203,65 @@ html+=`
 <tbody>
 `;
 
+students.forEach(function(s,index){
 
-/* =========================================================
-GENERATE EXACT NUMBER OF STUDENTS
-========================================================= */
-
-for(let i=0;i<d.students;i++){
-
-let student=getStudentName(i);
-let father=getFatherName(i);
-
-let gender;
-
-if(stream){
-
-gender=i%2===0?"Boy":"Girl";
-
-}else{
-
-let originalClass=classData[classNo];
-
-let boys=originalClass.boys;
-
-gender=i<boys?"Boy":"Girl";
-
-}
-
-let totalFee=35000;
-
-/* EXACT FEES */
-
-let paid;
-
-if(type==="fees"){
-
-if(i<d.paid){
-paid=35000;
-}else{
-paid=20000;
-}
-
-}else{
-
-paid=
-i%3===0
-?35000
-:i%3===1
-?20000
-:28000;
-
-}
-
-let due=totalFee-paid;
-
-
-/* EXACT ATTENDANCE */
-
-let isPresent=i<d.present;
-
-
-/* EXACT EXAM */
-
-let isPass=i<d.pass;
-
-let maths=isPass
-?70+(i%20)
-:20+(i%10);
-
-let science=isPass
-?75+(i%15)
-:25+(i%10);
-
-let english=isPass
-?68+(i%22)
-:22+(i%10);
-
-let total=maths+science+english;
-
-let percentage=(total/300*100).toFixed(1);
-
+let due=Number(s.fee)-Number(s.paid);
 
 html+=`
 
 <tr>
 
 <td>
-${i+1}
+${index+1}
 </td>
 
 <td>
-<strong>
-${student}
-</strong>
+<strong>${escapeHtml(s.name)}</strong>
 </td>
 
 <td>
-${father}
+${escapeHtml(s.father)}
 </td>
 
 <td>
-98${String(7654321-i).slice(-7)}
+${escapeHtml(s.mobile)}
 </td>
 
 <td>
-${i%2===0?"A":"B"}
+Class ${s.classNo}
+</td>
+
+<td>
+${s.section}
+</td>
+
+<td>
+${s.gender}
 </td>
 `;
 
-if(stream){
+if(classNo>=11){
 
 html+=`
 
 <td>
-${stream}
+${s.stream||"-"}
 </td>
 
 `;
 
 }
-
-
-/* STUDENTS */
-
-if(type==="students"){
-
-html+=`
-
-<td>
-${gender}
-</td>
-
-`;
-
-}
-
-
-/* FEES */
 
 if(type==="fees"){
 
 html+=`
 
 <td>
-₹${totalFee.toLocaleString("en-IN")}
+₹${Number(s.fee).toLocaleString("en-IN")}
 </td>
 
 <td>
-₹${paid.toLocaleString("en-IN")}
+₹${Number(s.paid).toLocaleString("en-IN")}
 </td>
 
 <td>
@@ -2387,8 +2270,8 @@ html+=`
 
 <td>
 
-<span class="badge ${due===0?"green":"yellow"}">
-${due===0?"Paid":"Pending"}
+<span class="badge ${due<=0?"green":"yellow"}">
+${due<=0?"Paid":"Pending"}
 </span>
 
 </td>
@@ -2397,9 +2280,6 @@ ${due===0?"Paid":"Pending"}
 
 }
 
-
-/* ATTENDANCE */
-
 if(type==="attendance"){
 
 html+=`
@@ -2407,19 +2287,14 @@ html+=`
 <td>
 
 <span
-class="badge ${isPresent?"green":"red"}"
+class="badge ${s.attendance==="Present"?"green":"red"}"
 >
-${isPresent?"Present":"Absent"}
+${s.attendance}
 </span>
 
 <button
-style="
-margin-left:8px;
-border:0;
-padding:6px 9px;
-border-radius:7px
-"
-onclick="toggleAttendance(this)"
+class="edit-btn"
+onclick="changeAttendance(${s.id},${classNo},'${stream||""}','${type}')"
 >
 Change
 </button>
@@ -2430,27 +2305,29 @@ Change
 
 }
 
-
-/* EXAM */
-
 if(type==="exams"){
+
+let maths=70+(index%20);
+let science=75+(index%15);
+let english=68+(index%22);
+
+let total=maths+science+english;
+let percentage=(total/300*100).toFixed(1);
+
+let pass=percentage>=33;
 
 html+=`
 
 <td>${maths}</td>
-
 <td>${science}</td>
-
 <td>${english}</td>
-
 <td>${total}/300</td>
-
 <td>${percentage}%</td>
 
 <td>
 
-<span class="badge ${isPass?"green":"red"}">
-${isPass?"PASS":"FAIL"}
+<span class="badge ${pass?"green":"red"}">
+${pass?"PASS":"FAIL"}
 </span>
 
 </td>
@@ -2461,11 +2338,32 @@ ${isPass?"PASS":"FAIL"}
 
 html+=`
 
-</tr>
+<td>
 
+<div class="action-buttons">
+
+<button
+class="edit-btn"
+onclick="editStudent(${s.id},${classNo},'${stream||""}','${type}')"
+>
+✏️ Edit
+</button>
+
+<button
+class="delete-btn"
+onclick="deleteStudent(${s.id},${classNo},'${stream||""}','${type}')"
+>
+🗑️ Delete
+</button>
+
+</div>
+
+</td>
+
+</tr>
 `;
 
-}
+});
 
 html+=`
 
@@ -2476,139 +2374,423 @@ html+=`
 </div>
 `;
 
-
-/* HOMEWORK */
-
-if(type==="homework"){
-
-html+=`
-
-<div class="notice">
-
-<strong>
-Mathematics
-</strong>
-
-<span>
-Chapter 5 Exercise • Due: 30 August
-</span>
-
-</div>
-
-<div class="notice">
-
-<strong>
-Science
-</strong>
-
-<span>
-Human Body Questions • Due: 31 August
-</span>
-
-</div>
-
-<div class="notice">
-
-<strong>
-English
-</strong>
-
-<span>
-Write an essay • Due: 1 September
-</span>
-
-</div>
-
-<div class="notice">
-
-<strong>
-Hindi
-</strong>
-
-<span>
-Chapter 8 Questions • Due: 2 September
-</span>
-
-</div>
-
-`;
+return html;
 
 }
 
 
-if(type==="attendance"){
+/* =====================================================
+SEARCH
+===================================================== */
 
-html+=`
+function filterStudentTable(type,classNo,stream){
 
-<div
-style="
-padding:20px;
-text-align:right
-"
->
+let search=document.getElementById("studentSearch").value.toLowerCase().trim();
 
-<button
-class="small-btn"
-onclick="alert('Attendance saved successfully!')"
->
-SAVE ATTENDANCE
-</button>
+let students=stream
+?
+getStreamStudents(classNo,stream)
+:
+getClassStudents(classNo);
 
-</div>
+if(search){
 
-`;
+students=students.filter(function(s){
+
+return (
+
+s.name.toLowerCase().includes(search) ||
+
+s.father.toLowerCase().includes(search) ||
+
+s.mobile.toLowerCase().includes(search)
+
+);
+
+});
 
 }
 
-html+=`
-
-</div>
-`;
-
-document.getElementById("otherPage").innerHTML=html;
-
-}
-
-
-/* =========================================================
-STREAM BOYS
-========================================================= */
-
-function getStreamBoys(total){
-
-return Math.ceil(total*0.55);
+document.getElementById("studentTableArea").innerHTML=
+buildStudentTable(type,classNo,stream,students);
 
 }
 
 
-/* =========================================================
-ATTENDANCE CHANGE
-========================================================= */
+/* =====================================================
+ADD STUDENT
+===================================================== */
 
-function toggleAttendance(btn){
+let editingStudentId=null;
 
-let badge=btn.previousElementSibling;
+function openAddStudent(classNo,stream){
 
-if(badge.classList.contains("green")){
+editingStudentId=null;
 
-badge.classList.remove("green");
-badge.classList.add("red");
-badge.innerText="Absent";
+document.getElementById("studentModalTitle").innerText="Add Student";
+
+document.getElementById("studentName").value="";
+document.getElementById("fatherName").value="";
+document.getElementById("studentMobile").value="";
+document.getElementById("studentGender").value="";
+document.getElementById("studentClass").value=classNo;
+document.getElementById("studentSection").value="A";
+document.getElementById("studentStream").value=stream||"";
+document.getElementById("studentFee").value=35000;
+
+document.getElementById("studentModal").style.display="flex";
+
+}
+
+
+/* =====================================================
+SAVE STUDENT
+===================================================== */
+
+function saveStudent(){
+
+let name=document.getElementById("studentName").value.trim();
+
+let father=document.getElementById("fatherName").value.trim();
+
+let mobile=document.getElementById("studentMobile").value.trim();
+
+let gender=document.getElementById("studentGender").value;
+
+let classNo=document.getElementById("studentClass").value;
+
+let section=document.getElementById("studentSection").value;
+
+let stream=document.getElementById("studentStream").value;
+
+let fee=Number(document.getElementById("studentFee").value)||0;
+
+if(!name){
+alert("Enter Student Name");
+return;
+}
+
+if(!father){
+alert("Enter Father Name");
+return;
+}
+
+if(!mobile){
+alert("Enter Mobile Number");
+return;
+}
+
+if(!gender){
+alert("Select Gender");
+return;
+}
+
+if(!classNo){
+alert("Select Class");
+return;
+}
+
+if((Number(classNo)===11 || Number(classNo)===12) && !stream){
+
+alert("Select Stream for Class 11 / 12");
+
+return;
+
+}
+
+let students=getStudents();
+
+if(editingStudentId){
+
+let index=students.findIndex(
+s=>Number(s.id)===Number(editingStudentId)
+);
+
+if(index!==-1){
+
+students[index].name=name;
+students[index].father=father;
+students[index].mobile=mobile;
+students[index].gender=gender;
+students[index].classNo=Number(classNo);
+students[index].section=section;
+students[index].stream=stream;
+students[index].fee=fee;
+
+}
 
 }else{
 
-badge.classList.remove("red");
-badge.classList.add("green");
-badge.innerText="Present";
+students.push({
+
+id:Date.now(),
+
+name:name,
+
+father:father,
+
+mobile:mobile,
+
+gender:gender,
+
+classNo:Number(classNo),
+
+section:section,
+
+stream:stream,
+
+fee:fee,
+
+paid:0,
+
+attendance:"Present"
+
+});
+
+}
+
+saveStudents(students);
+
+closeStudentModal();
+
+alert(
+editingStudentId
+?
+"Student updated successfully!"
+:
+"Student added successfully!"
+);
+
+updateDashboard();
+
+let currentType=
+window.currentStudentType||"students";
+
+if(
+window.currentClassNo
+){
+
+openStudentsData(
+currentType,
+window.currentClassNo,
+window.currentStream||""
+);
 
 }
 
 }
 
 
-/* =========================================================
+/* =====================================================
+EDIT STUDENT
+===================================================== */
+
+function editStudent(id,classNo,stream,type){
+
+let student=getStudents().find(
+s=>Number(s.id)===Number(id)
+);
+
+if(!student){
+alert("Student not found");
+return;
+}
+
+editingStudentId=id;
+
+window.currentStudentType=type;
+window.currentClassNo=classNo;
+window.currentStream=stream;
+
+document.getElementById("studentModalTitle").innerText="Edit Student";
+
+document.getElementById("studentName").value=student.name;
+
+document.getElementById("fatherName").value=student.father;
+
+document.getElementById("studentMobile").value=student.mobile;
+
+document.getElementById("studentGender").value=student.gender;
+
+document.getElementById("studentClass").value=student.classNo;
+
+document.getElementById("studentSection").value=student.section;
+
+document.getElementById("studentStream").value=student.stream||"";
+
+document.getElementById("studentFee").value=student.fee;
+
+document.getElementById("studentModal").style.display="flex";
+
+}
+
+
+/* =====================================================
+DELETE STUDENT
+===================================================== */
+
+function deleteStudent(id,classNo,stream,type){
+
+let student=getStudents().find(
+s=>Number(s.id)===Number(id)
+);
+
+if(!student){
+return;
+}
+
+let ok=confirm(
+"Delete "+student.name+"?\n\nThis action cannot be undone."
+);
+
+if(!ok){
+return;
+}
+
+let students=getStudents().filter(
+s=>Number(s.id)!==Number(id)
+);
+
+saveStudents(students);
+
+updateDashboard();
+
+openStudentsData(
+type,
+classNo,
+stream||""
+);
+
+}
+
+
+/* =====================================================
+CHANGE ATTENDANCE
+===================================================== */
+
+function changeAttendance(id,classNo,stream,type){
+
+let students=getStudents();
+
+let student=students.find(
+s=>Number(s.id)===Number(id)
+);
+
+if(!student){
+return;
+}
+
+student.attendance=
+student.attendance==="Present"
+?
+"Absent"
+:
+"Present";
+
+saveStudents(students);
+
+updateDashboard();
+
+openStudentsData(
+type,
+classNo,
+stream||""
+);
+
+}
+
+
+/* =====================================================
+CLOSE STUDENT MODAL
+===================================================== */
+
+function closeStudentModal(){
+
+document.getElementById("studentModal").style.display="none";
+
+editingStudentId=null;
+
+}
+
+
+/* =====================================================
+CURRENT PAGE TRACKING
+===================================================== */
+
+let oldOpenStudentsData=openStudentsData;
+
+openStudentsData=function(type,classNo,stream){
+
+window.currentStudentType=type;
+
+window.currentClassNo=classNo;
+
+window.currentStream=stream||"";
+
+oldOpenStudentsData(type,classNo,stream);
+
+};
+
+
+/* =====================================================
+TYPE TITLE
+===================================================== */
+
+function getTypeTitle(type){
+
+let x={
+
+students:"Students",
+
+fees:"Fees",
+
+attendance:"Attendance",
+
+exams:"Exam / Result",
+
+homework:"Homework"
+
+};
+
+return x[type]||type;
+
+}
+
+
+/* =====================================================
+DASHBOARD
+===================================================== */
+
+function updateDashboard(){
+
+let students=getStudents();
+
+document.getElementById("dashStudents").innerText=
+students.length;
+
+let present=students.filter(
+s=>s.attendance==="Present"
+).length;
+
+let absent=students.filter(
+s=>s.attendance==="Absent"
+).length;
+
+document.getElementById("dashPresent").innerText=
+present+" Students";
+
+document.getElementById("dashAbsent").innerText=
+absent+" Students";
+
+document.getElementById("dashLeave").innerText=
+"0 Students";
+
+}
+
+
+/* =====================================================
 OTHER PAGES
-========================================================= */
+===================================================== */
 
 function getOtherPage(page){
 
@@ -2624,7 +2806,7 @@ return `
 
 <button
 class="small-btn"
-onclick="alert('Add Teacher form next version me connect hoga.')"
+onclick="alert('Teacher Management next step me add hoga.')"
 >
 + Add Teacher
 </button>
@@ -2645,21 +2827,17 @@ onclick="alert('Add Teacher form next version me connect hoga.')"
 </tr>
 
 <tr>
-
 <td>EMP001</td>
 <td>Anita Sharma</td>
 <td>Mathematics</td>
 <td>9876543210</td>
-
 </tr>
 
 <tr>
-
 <td>EMP002</td>
 <td>Rajesh Verma</td>
 <td>Science</td>
 <td>9811122233</td>
-
 </tr>
 
 </table>
@@ -2754,25 +2932,37 @@ onclick="alert('New Notice form next version me connect hoga.')"
 
 <div class="notice">
 
-<strong>Independence Day Holiday</strong>
+<strong>
+Independence Day Holiday
+</strong>
 
-<span>School holiday notice</span>
-
-</div>
-
-<div class="notice">
-
-<strong>Parent Teacher Meeting</strong>
-
-<span>PTM scheduled Saturday</span>
+<span>
+School holiday notice
+</span>
 
 </div>
 
 <div class="notice">
 
-<strong>Annual Sports Day</strong>
+<strong>
+Parent Teacher Meeting
+</strong>
 
-<span>All students can participate</span>
+<span>
+PTM scheduled Saturday
+</span>
+
+</div>
+
+<div class="notice">
+
+<strong>
+Annual Sports Day
+</strong>
+
+<span>
+All students can participate
+</span>
 
 </div>
 
@@ -2788,6 +2978,18 @@ if(page==="reports"){
 return `
 
 <div class="stats">
+
+<div class="stat-card">
+
+<div class="stat-number">
+${getStudents().length}
+</div>
+
+<div class="stat-label">
+Students
+</div>
+
+</div>
 
 <div class="stat-card">
 
@@ -2825,18 +3027,6 @@ Exam Performance
 
 </div>
 
-<div class="stat-card">
-
-<div class="stat-number">
-607
-</div>
-
-<div class="stat-label">
-Students
-</div>
-
-</div>
-
 </div>
 
 <div class="card">
@@ -2851,7 +3041,9 @@ Students
 
 <strong>Student Report</strong>
 
-<span>Complete student report</span>
+<span>
+Complete student report
+</span>
 
 </div>
 
@@ -2859,7 +3051,9 @@ Students
 
 <strong>Attendance Report</strong>
 
-<span>Monthly attendance report</span>
+<span>
+Monthly attendance report
+</span>
 
 </div>
 
@@ -2867,7 +3061,9 @@ Students
 
 <strong>Fee Report</strong>
 
-<span>Monthly fee collection report</span>
+<span>
+Monthly fee collection report
+</span>
 
 </div>
 
@@ -2908,7 +3104,7 @@ return `
 
 <input
 id="settingsSchool"
-value="${school}"
+value="${escapeHtml(school)}"
 >
 
 </div>
@@ -2919,7 +3115,7 @@ value="${school}"
 
 <input
 id="settingsEmail"
-value="${email}"
+value="${escapeHtml(email)}"
 >
 
 </div>
@@ -2944,21 +3140,41 @@ return "";
 }
 
 
-/* =========================================================
+/* =====================================================
 SETTINGS
-========================================================= */
+===================================================== */
 
 function saveSettings(){
 
-let school=document.getElementById("settingsSchool").value;
-let email=document.getElementById("settingsEmail").value;
+let school=
+document.getElementById("settingsSchool").value.trim();
+
+let email=
+document.getElementById("settingsEmail").value.trim();
 
 localStorage.setItem("schoolName",school);
+
 localStorage.setItem("schoolEmail",email);
 
 document.getElementById("displaySchool").innerText=school;
 
 alert("Settings saved successfully!");
+
+}
+
+
+/* =====================================================
+ESCAPE HTML
+===================================================== */
+
+function escapeHtml(text){
+
+return String(text)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 
 }
 
