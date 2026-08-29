@@ -9,654 +9,160 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#f4f7fb;color:#172033}
 button{cursor:pointer}
-
-.login-page{
-min-height:100vh;
-background:linear-gradient(135deg,#1769ff,#6546e8);
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px
-}
-.login-box{
-width:100%;
-max-width:430px;
-background:white;
-padding:30px;
-border-radius:24px;
-box-shadow:0 20px 60px #0004
-}
-.logo{
-width:65px;height:65px;background:#1769ff;color:white;
-border-radius:18px;display:flex;align-items:center;
-justify-content:center;font-size:32px;font-weight:bold;margin:auto
-}
+.login-page{min-height:100vh;background:linear-gradient(135deg,#1769ff,#6546e8);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{width:100%;max-width:430px;background:white;padding:30px;border-radius:24px;box-shadow:0 20px 60px #0004}
+.logo{width:65px;height:65px;background:#1769ff;color:white;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;margin:auto}
 .login-title{text-align:center;font-size:28px;font-weight:bold;margin-top:15px}
 .login-subtitle{text-align:center;color:#777;margin:7px 0 25px}
-
 .form-group{margin-bottom:15px}
-.form-group label{
-display:block;font-size:14px;font-weight:bold;margin-bottom:7px
-}
-
-input,select{
-width:100%;
-height:47px;
-border:1px solid #dce2eb;
-border-radius:11px;
-padding:0 13px;
-font-size:15px;
-outline:none;
-background:white
-}
-
-.btn{
-width:100%;
-height:48px;
-border:0;
-border-radius:11px;
-font-size:16px;
-font-weight:bold
-}
+.form-group label{display:block;font-size:14px;font-weight:bold;margin-bottom:7px}
+input,select{width:100%;height:47px;border:1px solid #dce2eb;border-radius:11px;padding:0 13px;font-size:15px;outline:none;background:white}
+.btn{width:100%;height:48px;border:0;border-radius:11px;font-size:16px;font-weight:bold}
 .btn-primary{background:#1769ff;color:white}
-.btn-outline{
-background:white;color:#1769ff;
-border:1px solid #1769ff;
-margin-top:10px
-}
-
-.demo{
-margin-top:18px;
-background:#f3f6fb;
-padding:13px;
-border-radius:12px;
-font-size:13px;
-line-height:1.6
-}
+.btn-outline{background:white;color:#1769ff;border:1px solid #1769ff;margin-top:10px}
+.demo{margin-top:18px;background:#f3f6fb;padding:13px;border-radius:12px;font-size:13px;line-height:1.6}
 
 .app{display:none;min-height:100vh}
-
-.sidebar{
-position:fixed;
-left:0;
-top:0;
-bottom:0;
-width:250px;
-background:#101828;
-color:white;
-padding:20px 15px;
-z-index:100;
-overflow-y:auto
-}
-
-.brand{
-display:flex;
-align-items:center;
-gap:10px;
-font-size:22px;
-font-weight:bold;
-margin-bottom:22px
-}
-
-.brand-icon{
-width:40px;height:40px;
-background:#1769ff;
-border-radius:12px;
-display:flex;
-align-items:center;
-justify-content:center
-}
-
-.school-box{
-background:#1c2638;
-padding:13px;
-border-radius:13px;
-margin-bottom:18px;
-color:#b8c2d0;
-font-size:13px
-}
-.school-box strong{
-display:block;
-color:white;
-font-size:15px;
-margin-bottom:4px
-}
-
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:250px;background:#101828;color:white;padding:20px 15px;z-index:100;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:bold;margin-bottom:22px}
+.brand-icon{width:40px;height:40px;background:#1769ff;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.school-box{background:#1c2638;padding:13px;border-radius:13px;margin-bottom:18px;color:#b8c2d0;font-size:13px}
+.school-box strong{display:block;color:white;font-size:15px;margin-bottom:4px}
 .menu{list-style:none}
-.menu li{
-padding:12px;
-border-radius:10px;
-margin-bottom:5px;
-color:#c6cfdb;
-font-size:14px;
-cursor:pointer
-}
-.menu li:hover,.menu li.active{
-background:#1769ff;
-color:white
-}
-.menu .logout{
-color:#ff9999;
-margin-top:15px
-}
-
-.main{
-margin-left:250px;
-min-height:100vh
-}
-
-.topbar{
-height:72px;
-background:white;
-border-bottom:1px solid #e7ebf0;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 28px;
-position:sticky;
-top:0;
-z-index:50
-}
-
-.page-title{
-font-size:22px;
-font-weight:bold
-}
-
-.user{
-display:flex;
-align-items:center;
-gap:10px
-}
-
-.avatar{
-width:40px;
-height:40px;
-background:#1769ff;
-color:white;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold
-}
-
-.mobile-menu{
-display:none;
-background:none;
-border:0;
-font-size:25px
-}
-
+.menu li{padding:12px;border-radius:10px;margin-bottom:5px;color:#c6cfdb;font-size:14px;cursor:pointer}
+.menu li:hover,.menu li.active{background:#1769ff;color:white}
+.menu .logout{color:#ff9999;margin-top:15px}
+.main{margin-left:250px;min-height:100vh}
+.topbar{height:72px;background:white;border-bottom:1px solid #e7ebf0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.page-title{font-size:22px;font-weight:bold}
+.user{display:flex;align-items:center;gap:10px}
+.avatar{width:40px;height:40px;background:#1769ff;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.mobile-menu{display:none;background:none;border:0;font-size:25px}
 .content{padding:25px}
 
-.welcome{
-background:linear-gradient(110deg,#1769ff,#6046e8);
-color:white;
-padding:25px;
-border-radius:20px;
-margin-bottom:22px
-}
-
+.welcome{background:linear-gradient(110deg,#1769ff,#6046e8);color:white;padding:25px;border-radius:20px;margin-bottom:22px}
 .welcome h2{margin-bottom:7px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.stat-card{background:white;border:1px solid #e9edf3;border-radius:17px;padding:20px}
+.stat-number{font-size:27px;font-weight:bold;margin-top:12px}
+.stat-label{color:#777;font-size:13px;margin-top:4px}
 
-.stats{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:16px;
-margin-bottom:22px
-}
-
-.stat-card{
-background:white;
-border:1px solid #e9edf3;
-border-radius:17px;
-padding:20px
-}
-
-.stat-number{
-font-size:27px;
-font-weight:bold;
-margin-top:12px
-}
-
-.stat-label{
-color:#777;
-font-size:13px;
-margin-top:4px
-}
-
-.card{
-background:white;
-border:1px solid #e9edf3;
-border-radius:17px;
-overflow:hidden;
-margin-bottom:20px
-}
-
-.card-header{
-padding:18px 20px;
-border-bottom:1px solid #edf0f4;
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px
-}
-
+.card{background:white;border:1px solid #e9edf3;border-radius:17px;overflow:hidden;margin-bottom:20px}
+.card-header{padding:18px 20px;border-bottom:1px solid #edf0f4;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .card-header h3{font-size:17px}
+.small-btn{border:0;background:#1769ff;color:white;padding:9px 13px;border-radius:9px;font-weight:bold}
+.edit-btn{background:#eef4ff;color:#1769ff;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
+.delete-btn{background:#feecec;color:#dc2626;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
+.export-btn{background:#15803d;color:white;border:0;padding:9px 13px;border-radius:9px;font-weight:bold}
 
-.small-btn{
-border:0;
-background:#1769ff;
-color:white;
-padding:9px 13px;
-border-radius:9px;
-font-weight:bold
-}
-
-.edit-btn{
-background:#eef4ff;
-color:#1769ff;
-border:0;
-padding:7px 10px;
-border-radius:7px;
-font-weight:bold
-}
-
-.delete-btn{
-background:#feecec;
-color:#dc2626;
-border:0;
-padding:7px 10px;
-border-radius:7px;
-font-weight:bold
-}
-
-.export-btn{
-background:#15803d;
-color:white;
-border:0;
-padding:9px 13px;
-border-radius:9px;
-font-weight:bold
-}
-
-.two-column{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px
-}
-
-.notice{
-padding:15px 20px;
-border-bottom:1px solid #edf0f4
-}
-
-.notice strong{
-display:block;
-margin-bottom:5px
-}
-
-.notice span{
-color:#777;
-font-size:12px
-}
+.two-column{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.notice{padding:15px 20px;border-bottom:1px solid #edf0f4}
+.notice strong{display:block;margin-bottom:5px}
+.notice span{color:#777;font-size:12px}
 
 .table-container{overflow-x:auto}
-
-table{
-width:100%;
-min-width:1000px;
-border-collapse:collapse
-}
-
-th,td{
-padding:14px 18px;
-text-align:left;
-border-bottom:1px solid #edf0f4;
-font-size:14px
-}
-
-th{
-background:#fafbfd;
-color:#667085
-}
-
-.badge{
-padding:5px 9px;
-border-radius:20px;
-font-size:12px;
-font-weight:bold
-}
-
+table{width:100%;min-width:1000px;border-collapse:collapse}
+th,td{padding:14px 18px;text-align:left;border-bottom:1px solid #edf0f4;font-size:14px}
+th{background:#fafbfd;color:#667085}
+.badge{padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
 .green{background:#e6f8ed;color:#15803d}
 .red{background:#feecec;color:#dc2626}
 .yellow{background:#fff5d9;color:#b77900}
 .blue{background:#eef4ff;color:#1769ff}
 
-.back-btn{
-border:0;
-background:#eef4ff;
-color:#1769ff;
-padding:10px 15px;
-border-radius:10px;
-font-weight:bold;
-margin-bottom:18px
-}
-
-.class-section{
-margin-bottom:28px
-}
-
-.class-heading{
-font-size:18px;
-font-weight:bold;
-margin-bottom:5px
-}
-
-.class-summary{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-margin-bottom:10px;
-font-size:14px
-}
-
+.back-btn{border:0;background:#eef4ff;color:#1769ff;padding:10px 15px;border-radius:10px;font-weight:bold;margin-bottom:18px}
+.class-section{margin-bottom:28px}
+.class-heading{font-size:18px;font-weight:bold;margin-bottom:5px}
+.class-summary{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:10px;font-size:14px}
 .summary-item{font-weight:bold}
 .summary-total{color:#1769ff}
 .summary-green{color:#15803d}
 .summary-red{color:#dc2626}
 .summary-yellow{color:#b77900}
 
-.class-card{
-background:white;
-border:1px solid #e5eaf1;
-border-radius:17px;
-padding:20px;
-cursor:pointer;
-transition:.2s
-}
+.class-card{background:white;border:1px solid #e5eaf1;border-radius:17px;padding:20px;cursor:pointer;transition:.2s}
+.class-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px #0001}
+.class-number{font-size:25px;font-weight:bold;color:#1769ff}
+.class-info{color:#777;font-size:13px;margin-top:7px}
+.open-text{margin-top:12px;color:#1769ff;font-weight:bold}
 
-.class-card:hover{
-transform:translateY(-3px);
-box-shadow:0 8px 25px #0001
-}
-
-.class-number{
-font-size:25px;
-font-weight:bold;
-color:#1769ff
-}
-
-.class-info{
-color:#777;
-font-size:13px;
-margin-top:7px
-}
-
-.open-text{
-margin-top:12px;
-color:#1769ff;
-font-weight:bold
-}
-
-.stream-section{
-margin-bottom:25px
-}
-
-.stream-heading{
-font-size:18px;
-font-weight:bold;
-margin-bottom:6px
-}
-
-.stream-summary{
-display:flex;
-gap:18px;
-flex-wrap:wrap;
-font-size:14px;
-margin-bottom:10px
-}
-
-.stream-card{
-background:white;
-border:1px solid #e5eaf1;
-border-radius:17px;
-padding:25px;
-cursor:pointer;
-text-align:center;
-transition:.2s
-}
-
-.stream-card:hover{
-box-shadow:0 8px 25px #0001;
-transform:translateY(-3px)
-}
-
-.stream-icon{
-font-size:35px;
-margin-bottom:10px
-}
-
+.stream-section{margin-bottom:25px}
+.stream-heading{font-size:18px;font-weight:bold;margin-bottom:6px}
+.stream-summary{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin-bottom:10px}
+.stream-card{background:white;border:1px solid #e5eaf1;border-radius:17px;padding:25px;cursor:pointer;text-align:center;transition:.2s}
+.stream-card:hover{box-shadow:0 8px 25px #0001;transform:translateY(-3px)}
+.stream-icon{font-size:35px;margin-bottom:10px}
 .stream-card h3{font-size:18px}
-.stream-card p{
-color:#777;
-font-size:13px;
-margin-top:5px
-}
+.stream-card p{color:#777;font-size:13px;margin-top:5px}
 
-.search-box{
-display:flex;
-gap:10px;
-padding:18px;
-border-bottom:1px solid #edf0f4
-}
-
+.search-box{display:flex;gap:10px;padding:18px;border-bottom:1px solid #edf0f4}
 .search-box input{flex:1}
 
-.modal-bg{
-display:none;
-position:fixed;
-inset:0;
-background:#0008;
-z-index:300;
-align-items:center;
-justify-content:center;
-padding:20px
-}
+.modal-bg{display:none;position:fixed;inset:0;background:#0008;z-index:300;align-items:center;justify-content:center;padding:20px}
+.modal{width:100%;max-width:700px;background:white;border-radius:20px;padding:25px;max-height:92vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.close-btn{border:0;width:35px;height:35px;border-radius:50%;font-size:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.empty{padding:35px;text-align:center;color:#777}
+.action-buttons{display:flex;gap:7px;flex-wrap:wrap}
 
-.modal{
-width:100%;
-max-width:700px;
-background:white;
-border-radius:20px;
-padding:25px;
-max-height:92vh;
-overflow-y:auto
-}
-
-.modal-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px
-}
-
-.close-btn{
-border:0;
-width:35px;
-height:35px;
-border-radius:50%;
-font-size:20px
-}
-
-.form-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px
-}
-
-.empty{
-padding:35px;
-text-align:center;
-color:#777
-}
-
-.action-buttons{
-display:flex;
-gap:7px;
-flex-wrap:wrap
-}
-
-.result-box{
+.attendance-toolbar{
 padding:18px;
 background:#f8faff;
 border-bottom:1px solid #edf0f4;
 display:flex;
-gap:20px;
-flex-wrap:wrap
-}
-
-.pass-mark{
-color:#15803d;
-font-weight:bold
-}
-
-.fail-mark{
-color:#dc2626;
-font-weight:bold
-}
-
-.export-grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:15px;
-padding:20px
-}
-
-.export-card{
-border:1px solid #e5eaf1;
-border-radius:14px;
-padding:18px
-}
-
-.export-card h4{margin-bottom:7px}
-
-.export-card p{
-font-size:12px;
-color:#777;
-margin-bottom:12px
-}
-
-.report-filter{
-padding:20px;
-background:#f8faff;
-border-bottom:1px solid #edf0f4
-}
-
-.report-filter-grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px
-}
-
-.report-class-card{
-background:white;
-border:1px solid #e5eaf1;
-border-radius:17px;
-padding:20px;
-margin-bottom:18px
-}
-
-.report-class-title{
-font-size:20px;
-font-weight:bold;
-color:#1769ff;
-margin-bottom:12px
-}
-
-.report-mini-grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:10px
-}
-
-.report-mini{
-background:#f8faff;
-padding:14px;
-border-radius:12px
-}
-
-.report-mini strong{
-display:block;
-font-size:18px;
-margin-top:5px
-}
-
-.report-actions{
-display:flex;
-gap:8px;
+gap:10px;
 flex-wrap:wrap;
-margin-top:15px
+align-items:end
+}
+.attendance-toolbar .form-group{
+margin:0;
+min-width:180px
+}
+
+.subject-row{
+display:grid;
+grid-template-columns:2fr 1fr 1fr 45px;
+gap:8px;
+margin-bottom:10px;
+align-items:center
+}
+.remove-subject{
+height:42px;
+border:0;
+border-radius:8px;
+background:#feecec;
+color:#dc2626;
+font-size:18px
+}
+.add-subject{
+border:0;
+background:#eef4ff;
+color:#1769ff;
+padding:10px 14px;
+border-radius:9px;
+font-weight:bold;
+margin-bottom:15px
 }
 
 @media(max-width:1000px){
 .stats{grid-template-columns:repeat(2,1fr)}
-.export-grid{grid-template-columns:repeat(2,1fr)}
-.report-filter-grid{grid-template-columns:repeat(2,1fr)}
-.report-mini-grid{grid-template-columns:repeat(2,1fr)}
 }
 
 @media(max-width:700px){
-.sidebar{
-transform:translateX(-100%);
-transition:.25s
-}
-
-.sidebar.open{
-transform:translateX(0)
-}
-
+.sidebar{transform:translateX(-100%);transition:.25s}
+.sidebar.open{transform:translateX(0)}
 .main{margin-left:0}
-
 .mobile-menu{display:block}
-
 .topbar{padding:0 15px}
 .content{padding:15px}
-
-.stats{
-grid-template-columns:1fr 1fr
-}
-
-.two-column{
-grid-template-columns:1fr
-}
-
+.stats{grid-template-columns:1fr 1fr}
+.two-column{grid-template-columns:1fr}
 .user-name{display:none}
-
-.class-summary,.stream-summary{
-gap:10px;
-font-size:13px
-}
-
-.form-grid{
-grid-template-columns:1fr
-}
-
-.search-box{
-flex-direction:column
-}
-
-.export-grid{
-grid-template-columns:1fr
-}
-
-.report-filter-grid{
-grid-template-columns:1fr
-}
-
-.report-mini-grid{
-grid-template-columns:1fr 1fr
+.class-summary,.stream-summary{gap:10px;font-size:13px}
+.form-grid{grid-template-columns:1fr}
+.search-box{flex-direction:column}
+.subject-row{grid-template-columns:1fr 1fr 1fr 40px}
 }
 </style>
 </head>
@@ -666,11 +172,9 @@ grid-template-columns:1fr 1fr
 <!-- LOGIN -->
 
 <div class="login-page" id="loginPage">
-
 <div class="login-box">
 
 <div class="logo">S</div>
-
 <div class="login-title">SchoolHub</div>
 <div class="login-subtitle">Multi-School Management System</div>
 
@@ -695,10 +199,7 @@ grid-template-columns:1fr 1fr
 </div>
 
 <button class="btn btn-primary" onclick="loginUser()">Login</button>
-
-<button class="btn btn-outline" onclick="openRegister()">
-+ Register New School
-</button>
+<button class="btn btn-outline" onclick="openRegister()">+ Register New School</button>
 
 <div class="demo">
 <strong>Demo Login</strong><br>
@@ -726,55 +227,18 @@ SchoolHub
 </div>
 
 <ul class="menu">
-
-<li class="active" onclick="showPage('dashboard',this)">
-🏠 Dashboard
-</li>
-
-<li onclick="showPage('students',this)">
-👨‍🎓 Students
-</li>
-
-<li onclick="showPage('teachers',this)">
-👨‍🏫 Teachers
-</li>
-
-<li onclick="showPage('attendance',this)">
-📅 Attendance
-</li>
-
-<li onclick="showPage('fees',this)">
-💰 Fees
-</li>
-
-<li onclick="showPage('exams',this)">
-📝 Exam / Result
-</li>
-
-<li onclick="showPage('homework',this)">
-📚 Homework
-</li>
-
-<li onclick="showPage('timetable',this)">
-🕐 Timetable
-</li>
-
-<li onclick="showPage('notices',this)">
-📢 Notices
-</li>
-
-<li onclick="showPage('reports',this)">
-📊 Reports
-</li>
-
-<li onclick="showPage('settings',this)">
-⚙️ Settings
-</li>
-
-<li class="logout" onclick="logoutUser()">
-🚪 Logout
-</li>
-
+<li class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</li>
+<li onclick="showPage('students',this)">👨‍🎓 Students</li>
+<li onclick="showPage('teachers',this)">👨‍🏫 Teachers</li>
+<li onclick="showPage('attendance',this)">📅 Attendance</li>
+<li onclick="showPage('fees',this)">💰 Fees</li>
+<li onclick="showPage('exams',this)">📝 Exam / Result</li>
+<li onclick="showPage('homework',this)">📚 Homework</li>
+<li onclick="showPage('timetable',this)">🕐 Timetable</li>
+<li onclick="showPage('notices',this)">📢 Notices</li>
+<li onclick="showPage('reports',this)">📊 Reports</li>
+<li onclick="showPage('settings',this)">⚙️ Settings</li>
+<li class="logout" onclick="logoutUser()">🚪 Logout</li>
 </ul>
 
 </aside>
@@ -782,31 +246,15 @@ SchoolHub
 <main class="main">
 
 <header class="topbar">
-
 <div style="display:flex;align-items:center;gap:15px">
-
-<button class="mobile-menu" onclick="toggleSidebar()">
-☰
-</button>
-
-<div class="page-title" id="pageTitle">
-Dashboard
-</div>
-
+<button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+<div class="page-title" id="pageTitle">Dashboard</div>
 </div>
 
 <div class="user">
-
-<span class="user-name" id="topUser">
-School Admin
-</span>
-
-<div class="avatar">
-A
+<span class="user-name" id="topUser">School Admin</span>
+<div class="avatar">A</div>
 </div>
-
-</div>
-
 </header>
 
 <div class="content">
@@ -845,12 +293,9 @@ A
 <div class="two-column">
 
 <div class="card">
-
 <div class="card-header">
 <h3>Recent Notices</h3>
-<button class="small-btn" onclick="showPage('notices')">
-View
-</button>
+<button class="small-btn" onclick="showPage('notices')">View</button>
 </div>
 
 <div class="notice">
@@ -867,16 +312,12 @@ View
 <strong>Annual Examination</strong>
 <span>Exam schedule published</span>
 </div>
-
 </div>
 
 <div class="card">
-
 <div class="card-header">
 <h3>Today's Attendance</h3>
-<button class="small-btn" onclick="showPage('attendance')">
-View
-</button>
+<button class="small-btn" onclick="showPage('attendance')">View</button>
 </div>
 
 <div class="notice">
@@ -893,24 +334,20 @@ View
 <strong>Leave</strong>
 <span id="dashLeave">0 Students</span>
 </div>
-
 </div>
 
 </div>
-
 </div>
 
 <div id="otherPage" style="display:none"></div>
 
 </div>
-
 </main>
 </div>
 
 <!-- REGISTER MODAL -->
 
 <div class="modal-bg" id="registerModal">
-
 <div class="modal">
 
 <div class="modal-header">
@@ -920,52 +357,41 @@ View
 
 <div class="form-group">
 <label>School Name</label>
-<input id="regSchoolName">
+<input id="regSchoolName" placeholder="Enter school name">
 </div>
 
 <div class="form-group">
 <label>School Email</label>
-<input id="regSchoolEmail">
+<input id="regSchoolEmail" type="email" placeholder="school@example.com">
 </div>
 
 <div class="form-group">
 <label>Mobile Number</label>
-<input id="regSchoolMobile">
+<input id="regSchoolMobile" placeholder="Enter mobile number">
 </div>
 
 <div class="form-group">
 <label>City</label>
-<input id="regSchoolCity">
+<input id="regSchoolCity" placeholder="Enter city">
 </div>
 
 <div class="form-group">
 <label>Create Password</label>
-<input id="regSchoolPassword" type="password">
+<input id="regSchoolPassword" type="password" placeholder="Minimum 6 characters">
 </div>
 
-<button class="btn btn-primary" onclick="registerSchool()">
-Register School
-</button>
-
+<button class="btn btn-primary" onclick="registerSchool()">Register School</button>
 </div>
 </div>
 
 <!-- STUDENT MODAL -->
 
 <div class="modal-bg" id="studentModal">
-
 <div class="modal">
 
 <div class="modal-header">
-
-<h2 id="studentModalTitle">
-Add Student
-</h2>
-
-<button class="close-btn" onclick="closeStudentModal()">
-×
-</button>
-
+<h2 id="studentModalTitle">Add Student</h2>
+<button class="close-btn" onclick="closeStudentModal()">×</button>
 </div>
 
 <div class="form-grid">
@@ -986,27 +412,18 @@ Add Student
 </div>
 
 <div class="form-group">
-
 <label>Gender *</label>
-
 <select id="studentGender">
-
 <option value="">Select Gender</option>
 <option value="Boy">Boy</option>
 <option value="Girl">Girl</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Class *</label>
-
 <select id="studentClass">
-
 <option value="">Select Class</option>
-
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
 <option value="3">Class 3</option>
@@ -1019,75 +436,131 @@ Add Student
 <option value="10">Class 10</option>
 <option value="11">Class 11</option>
 <option value="12">Class 12</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Section</label>
-
 <select id="studentSection">
-
 <option value="A">A</option>
 <option value="B">B</option>
 <option value="C">C</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Stream</label>
-
 <select id="studentStream">
-
 <option value="">Not Applicable</option>
 <option value="Science">Science</option>
 <option value="Commerce">Commerce</option>
 <option value="Arts">Arts</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Total Fee</label>
-
 <input id="studentFee" type="number" value="35000">
-
 </div>
 
 </div>
 
 <br>
+<button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
 
-<button class="btn btn-primary" onclick="saveStudent()">
-Save Student
-</button>
+</div>
+</div>
 
+<!-- FEE MODAL -->
+
+<div class="modal-bg" id="feeModal">
+<div class="modal">
+
+<div class="modal-header">
+<h2 id="feeModalTitle">Add Fee Payment</h2>
+<button class="close-btn" onclick="closeFeeModal()">×</button>
+</div>
+
+<div class="form-group">
+<label>Student</label>
+<input id="feeStudentName" readonly>
+</div>
+
+<div class="form-grid">
+
+<div class="form-group">
+<label>Payment Amount *</label>
+<input id="feeAmount" type="number" min="0">
+</div>
+
+<div class="form-group">
+<label>Payment Date *</label>
+<input id="feeDate" type="date">
+</div>
+
+<div class="form-group">
+<label>Payment Mode</label>
+<select id="feeMode">
+<option>Cash</option>
+<option>UPI</option>
+<option>Bank Transfer</option>
+<option>Cheque</option>
+<option>Online</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Receipt No.</label>
+<input id="feeReceipt">
+</div>
+
+</div>
+
+<button class="btn btn-primary" onclick="saveFeePayment()">Save Payment</button>
+</div>
+</div>
+
+<!-- ATTENDANCE MODAL -->
+
+<div class="modal-bg" id="attendanceModal">
+<div class="modal">
+
+<div class="modal-header">
+<h2>Attendance Record</h2>
+<button class="close-btn" onclick="closeAttendanceModal()">×</button>
+</div>
+
+<div class="form-group">
+<label>Student</label>
+<input id="attendanceStudentName" readonly>
+</div>
+
+<div class="form-group">
+<label>Date</label>
+<input id="attendanceEditDate" type="date">
+</div>
+
+<div class="form-group">
+<label>Status</label>
+<select id="attendanceEditStatus">
+<option value="Present">🟢 Present</option>
+<option value="Absent">🔴 Absent</option>
+<option value="Leave">🟡 Leave</option>
+</select>
+</div>
+
+<button class="btn btn-primary" onclick="saveAttendanceEdit()">Save Attendance</button>
 </div>
 </div>
 
 <!-- EXAM MODAL -->
 
 <div class="modal-bg" id="examModal">
-
 <div class="modal">
 
 <div class="modal-header">
-
-<h2 id="examModalTitle">
-Add Exam Result
-</h2>
-
-<button class="close-btn" onclick="closeExamModal()">
-×
-</button>
-
+<h2 id="examModalTitle">Add Exam Result</h2>
+<button class="close-btn" onclick="closeExamModal()">×</button>
 </div>
 
 <div class="form-grid">
@@ -1109,28 +582,23 @@ Add Exam Result
 
 </div>
 
+<hr style="margin:15px 0;border:0;border-top:1px solid #eee">
+
+<h3 style="margin-bottom:12px">Subjects</h3>
+
 <div id="subjectRows"></div>
 
-<button
-class="btn btn-outline"
-onclick="addSubjectRow()"
-style="margin:5px 0 15px">
-
+<button class="add-subject" onclick="addSubjectRow()">
 + Add Subject
-
 </button>
 
-<div id="examSummaryBox" class="result-box">
-
-Total: 0 |
-Obtained: 0 |
-Percentage: 0%
-
+<div style="background:#f8faff;padding:15px;border-radius:12px;margin:5px 0 20px">
+<div><strong>Total Marks:</strong> <span id="previewMax">0</span></div>
+<div><strong>Obtained Marks:</strong> <span id="previewObtained">0</span></div>
+<div><strong>Percentage:</strong> <span id="previewPercentage">0%</span></div>
 </div>
 
-<button class="btn btn-primary" onclick="saveExam()">
-Save Result
-</button>
+<button class="btn btn-primary" onclick="saveExam()">Save Result</button>
 
 </div>
 </div>
@@ -1143,120 +611,55 @@ function today(){
 return new Date().toISOString().split("T")[0];
 }
 
-function getJSON(k){
-try{
-return JSON.parse(localStorage.getItem(k)||"[]");
-}catch(e){
-return [];
-}
-}
-
-function setJSON(k,v){
-localStorage.setItem(k,JSON.stringify(v));
-}
-
-/* DATABASE */
-
-function getStudents(){
-return getJSON("schoolStudents");
-}
-
-function saveStudents(v){
-setJSON("schoolStudents",v);
-}
-
-function getFees(){
-return getJSON("schoolFees");
-}
-
-function saveFees(v){
-setJSON("schoolFees",v);
-}
-
-function getAttendance(){
-return getJSON("schoolAttendance");
-}
-
-function saveAttendance(v){
-setJSON("schoolAttendance",v);
-}
-
-function getExams(){
-return getJSON("schoolExams");
-}
-
-function saveExams(v){
-setJSON("schoolExams",v);
-}
-
-function getHomework(){
-return getJSON("schoolHomework");
-}
-
-function saveHomework(v){
-setJSON("schoolHomework",v);
-}
-
 /* LOGIN */
 
 function loginUser(){
 
-let e=document.getElementById("loginEmail").value.trim();
-let p=document.getElementById("loginPassword").value;
+let email=document.getElementById("loginEmail").value.trim();
+let password=document.getElementById("loginPassword").value;
 
-if(!e){
+if(!email){
 alert("Please enter Email / Mobile");
 return;
 }
 
-if(!p){
+if(!password){
 alert("Please enter Password");
 return;
 }
 
-if(e==="admin@school.com" && p==="123456"){
-openApplication(
-"ABC Public School",
-"School Administrator"
-);
+if(email==="admin@school.com" && password==="123456"){
+openApplication("ABC Public School","School Administrator");
 return;
 }
 
-let se=localStorage.getItem("schoolEmail");
-let sp=localStorage.getItem("schoolPassword");
-let ss=localStorage.getItem("schoolName");
+let savedEmail=localStorage.getItem("schoolEmail");
+let savedPassword=localStorage.getItem("schoolPassword");
+let savedSchool=localStorage.getItem("schoolName");
 
-if(e===se && p===sp){
-openApplication(ss,"School Administrator");
+if(email===savedEmail && password===savedPassword){
+openApplication(savedSchool,"School Administrator");
 return;
 }
 
-alert(
-"Invalid Login Details.\n\nDemo:\nadmin@school.com\n123456"
-);
-
+alert("Invalid Login Details.\n\nDemo:\nadmin@school.com\n123456");
 }
 
-function openApplication(s,r){
+function openApplication(school,role){
 
 document.getElementById("loginPage").style.display="none";
 document.getElementById("app").style.display="block";
 
-document.getElementById("displaySchool").innerText=
-s||"ABC Public School";
-
-document.getElementById("displayRole").innerText=r;
-document.getElementById("topUser").innerText=r;
+document.getElementById("displaySchool").innerText=school;
+document.getElementById("displayRole").innerText=role;
+document.getElementById("topUser").innerText=role;
 
 updateDashboard();
-
 }
 
 function logoutUser(){
-
 document.getElementById("app").style.display="none";
 document.getElementById("loginPage").style.display="flex";
-
 }
 
 function openRegister(){
@@ -1269,115 +672,196 @@ document.getElementById("registerModal").style.display="none";
 
 function registerSchool(){
 
-let s=document.getElementById("regSchoolName").value.trim();
-let e=document.getElementById("regSchoolEmail").value.trim();
-let m=document.getElementById("regSchoolMobile").value.trim();
-let c=document.getElementById("regSchoolCity").value.trim();
-let p=document.getElementById("regSchoolPassword").value;
+let school=document.getElementById("regSchoolName").value.trim();
+let email=document.getElementById("regSchoolEmail").value.trim();
+let mobile=document.getElementById("regSchoolMobile").value.trim();
+let city=document.getElementById("regSchoolCity").value.trim();
+let password=document.getElementById("regSchoolPassword").value;
 
-if(!s||!e||!m||!c){
+if(!school||!email||!mobile||!city){
 alert("Please fill all fields");
 return;
 }
 
-if(p.length<6){
+if(password.length<6){
 alert("Password must be at least 6 characters");
 return;
 }
 
-localStorage.setItem("schoolName",s);
-localStorage.setItem("schoolEmail",e);
-localStorage.setItem("schoolMobile",m);
-localStorage.setItem("schoolCity",c);
-localStorage.setItem("schoolPassword",p);
+localStorage.setItem("schoolName",school);
+localStorage.setItem("schoolEmail",email);
+localStorage.setItem("schoolMobile",mobile);
+localStorage.setItem("schoolCity",city);
+localStorage.setItem("schoolPassword",password);
 
 closeRegister();
 
-document.getElementById("loginEmail").value=e;
+document.getElementById("loginEmail").value=email;
 
-alert(
-"School Registered Successfully!\n\nNow login with your registered Email and Password."
-);
-
+alert("School Registered Successfully!\n\nNow login with your registered Email and Password.");
 }
 
 function toggleSidebar(){
 document.getElementById("sidebar").classList.toggle("open");
 }
 
+/* DATABASE */
+
+function getStudents(){
+let data=localStorage.getItem("schoolStudents");
+if(!data)return [];
+try{return JSON.parse(data)}catch(e){return []}
+}
+
+function saveStudents(data){
+localStorage.setItem("schoolStudents",JSON.stringify(data));
+}
+
+function getFees(){
+let data=localStorage.getItem("schoolFees");
+if(!data)return [];
+try{return JSON.parse(data)}catch(e){return []}
+}
+
+function saveFees(data){
+localStorage.setItem("schoolFees",JSON.stringify(data));
+}
+
+function getAttendance(){
+let data=localStorage.getItem("schoolAttendance");
+if(!data)return [];
+try{return JSON.parse(data)}catch(e){return []}
+}
+
+function saveAttendance(data){
+localStorage.setItem("schoolAttendance",JSON.stringify(data));
+}
+
+function getExams(){
+let data=localStorage.getItem("schoolExams");
+if(!data)return [];
+try{return JSON.parse(data)}catch(e){return []}
+}
+
+function saveExams(data){
+localStorage.setItem("schoolExams",JSON.stringify(data));
+}
+
+/* DEMO */
+
+function createDemoStudents(){
+
+if(getStudents().length>0)return;
+
+let names=[
+"Rahul Sharma","Priya Singh","Arjun Kumar","Anjali Verma",
+"Rohit Gupta","Neha Sharma","Aman Khan","Simran Kaur",
+"Vikas Yadav","Pooja Meena","Aditya Singh","Kajal Sharma"
+];
+
+let fathers=[
+"Rakesh Sharma","Mahesh Singh","Suresh Kumar","Rajesh Verma",
+"Manoj Gupta","Ajay Sharma","Salim Khan","Harpreet Kaur",
+"Vijay Yadav","Ramesh Meena","Sunil Singh","Deepak Sharma"
+];
+
+let students=[];
+
+for(let i=0;i<names.length;i++){
+
+students.push({
+id:Date.now()+i,
+name:names[i],
+father:fathers[i],
+mobile:"98"+String(76543210-i),
+gender:i%2===0?"Boy":"Girl",
+classNo:(i%10)+1,
+section:i%2===0?"A":"B",
+stream:"",
+fee:35000
+});
+
+}
+
+saveStudents(students);
+
+let fees=[];
+
+students.forEach(function(s,i){
+
+fees.push({
+id:Date.now()+100+i,
+studentId:s.id,
+amount:i%3===0?35000:i%3===1?20000:28000,
+date:today(),
+mode:i%2===0?"Cash":"UPI",
+receipt:"REC-"+(1001+i)
+});
+
+});
+
+saveFees(fees);
+
+let attendance=[];
+
+students.forEach(function(s,i){
+
+attendance.push({
+id:Date.now()+200+i,
+studentId:s.id,
+date:today(),
+status:i%4===1?"Absent":"Present"
+});
+
+});
+
+saveAttendance(attendance);
+
+}
+
+createDemoStudents();
+
 /* HELPERS */
 
-function escapeHtml(t){
-return String(t??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+function getClassStudents(classNo){
+return getStudents().filter(s=>Number(s.classNo)===Number(classNo));
 }
 
-function formatDate(d){
-
-if(!d)return "-";
-
-let p=d.split("-");
-
-return p.length===3
-?p[2]+"-"+p[1]+"-"+p[0]
-:d;
-
-}
-
-function getClassStudents(c){
-
+function getStreamStudents(classNo,stream){
 return getStudents().filter(
-s=>Number(s.classNo)===Number(c)
+s=>Number(s.classNo)===Number(classNo)&&s.stream===stream
 );
-
 }
 
-function getStreamStudents(c,st){
-
-return getStudents().filter(
-s=>Number(s.classNo)===Number(c)
-&&s.stream===st
-);
-
+function getSectionStudents(classNo,stream,section){
+return getStudents().filter(function(s){
+return Number(s.classNo)===Number(classNo)
+&&(!stream||s.stream===stream)
+&&s.section===section;
+});
 }
 
-function getSectionStudents(c,st,se){
+function getTypeTitle(type){
 
-return getStudents().filter(
-s=>Number(s.classNo)===Number(c)
-&&(!st||s.stream===st)
-&&s.section===se
-);
-
-}
-
-function getTypeTitle(t){
-
-return{
+let x={
 students:"Students",
 fees:"Fees",
 attendance:"Attendance",
-exams:"Exam / Result",
-homework:"Homework"
-}[t]||t;
+exams:"Exam / Result"
+};
 
+return x[type]||type;
 }
 
 /* PAGE */
 
-function showPage(page,el){
+function showPage(page,element){
 
-document.querySelectorAll(".menu li")
-.forEach(x=>x.classList.remove("active"));
+document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
 
-if(el)el.classList.add("active");
+if(element)element.classList.add("active");
 
-document.getElementById("sidebar")
-.classList.remove("open");
+document.getElementById("sidebar").classList.remove("open");
 
 let titles={
 dashboard:"Dashboard",
@@ -1393,280 +877,298 @@ reports:"Reports",
 settings:"Settings"
 };
 
-document.getElementById("pageTitle").innerText=
-titles[page]||page;
+document.getElementById("pageTitle").innerText=titles[page];
 
 if(page==="dashboard"){
-
-document.getElementById("dashboardPage")
-.style.display="block";
-
-document.getElementById("otherPage")
-.style.display="none";
-
+document.getElementById("dashboardPage").style.display="block";
+document.getElementById("otherPage").style.display="none";
 updateDashboard();
-
 return;
-
 }
 
-document.getElementById("dashboardPage")
-.style.display="none";
+document.getElementById("dashboardPage").style.display="none";
+document.getElementById("otherPage").style.display="block";
 
-document.getElementById("otherPage")
-.style.display="block";
-
-if(
-["students","fees","attendance","exams","homework"]
-.includes(page)
-){
-
+if(["students","fees","attendance","exams"].includes(page)){
 openClasses(page);
 return;
-
 }
 
-document.getElementById("otherPage").innerHTML=
-getOtherPage(page);
-
+document.getElementById("otherPage").innerHTML=getOtherPage(page);
 }
 
-/* CLASS LIST */
+/* CLASS SUMMARY */
+
+function getAttendanceSummary(students){
+
+let records=getAttendance();
+
+let ids=students.map(s=>Number(s.id));
+
+let todayRecords=records.filter(
+r=>r.date===today()&&ids.includes(Number(r.studentId))
+);
+
+let present=todayRecords.filter(r=>r.status==="Present").length;
+let absent=todayRecords.filter(r=>r.status==="Absent").length;
+let leave=todayRecords.filter(r=>r.status==="Leave").length;
+
+let total=present+absent+leave;
+
+return {
+present,
+absent,
+leave,
+percentage:total?Math.round(present/total*100):0
+};
+}
+
+function getFeesSummary(students){
+
+let total=0;
+let paid=0;
+let payments=0;
+
+students.forEach(s=>{
+total+=Number(s.fee||0);
+paid+=getStudentPaid(s.id);
+payments+=getStudentPayments(s.id).length;
+});
+
+return {
+total,
+paid,
+due:Math.max(0,total-paid),
+payments
+};
+}
+
+function getResultSummary(students){
+
+let results=0;
+let pass=0;
+let fail=0;
+
+students.forEach(s=>{
+let exams=getStudentExams(s.id);
+
+exams.forEach(e=>{
+results++;
+let p=getExamPercentage(e);
+if(p>=33)pass++;
+else fail++;
+});
+});
+
+return {results,pass,fail};
+}
+
+/* CLASSES */
 
 function openClasses(type){
 
-let h=`
+let html=`
 
 <div class="card">
-
 <div class="card-header">
-
-<h3>
-${getTypeTitle(type)} - Select Class
-</h3>
-
+<h3>${getTypeTitle(type)} - Select Class</h3>
 </div>
-
 </div>
-
 `;
 
 for(let i=1;i<=12;i++){
 
-let s=getClassStudents(i);
+let students=getClassStudents(i);
+let boys=students.filter(s=>s.gender==="Boy").length;
+let girls=students.filter(s=>s.gender==="Girl").length;
 
-let b=s.filter(
-x=>x.gender==="Boy"
-).length;
+let att=getAttendanceSummary(students);
+let fees=getFeesSummary(students);
+let result=getResultSummary(students);
 
-let g=s.filter(
-x=>x.gender==="Girl"
-).length;
-
-let att=s
-.map(x=>getAttendanceForStudent(x.id))
-.flat();
-
-let tp=att.filter(
-x=>x.status==="Present"
-).length;
-
-let ta=att.filter(
-x=>x.status==="Absent"
-).length;
-
-let tl=att.filter(
-x=>x.status==="Leave"
-).length;
-
-let paid=s.reduce(
-(a,x)=>a+getStudentPaid(x.id),
-0
-);
-
-let total=s.reduce(
-(a,x)=>a+Number(x.fee||0),
-0
-);
-
-let due=Math.max(0,total-paid);
-
-let results=s
-.map(x=>getExamForStudent(x.id))
-.filter(Boolean);
-
-let obt=results.reduce(
-(a,e)=>a+getExamObtained(e),
-0
-);
-
-let max=results.reduce(
-(a,e)=>a+getExamMax(e),
-0
-);
-
-let pct=max
-?(obt/max*100).toFixed(1)
-:0;
-
-h+=`
+html+=`
 
 <div class="class-section">
 
-<div class="class-heading">
-Class ${i}
-</div>
+<div class="class-heading">Class ${i}</div>
 
 <div class="class-summary">
 
 <span class="summary-item summary-total">
-👨‍🎓 Students: ${s.length}
+👨‍🎓 Students: ${students.length}
 </span>
 `;
 
 if(type==="students"){
 
-h+=`
-
-<span class="summary-item">
-👦 Boys: ${b}
-</span>
-
-<span class="summary-item">
-👧 Girls: ${g}
-</span>
-
+html+=`
+<span class="summary-item">👦 Boys: ${boys}</span>
+<span class="summary-item">👧 Girls: ${girls}</span>
 `;
 
 }
 
 if(type==="attendance"){
 
-let at=tp+ta+tl;
-
-let pc=at
-?(tp/at*100).toFixed(1)
-:0;
-
-h+=`
-
-<span class="summary-item summary-green">
-🟢 Present: ${tp}
-</span>
-
-<span class="summary-item summary-red">
-🔴 Absent: ${ta}
-</span>
-
-<span class="summary-item summary-yellow">
-🟡 Leave: ${tl}
-</span>
-
-<span class="summary-item">
-📊 ${pc}%
-</span>
-
+html+=`
+<span class="summary-item summary-green">🟢 Present: ${att.present}</span>
+<span class="summary-item summary-red">🔴 Absent: ${att.absent}</span>
+<span class="summary-item summary-yellow">🟡 Leave: ${att.leave}</span>
+<span class="summary-item summary-green">📊 ${att.percentage}%</span>
 `;
 
 }
 
 if(type==="fees"){
 
-h+=`
-
-<span class="summary-item summary-green">
-💰 Paid: ₹${paid.toLocaleString("en-IN")}
-</span>
-
-<span class="summary-item summary-yellow">
-⏳ Due: ₹${due.toLocaleString("en-IN")}
-</span>
-
-<span class="summary-item">
-🧾 Payments: ${
-s.reduce(
-(a,x)=>a+getStudentPayments(x.id).length,
-0
-)
-}
-</span>
-
+html+=`
+<span class="summary-item summary-green">💰 Paid: ₹${fees.paid.toLocaleString("en-IN")}</span>
+<span class="summary-item summary-yellow">⏳ Due: ₹${fees.due.toLocaleString("en-IN")}</span>
+<span class="summary-item">💳 Payments: ${fees.payments}</span>
 `;
 
 }
 
 if(type==="exams"){
 
-h+=`
-
-<span class="summary-item summary-green">
-📝 Results: ${results.length}
-</span>
-
-<span class="summary-item">
-Obtained: ${obt}/${max}
-</span>
-
-<span class="summary-item">
-${pct}%
-</span>
-
+html+=`
+<span class="summary-item summary-green">📝 Results: ${result.results}</span>
+<span class="summary-item summary-green">PASS: ${result.pass}</span>
+<span class="summary-item summary-red">FAIL: ${result.fail}</span>
 `;
 
 }
 
-h+=`
+html+=`
+
+</div>
+
+<div class="class-card" onclick="openClass('${type}',${i})">
+
+<div class="class-number">Class ${i}</div>
+
+<div class="class-info">${students.length} Students</div>
+
+<div class="open-text">Open Class →</div>
+
+</div>
+
+</div>
+`;
+
+}
+
+document.getElementById("otherPage").innerHTML=html;
+}
+
+/* OPEN CLASS */
+
+function openClass(type,classNo){
+
+if(classNo===11||classNo===12){
+openStreams(type,classNo);
+return;
+}
+
+openSections(type,classNo,"");
+}
+
+/* SECTION */
+
+function openSections(type,classNo,stream){
+
+let all=stream
+?getStreamStudents(classNo,stream)
+:getClassStudents(classNo);
+
+let sections=["A","B","C"];
+
+let html=`
+
+<button class="back-btn" onclick="${stream?`openStreams('${type}',${classNo})`:`openClasses('${type}')`}">
+← Back
+</button>
+
+<div class="card">
+<div class="card-header">
+<h3>Class ${classNo}${stream?" - "+stream:""} → Select Section</h3>
+</div>
+</div>
+`;
+
+sections.forEach(section=>{
+
+let students=all.filter(s=>s.section===section);
+
+let att=getAttendanceSummary(students);
+let fees=getFeesSummary(students);
+let result=getResultSummary(students);
+
+html+=`
+
+<div class="class-section">
+
+<div class="class-heading">Section ${section}</div>
+
+<div class="class-summary">
+
+<span class="summary-item summary-total">
+👨‍🎓 Students: ${students.length}
+</span>
+
+`;
+
+if(type==="attendance"){
+html+=`
+<span class="summary-item summary-green">🟢 ${att.present}</span>
+<span class="summary-item summary-red">🔴 ${att.absent}</span>
+<span class="summary-item summary-yellow">🟡 ${att.leave}</span>
+<span class="summary-item">📊 ${att.percentage}%</span>
+`;
+}
+
+if(type==="fees"){
+html+=`
+<span class="summary-item summary-green">💰 Paid ₹${fees.paid.toLocaleString("en-IN")}</span>
+<span class="summary-item summary-yellow">⏳ Due ₹${fees.due.toLocaleString("en-IN")}</span>
+`;
+}
+
+if(type==="exams"){
+html+=`
+<span class="summary-item summary-green">PASS ${result.pass}</span>
+<span class="summary-item summary-red">FAIL ${result.fail}</span>
+`;
+}
+
+html+=`
 
 </div>
 
 <div class="class-card"
-onclick="openClass('${type}',${i})">
+onclick="openStudentsData('${type}',${classNo},'${stream||""}','${section}')">
 
-<div class="class-number">
-Class ${i}
-</div>
-
-<div class="class-info">
-${s.length} Students
-</div>
-
-<div class="open-text">
-Open Class →
-</div>
+<div class="class-number">Section ${section}</div>
+<div class="class-info">${students.length} Students</div>
+<div class="open-text">Open Section →</div>
 
 </div>
 
 </div>
-
 `;
 
-}
+});
 
-document.getElementById("otherPage").innerHTML=h;
-
-}
-
-function openClass(type,c){
-
-if(c===11||c===12){
-openStreams(type,c);
-}else{
-openStudentsData(type,c,"");
-}
-
+document.getElementById("otherPage").innerHTML=html;
 }
 
 /* STREAM */
 
-function openStreams(type,c){
+function openStreams(type,classNo){
 
-let all=getClassStudents(c);
+let all=getClassStudents(classNo);
 
-let names=[
-"Science",
-"Commerce",
-"Arts"
-];
+let streamNames=["Science","Commerce","Arts"];
 
 let icons={
 Science:"🔬",
@@ -1674,97 +1176,111 @@ Commerce:"💼",
 Arts:"🎨"
 };
 
-let h=`
+let html=`
 
-<button class="back-btn"
-onclick="openClasses('${type}')">
+<button class="back-btn" onclick="openClasses('${type}')">
 ← Back to Classes
 </button>
 
 <div class="card">
-
 <div class="card-header">
-
-<h3>
-Class ${c} - Select Stream
-</h3>
-
+<h3>Class ${classNo} - Select Stream</h3>
 </div>
-
 </div>
-
 `;
 
-names.forEach(st=>{
+streamNames.forEach(function(stream){
 
-let s=all.filter(
-x=>x.stream===st
-);
+let students=all.filter(s=>s.stream===stream);
 
-h+=`
+let att=getAttendanceSummary(students);
+let fees=getFeesSummary(students);
+let result=getResultSummary(students);
+
+html+=`
 
 <div class="stream-section">
 
-<div class="stream-heading">
-${st}
-</div>
+<div class="stream-heading">${stream}</div>
 
 <div class="stream-summary">
 
 <span class="summary-item summary-total">
-👨‍🎓 Students: ${s.length}
+👨‍🎓 Students: ${students.length}
 </span>
+`;
+
+if(type==="attendance"){
+html+=`
+<span class="summary-item summary-green">🟢 ${att.present}</span>
+<span class="summary-item summary-red">🔴 ${att.absent}</span>
+<span class="summary-item summary-yellow">🟡 ${att.leave}</span>
+`;
+}
+
+if(type==="fees"){
+html+=`
+<span class="summary-item summary-green">💰 Paid ₹${fees.paid.toLocaleString("en-IN")}</span>
+<span class="summary-item summary-yellow">⏳ Due ₹${fees.due.toLocaleString("en-IN")}</span>
+`;
+}
+
+if(type==="exams"){
+html+=`
+<span class="summary-item summary-green">PASS ${result.pass}</span>
+<span class="summary-item summary-red">FAIL ${result.fail}</span>
+`;
+}
+
+html+=`
 
 </div>
 
 <div class="stream-card"
-onclick="openStudentsData('${type}',${c},'${st}')">
+onclick="openSections('${type}',${classNo},'${stream}')">
 
-<div class="stream-icon">
-${icons[st]}
-</div>
-
-<h3>${st}</h3>
-
-<p>${s.length} Students</p>
+<div class="stream-icon">${icons[stream]}</div>
+<h3>${stream}</h3>
+<p>${students.length} Students</p>
 
 </div>
 
 </div>
-
 `;
 
 });
 
-document.getElementById("otherPage")
-.innerHTML=h;
-
+document.getElementById("otherPage").innerHTML=html;
 }
 
-/* STUDENT DATA */
+/* DATA PAGE */
 
-function openStudentsData(type,c,st){
+function openStudentsData(type,classNo,stream,section){
 
 window.currentStudentType=type;
-window.currentClassNo=c;
-window.currentStream=st||"";
+window.currentClassNo=classNo;
+window.currentStream=stream||"";
+window.currentSection=section||"";
 
-let students=st
-?getStreamStudents(c,st)
-:getClassStudents(c);
+let students=getStudents().filter(function(s){
 
-let title=
-`Class ${c}${st?" - "+st:""}`;
+return Number(s.classNo)===Number(classNo)
+&&(!stream||s.stream===stream)
+&&(!section||s.section===section);
 
-let back=st
-?`openStreams('${type}',${c})`
+});
+
+let title=`Class ${classNo}${stream?" - "+stream:""}${section?" - Section "+section:""}`;
+
+let back=section
+?`openSections('${type}',${classNo},'${stream||""}')`
+:stream
+?`openStreams('${type}',${classNo})`
 :`openClasses('${type}')`;
 
-document.getElementById("otherPage")
-.innerHTML=`
+let html=`
 
-<button class="back-btn"
-onclick="${back}">
+<button class="back-btn" onclick="${back}">
 ← Back
 </button>
 
@@ -1773,5 +1289,1455 @@ onclick="${back}">
 <div class="card-header">
 
 <div>
+<h3>${title}</h3>
+<p style="color:#777;font-size:12px;margin-top:4px">
+${getTypeTitle(type)} Details
+</p>
+</div>
 
-<h3
+${type==="students"?`
+<button class="small-btn"
+onclick="openAddStudent(${classNo},'${stream||""}')">
++ Add Student
+</button>
+`:""}
+
+</div>
+
+<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
+👨‍🎓 <strong>Students:</strong> ${students.length}
+</div>
+
+<div class="search-box">
+<input id="studentSearch"
+placeholder="🔍 Search student name, father name or mobile..."
+oninput="filterStudentTable('${type}',${classNo},'${stream||""}','${section||""}')">
+</div>
+
+<div id="studentTableArea">
+${buildStudentTable(type,classNo,stream,section,students)}
+</div>
+
+</div>
+`;
+
+document.getElementById("otherPage").innerHTML=html;
+}
+
+/* TABLE */
+
+function buildStudentTable(type,classNo,stream,section,students){
+
+if(students.length===0){
+return `
+<div class="empty">
+<h3>No Students Found</h3>
+<p style="margin-top:8px">Add students first.</p>
+</div>
+`;
+}
+
+let html=`
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Roll</th>
+<th>Student Name</th>
+<th>Father Name</th>
+<th>Mobile</th>
+<th>Section</th>
+<th>Gender</th>
+`;
+
+if(classNo>=11)html+=`<th>Stream</th>`;
+
+if(type==="students")html+=`<th>Action</th>`;
+
+if(type==="fees"){
+
+html+=`
+<th>Total Fee</th>
+<th>Paid Fee</th>
+<th>Due Fee</th>
+<th>Payment Count</th>
+<th>Payment History</th>
+<th>Action</th>
+`;
+}
+
+if(type==="attendance"){
+
+html+=`
+<th>Present</th>
+<th>Absent</th>
+<th>Leave</th>
+<th>Attendance %</th>
+<th>Action</th>
+`;
+}
+
+if(type==="exams"){
+
+html+=`
+<th>Result Count</th>
+<th>Total Marks</th>
+<th>Obtained</th>
+<th>%</th>
+<th>Result</th>
+<th>Action</th>
+`;
+}
+
+html+=`</tr></thead><tbody>`;
+
+students.forEach(function(s,index){
+
+html+=`
+
+<tr>
+
+<td>${index+1}</td>
+<td><strong>${escapeHtml(s.name)}</strong></td>
+<td>${escapeHtml(s.father)}</td>
+<td>${escapeHtml(s.mobile)}</td>
+<td>${s.section}</td>
+<td>${s.gender}</td>
+`;
+
+if(classNo>=11){
+html+=`<td>${s.stream||"-"}</td>`;
+}
+
+/* STUDENT */
+
+if(type==="students"){
+
+html+=`
+
+<td>
+<div class="action-buttons">
+
+<button class="edit-btn"
+onclick="editStudent(${s.id},${classNo},'${stream||""}','students')">
+✏️ Edit
+</button>
+
+<button class="delete-btn"
+onclick="deleteStudent(${s.id},${classNo},'${stream||""}','students')">
+🗑️ Delete
+</button>
+
+</div>
+</td>
+`;
+}
+
+/* FEES */
+
+if(type==="fees"){
+
+let paid=getStudentPaid(s.id);
+let due=Math.max(0,Number(s.fee||0)-paid);
+let payments=getStudentPayments(s.id);
+
+html+=`
+
+<td>₹${Number(s.fee||0).toLocaleString("en-IN")}</td>
+
+<td class="summary-green">
+₹${paid.toLocaleString("en-IN")}
+</td>
+
+<td class="${due>0?"summary-yellow":"summary-green"}">
+₹${due.toLocaleString("en-IN")}
+</td>
+
+<td>${payments.length}</td>
+
+<td>
+
+${payments.length?payments.map(p=>`
+
+<div style="background:#f8faff;padding:9px;border-radius:9px;margin-bottom:6px">
+
+<b>₹${Number(p.amount).toLocaleString("en-IN")}</b>
+
+<br>${formatDate(p.date)}
+<br>${escapeHtml(p.mode||"")}
+
+${p.receipt?`<br>Receipt: ${escapeHtml(p.receipt)}`:""}
+
+<br>
+
+<button class="edit-btn"
+onclick="editFeePayment(${p.id},${s.id},${classNo},'${stream||""}','${section||""}')">
+✏️ Edit
+</button>
+
+<button class="delete-btn"
+onclick="deleteFeePayment(${p.id},${s.id},${classNo},'${stream||""}','${section||""}')">
+🗑️ Delete
+</button>
+
+</div>
+
+`).join(""):"No Payment"}
+
+</td>
+
+<td>
+
+<button class="small-btn"
+onclick="openFeeModal(${s.id},${classNo},'${stream||""}','${section||""}')">
++ Payment
+</button>
+
+</td>
+`;
+}
+
+/* ATTENDANCE */
+
+if(type==="attendance"){
+
+let records=getAttendanceForStudent(s.id);
+
+let present=records.filter(x=>x.status==="Present").length;
+let absent=records.filter(x=>x.status==="Absent").length;
+let leave=records.filter(x=>x.status==="Leave").length;
+
+let total=present+absent+leave;
+
+let percentage=total?((present/total)*100).toFixed(1):0;
+
+html+=`
+
+<td class="summary-green">${present}</td>
+<td class="summary-red">${absent}</td>
+<td class="summary-yellow">${leave}</td>
+<td><strong>${percentage}%</strong></td>
+
+<td>
+
+<button class="edit-btn"
+onclick="openAttendanceModal(${s.id},${classNo},'${stream||""}','${section||""}')">
+✏️ Manage
+</button>
+
+</td>
+`;
+}
+
+/* EXAM */
+
+if(type==="exams"){
+
+let exams=getStudentExams(s.id);
+
+let totalMarks=0;
+let obtained=0;
+
+exams.forEach(e=>{
+totalMarks+=getExamTotal(e);
+obtained+=getExamObtained(e);
+});
+
+let percentage=totalMarks?obtained/totalMarks*100:0;
+
+html+=`
+
+<td>${exams.length}</td>
+<td>${totalMarks}</td>
+<td>${obtained}</td>
+<td><strong>${percentage.toFixed(1)}%</strong></td>
+<td>
+
+<span class="badge ${percentage>=33?"green":"red"}">
+${percentage>=33?"PASS":"FAIL"}
+</span>
+
+</td>
+
+<td>
+
+<div class="action-buttons">
+
+<button class="small-btn"
+onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">
++ Add Result
+</button>
+
+</div>
+
+</td>
+`;
+}
+
+html+=`</tr>`;
+});
+
+html+=`</tbody></table></div>`;
+
+return html;
+}
+
+/* SEARCH */
+
+function filterStudentTable(type,classNo,stream,section){
+
+let search=document.getElementById("studentSearch").value.toLowerCase().trim();
+
+let students=getStudents().filter(function(s){
+
+return Number(s.classNo)===Number(classNo)
+&&(!stream||s.stream===stream)
+&&(!section||s.section===section);
+
+});
+
+if(search){
+
+students=students.filter(s=>
+String(s.name).toLowerCase().includes(search)||
+String(s.father).toLowerCase().includes(search)||
+String(s.mobile).toLowerCase().includes(search)
+);
+}
+
+document.getElementById("studentTableArea").innerHTML=
+buildStudentTable(type,classNo,stream,section,students);
+}
+
+/* STUDENT */
+
+let editingStudentId=null;
+
+function openAddStudent(classNo,stream){
+
+editingStudentId=null;
+
+document.getElementById("studentModalTitle").innerText="Add Student";
+
+document.getElementById("studentName").value="";
+document.getElementById("fatherName").value="";
+document.getElementById("studentMobile").value="";
+document.getElementById("studentGender").value="";
+document.getElementById("studentClass").value=classNo;
+document.getElementById("studentSection").value="A";
+document.getElementById("studentStream").value=stream||"";
+document.getElementById("studentFee").value=35000;
+
+document.getElementById("studentModal").style.display="flex";
+}
+
+function saveStudent(){
+
+let name=document.getElementById("studentName").value.trim();
+let father=document.getElementById("fatherName").value.trim();
+let mobile=document.getElementById("studentMobile").value.trim();
+let gender=document.getElementById("studentGender").value;
+let classNo=document.getElementById("studentClass").value;
+let section=document.getElementById("studentSection").value;
+let stream=document.getElementById("studentStream").value;
+let fee=Number(document.getElementById("studentFee").value)||0;
+
+if(!name||!father||!mobile||!gender||!classNo){
+alert("Please fill all required fields");
+return;
+}
+
+if((Number(classNo)===11||Number(classNo)===12)&&!stream){
+alert("Select Stream for Class 11 / 12");
+return;
+}
+
+let students=getStudents();
+
+if(editingStudentId){
+
+let s=students.find(x=>Number(x.id)===Number(editingStudentId));
+
+if(s){
+s.name=name;
+s.father=father;
+s.mobile=mobile;
+s.gender=gender;
+s.classNo=Number(classNo);
+s.section=section;
+s.stream=stream;
+s.fee=fee;
+}
+
+}else{
+
+students.push({
+id:Date.now(),
+name,
+father,
+mobile,
+gender,
+classNo:Number(classNo),
+section,
+stream,
+fee
+});
+
+}
+
+saveStudents(students);
+closeStudentModal();
+updateDashboard();
+
+openStudentsData(
+window.currentStudentType||"students",
+window.currentClassNo||Number(classNo),
+window.currentStream||"",
+window.currentSection||""
+);
+}
+
+function editStudent(id,classNo,stream,type){
+
+let s=getStudents().find(x=>Number(x.id)===Number(id));
+
+if(!s)return;
+
+editingStudentId=id;
+
+window.currentStudentType=type;
+window.currentClassNo=classNo;
+window.currentStream=stream;
+window.currentSection=s.section;
+
+document.getElementById("studentModalTitle").innerText="Edit Student";
+
+document.getElementById("studentName").value=s.name;
+document.getElementById("fatherName").value=s.father;
+document.getElementById("studentMobile").value=s.mobile;
+document.getElementById("studentGender").value=s.gender;
+document.getElementById("studentClass").value=s.classNo;
+document.getElementById("studentSection").value=s.section;
+document.getElementById("studentStream").value=s.stream||"";
+document.getElementById("studentFee").value=s.fee;
+
+document.getElementById("studentModal").style.display="flex";
+}
+
+function deleteStudent(id,classNo,stream,type){
+
+let s=getStudents().find(x=>Number(x.id)===Number(id));
+
+if(!s)return;
+
+if(!confirm("Delete "+s.name+"?\n\nStudent and all related records will be deleted."))return;
+
+saveStudents(getStudents().filter(x=>Number(x.id)!==Number(id)));
+saveFees(getFees().filter(x=>Number(x.studentId)!==Number(id)));
+saveAttendance(getAttendance().filter(x=>Number(x.studentId)!==Number(id)));
+saveExams(getExams().filter(x=>Number(x.studentId)!==Number(id)));
+
+updateDashboard();
+
+openStudentsData(
+type,
+classNo,
+stream||"",
+window.currentSection||""
+);
+}
+
+function closeStudentModal(){
+document.getElementById("studentModal").style.display="none";
+editingStudentId=null;
+}
+
+/* FEES */
+
+function getStudentPayments(studentId){
+
+return getFees()
+.filter(x=>Number(x.studentId)===Number(studentId))
+.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+}
+
+function getStudentPaid(studentId){
+
+return getStudentPayments(studentId)
+.reduce((a,x)=>a+Number(x.amount||0),0);
+}
+
+let editingFeeId=null;
+
+function openFeeModal(studentId,classNo,stream,section){
+
+let s=getStudents().find(x=>Number(x.id)===Number(studentId));
+if(!s)return;
+
+editingFeeId=null;
+
+document.getElementById("feeModalTitle").innerText="Add Fee Payment";
+document.getElementById("feeStudentName").value=s.name;
+document.getElementById("feeAmount").value="";
+document.getElementById("feeDate").value=today();
+document.getElementById("feeMode").value="Cash";
+document.getElementById("feeReceipt").value="";
+
+window.feeStudentId=studentId;
+window.feeClassNo=classNo;
+window.feeStream=stream||"";
+window.feeSection=section||"";
+
+document.getElementById("feeModal").style.display="flex";
+}
+
+function editFeePayment(id,studentId,classNo,stream,section){
+
+let p=getFees().find(x=>Number(x.id)===Number(id));
+let s=getStudents().find(x=>Number(x.id)===Number(studentId));
+
+if(!p||!s)return;
+
+editingFeeId=id;
+
+window.feeStudentId=studentId;
+window.feeClassNo=classNo;
+window.feeStream=stream||"";
+window.feeSection=section||"";
+
+document.getElementById("feeModalTitle").innerText="Edit Fee Payment";
+document.getElementById("feeStudentName").value=s.name;
+document.getElementById("feeAmount").value=p.amount;
+document.getElementById("feeDate").value=p.date;
+document.getElementById("feeMode").value=p.mode||"Cash";
+document.getElementById("feeReceipt").value=p.receipt||"";
+
+document.getElementById("feeModal").style.display="flex";
+}
+
+function saveFeePayment(){
+
+let amount=Number(document.getElementById("feeAmount").value)||0;
+let date=document.getElementById("feeDate").value;
+let mode=document.getElementById("feeMode").value;
+let receipt=document.getElementById("feeReceipt").value.trim();
+
+if(amount<=0){
+alert("Enter valid payment amount");
+return;
+}
+
+if(!date){
+alert("Select payment date");
+return;
+}
+
+let fees=getFees();
+
+if(editingFeeId){
+
+let p=fees.find(x=>Number(x.id)===Number(editingFeeId));
+
+if(p){
+p.amount=amount;
+p.date=date;
+p.mode=mode;
+p.receipt=receipt;
+}
+
+}else{
+
+fees.push({
+id:Date.now(),
+studentId:Number(window.feeStudentId),
+amount,
+date,
+mode,
+receipt
+});
+
+}
+
+saveFees(fees);
+closeFeeModal();
+updateDashboard();
+
+openStudentsData(
+"fees",
+window.feeClassNo,
+window.feeStream,
+window.feeSection
+);
+}
+
+function deleteFeePayment(id,studentId,classNo,stream,section){
+
+if(!confirm("Delete this fee payment?"))return;
+
+saveFees(
+getFees().filter(x=>Number(x.id)!==Number(id))
+);
+
+updateDashboard();
+
+openStudentsData(
+"fees",
+classNo,
+stream||"",
+section||""
+);
+}
+
+function closeFeeModal(){
+document.getElementById("feeModal").style.display="none";
+editingFeeId=null;
+}
+
+/* ATTENDANCE */
+
+function getAttendanceForStudent(studentId){
+
+return getAttendance()
+.filter(x=>Number(x.studentId)===Number(studentId))
+.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+}
+
+/* ATTENDANCE MODAL */
+
+function openAttendanceModal(studentId,classNo,stream,section){
+
+let s=getStudents().find(x=>Number(x.id)===Number(studentId));
+if(!s)return;
+
+let records=getAttendanceForStudent(studentId);
+
+let latest=records.length?records[0]:null;
+
+window.attStudentId=studentId;
+window.attClassNo=classNo;
+window.attStream=stream||"";
+window.attSection=section||"";
+window.attEditingId=latest?latest.id:null;
+
+document.getElementById("attendanceStudentName").value=s.name;
+document.getElementById("attendanceEditDate").value=latest?latest.date:today();
+document.getElementById("attendanceEditStatus").value=latest?latest.status:"Present";
+
+document.getElementById("attendanceModal").style.display="flex";
+}
+
+function saveAttendanceEdit(){
+
+let date=document.getElementById("attendanceEditDate").value;
+let status=document.getElementById("attendanceEditStatus").value;
+
+if(!date)return;
+
+let data=getAttendance();
+
+if(window.attEditingId){
+
+let record=data.find(x=>Number(x.id)===Number(window.attEditingId));
+
+if(record){
+record.date=date;
+record.status=status;
+}
+
+}else{
+
+data.push({
+id:Date.now(),
+studentId:Number(window.attStudentId),
+date,
+status
+});
+
+}
+
+saveAttendance(data);
+closeAttendanceModal();
+updateDashboard();
+
+openStudentsData(
+"attendance",
+window.attClassNo,
+window.attStream,
+window.attSection
+);
+}
+
+function closeAttendanceModal(){
+document.getElementById("attendanceModal").style.display="none";
+}
+
+/* EXAM */
+
+function getStudentExams(studentId){
+
+return getExams()
+.filter(x=>Number(x.studentId)===Number(studentId))
+.sort((a,b)=>String(a.examDate).localeCompare(String(b.examDate)));
+}
+
+function getExamForStudent(studentId){
+let e=getStudentExams(studentId);
+return e.length?e[e.length-1]:null;
+}
+
+function getExamTotal(e){
+
+if(Array.isArray(e.subjects)){
+return e.subjects.reduce((a,s)=>a+Number(s.max||0),0);
+}
+
+return 0;
+}
+
+function getExamObtained(e){
+
+if(Array.isArray(e.subjects)){
+return e.subjects.reduce((a,s)=>a+Number(s.obtained||0),0);
+}
+
+return 0;
+}
+
+function getExamPercentage(e){
+
+let max=getExamTotal(e);
+return max?getExamObtained(e)/max*100:0;
+}
+
+/* EXAM MODAL */
+
+function openExamModal(studentId,classNo,stream,section){
+
+let s=getStudents().find(x=>Number(x.id)===Number(studentId));
+if(!s)return;
+
+window.examStudentId=studentId;
+window.examClassNo=classNo;
+window.examStream=stream||"";
+window.examSection=section||"";
+window.editingExamId=null;
+
+document.getElementById("examModalTitle").innerText="Add Exam Result";
+document.getElementById("examStudentName").value=s.name;
+document.getElementById("examName").value="Annual Examination";
+document.getElementById("examDate").value=today();
+
+document.getElementById("subjectRows").innerHTML="";
+addSubjectRow();
+
+document.getElementById("examModal").style.display="flex";
+}
+
+function addSubjectRow(name="",max="",obtained=""){
+
+let box=document.getElementById("subjectRows");
+
+let row=document.createElement("div");
+
+row.className="subject-row";
+
+row.innerHTML=`
+
+<input class="subject-name" placeholder="Subject Name" value="${escapeHtml(name)}">
+
+<input class="subject-max" type="number" min="1" placeholder="Max Marks" value="${max}">
+
+<input class="subject-obtained" type="number" min="0" placeholder="Obtained" value="${obtained}">
+
+<button class="remove-subject" onclick="this.parentElement.remove();updateExamPreview()">×</button>
+`;
+
+box.appendChild(row);
+
+row.querySelectorAll("input").forEach(i=>{
+i.addEventListener("input",updateExamPreview);
+});
+
+updateExamPreview();
+}
+
+function updateExamPreview(){
+
+let rows=document.querySelectorAll(".subject-row");
+
+let max=0;
+let obtained=0;
+
+rows.forEach(row=>{
+
+let m=Number(row.querySelector(".subject-max").value)||0;
+let o=Number(row.querySelector(".subject-obtained").value)||0;
+
+max+=m;
+obtained+=o;
+
+});
+
+let percentage=max?obtained/max*100:0;
+
+document.getElementById("previewMax").innerText=max;
+document.getElementById("previewObtained").innerText=obtained;
+document.getElementById("previewPercentage").innerText=percentage.toFixed(1)+"%";
+}
+
+function saveExam(){
+
+let examName=document.getElementById("examName").value.trim();
+let examDate=document.getElementById("examDate").value;
+
+if(!examName||!examDate){
+alert("Enter Exam Name and Date");
+return;
+}
+
+let subjects=[];
+
+document.querySelectorAll(".subject-row").forEach(row=>{
+
+let name=row.querySelector(".subject-name").value.trim();
+let max=Number(row.querySelector(".subject-max").value)||0;
+let obtained=Number(row.querySelector(".subject-obtained").value)||0;
+
+if(name&&max>0){
+subjects.push({
+name,
+max,
+obtained
+});
+}
+
+});
+
+if(subjects.length===0){
+alert("Add at least one subject");
+return;
+}
+
+for(let s of subjects){
+
+if(s.obtained<0||s.obtained>s.max){
+alert("Obtained marks cannot be greater than Maximum Marks");
+return;
+}
+
+}
+
+let data=getExams();
+
+data.push({
+id:Date.now(),
+studentId:Number(window.examStudentId),
+examName,
+examDate,
+subjects
+});
+
+saveExams(data);
+closeExamModal();
+
+openStudentsData(
+"exams",
+window.examClassNo,
+window.examStream,
+window.examSection
+);
+}
+
+function closeExamModal(){
+document.getElementById("examModal").style.display="none";
+}
+
+/* DASHBOARD */
+
+function updateDashboard(){
+
+let students=getStudents();
+
+document.getElementById("dashStudents").innerText=students.length;
+
+let att=getTodayAttendanceForStudents(students);
+
+document.getElementById("dashPresent").innerText=att.present+" Students";
+document.getElementById("dashAbsent").innerText=att.absent+" Students";
+document.getElementById("dashLeave").innerText=att.leave+" Students";
+
+let totalMarked=att.present+att.absent+att.leave;
+
+let percentage=totalMarked?Math.round(att.present/totalMarked*100):0;
+
+document.getElementById("dashAttendance").innerText=percentage+"%";
+
+let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
+
+document.getElementById("dashFees").innerText=
+"₹"+paid.toLocaleString("en-IN");
+}
+
+function getTodayAttendanceForStudents(students){
+
+let records=getAttendance();
+
+let ids=students.map(s=>Number(s.id));
+
+let todayRecords=records.filter(
+x=>x.date===today()&&ids.includes(Number(x.studentId))
+);
+
+return {
+
+present:todayRecords.filter(x=>x.status==="Present").length,
+absent:todayRecords.filter(x=>x.status==="Absent").length,
+leave:todayRecords.filter(x=>x.status==="Leave").length
+
+};
+}
+
+/* REPORTS */
+
+function getOtherPage(page){
+
+if(page==="reports"){
+
+let students=getStudents();
+
+let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
+
+let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
+
+let att=getAttendanceSummary(students);
+
+let result=getResultSummary(students);
+
+return `
+
+<div class="stats">
+
+<div class="stat-card">
+<div class="stat-number">${students.length}</div>
+<div class="stat-label">Students</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number">${total?Math.round(paid/total*100):0}%</div>
+<div class="stat-label">Fee Collection</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number">${att.percentage}%</div>
+<div class="stat-label">Today's Attendance</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number">${result.results}</div>
+<div class="stat-label">Results</div>
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-header">
+
+<h3>Export Reports</h3>
+
+</div>
+
+<div style="padding:20px;display:flex;gap:10px;flex-wrap:wrap">
+
+<button class="export-btn" onclick="exportStudentsCSV()">
+⬇️ Student Report
+</button>
+
+<button class="export-btn" onclick="exportAttendanceCSV()">
+⬇️ Attendance Report
+</button>
+
+<button class="export-btn" onclick="exportFeesCSV()">
+⬇️ Fees Report
+</button>
+
+<button class="export-btn" onclick="exportResultsCSV()">
+⬇️ Result Report
+</button>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-header">
+<h3>Reports Summary</h3>
+</div>
+
+<div class="notice">
+<strong>Student Report</strong>
+<span>Complete student data with class, section and stream.</span>
+</div>
+
+<div class="notice">
+<strong>Attendance Report</strong>
+<span>Student-wise attendance history with date and status.</span>
+</div>
+
+<div class="notice">
+<strong>Fee Report</strong>
+<span>Total fee, paid fee, due fee and every payment.</span>
+</div>
+
+<div class="notice">
+<strong>Result Report</strong>
+<span>Exam-wise subjects, marks, percentage and result.</span>
+</div>
+
+</div>
+`;
+}
+
+if(page==="teachers"){
+
+return `
+
+<div class="card">
+
+<div class="card-header">
+<h3>Teachers</h3>
+<button class="small-btn">+ Add Teacher</button>
+</div>
+
+<div class="table-container">
+
+<table>
+
+<tr>
+<th>Employee ID</th>
+<th>Name</th>
+<th>Subject</th>
+<th>Mobile</th>
+<th>Action</th>
+</tr>
+
+<tr>
+<td>EMP001</td>
+<td>Anita Sharma</td>
+<td>Mathematics</td>
+<td>9876543210</td>
+<td><button class="edit-btn">✏️ Edit</button></td>
+</tr>
+
+<tr>
+<td>EMP002</td>
+<td>Rajesh Verma</td>
+<td>Science</td>
+<td>9811122233</td>
+<td><button class="edit-btn">✏️ Edit</button></td>
+</tr>
+
+</table>
+
+</div>
+</div>
+`;
+}
+
+if(page==="timetable"){
+
+return `
+
+<div class="card">
+
+<div class="card-header">
+<h3>Class Timetable</h3>
+</div>
+
+<div class="table-container">
+
+<table>
+
+<tr>
+<th>Time</th>
+<th>Monday</th>
+<th>Tuesday</th>
+<th>Wednesday</th>
+<th>Thursday</th>
+<th>Friday</th>
+</tr>
+
+<tr>
+<td>08:00</td>
+<td>Maths</td>
+<td>Science</td>
+<td>English</td>
+<td>Maths</td>
+<td>Hindi</td>
+</tr>
+
+<tr>
+<td>09:00</td>
+<td>English</td>
+<td>Maths</td>
+<td>Hindi</td>
+<td>Science</td>
+<td>Computer</td>
+</tr>
+
+</table>
+
+</div>
+</div>
+`;
+}
+
+if(page==="notices"){
+
+return `
+
+<div class="card">
+
+<div class="card-header">
+<h3>Notice Board</h3>
+<button class="small-btn">+ New Notice</button>
+</div>
+
+<div class="notice">
+<strong>Independence Day Holiday</strong>
+<span>School holiday notice</span>
+</div>
+
+<div class="notice">
+<strong>Parent Teacher Meeting</strong>
+<span>PTM scheduled Saturday</span>
+</div>
+
+<div class="notice">
+<strong>Annual Sports Day</strong>
+<span>All students can participate</span>
+</div>
+
+</div>
+`;
+}
+
+if(page==="settings"){
+
+let school=localStorage.getItem("schoolName")||"ABC Public School";
+let email=localStorage.getItem("schoolEmail")||"abcschool@example.com";
+
+return `
+
+<div class="card">
+
+<div class="card-header">
+<h3>School Settings</h3>
+</div>
+
+<div style="padding:20px">
+
+<div class="form-group">
+<label>School Name</label>
+<input id="settingsSchool" value="${escapeHtml(school)}">
+</div>
+
+<div class="form-group">
+<label>Email</label>
+<input id="settingsEmail" value="${escapeHtml(email)}">
+</div>
+
+<button class="btn btn-primary" onclick="saveSettings()">
+Save Changes
+</button>
+
+</div>
+</div>
+`;
+}
+
+return "";
+}
+
+/* EXPORT */
+
+function downloadCSV(filename,rows){
+
+if(!rows.length)return;
+
+let csv=rows.map(row=>
+row.map(cell=>{
+
+let value=String(cell??"")
+.replace(/"/g,'""');
+
+return `"${value}"`;
+
+}).join(",")
+).join("\n");
+
+let blob=new Blob(["\ufeff"+csv],{
+type:"text/csv;charset=utf-8;"
+});
+
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+a.href=url;
+a.download=filename;
+document.body.appendChild(a);
+a.click();
+a.remove();
+
+URL.revokeObjectURL(url);
+}
+
+function exportStudentsCSV(){
+
+let rows=[
+[
+"Student Name",
+"Father Name",
+"Mobile",
+"Class",
+"Section",
+"Stream",
+"Gender",
+"Total Fee"
+]
+];
+
+getStudents().forEach(s=>{
+
+rows.push([
+s.name,
+s.father,
+s.mobile,
+"Class "+s.classNo,
+s.section,
+s.stream||"",
+s.gender,
+s.fee
+]);
+
+});
+
+downloadCSV("SchoolHub_Student_Report.csv",rows);
+}
+
+function exportAttendanceCSV(){
+
+let rows=[
+[
+"Student Name",
+"Class",
+"Section",
+"Stream",
+"Date",
+"Status"
+]
+];
+
+let students=getStudents();
+let attendance=getAttendance();
+
+attendance.forEach(a=>{
+
+let s=students.find(
+x=>Number(x.id)===Number(a.studentId)
+);
+
+if(!s)return;
+
+rows.push([
+s.name,
+"Class "+s.classNo,
+s.section,
+s.stream||"",
+a.date,
+a.status
+]);
+
+});
+
+downloadCSV("SchoolHub_Attendance_Report.csv",rows);
+}
+
+function exportFeesCSV(){
+
+let rows=[
+[
+"Student Name",
+"Class",
+"Section",
+"Stream",
+"Total Fee",
+"Payment Date",
+"Payment Amount",
+"Mode",
+"Receipt"
+]
+];
+
+let students=getStudents();
+
+students.forEach(s=>{
+
+let payments=getStudentPayments(s.id);
+
+if(!payments.length){
+
+rows.push([
+s.name,
+"Class "+s.classNo,
+s.section,
+s.stream||"",
+s.fee,
+"",
+0,
+"",
+""
+]);
+
+return;
+
+}
+
+payments.forEach(p=>{
+
+rows.push([
+s.name,
+"Class "+s.classNo,
+s.section,
+s.stream||"",
+s.fee,
+p.date,
+p.amount,
+p.mode||"",
+p.receipt||""
+]);
+
+});
+
+});
+
+downloadCSV("SchoolHub_Fees_Report.csv",rows);
+}
+
+function exportResultsCSV(){
+
+let rows=[
+[
+"Student Name",
+"Class",
+"Section",
+"Stream",
+"Exam",
+"Exam Date",
+"Subject",
+"Maximum Marks",
+"Obtained Marks",
+"Percentage",
+"Result"
+]
+];
+
+let students=getStudents();
+
+students.forEach(s=>{
+
+let exams=getStudentExams(s.id);
+
+exams.forEach(e=>{
+
+let percentage=getExamPercentage(e);
+let result=percentage>=33?"PASS":"FAIL";
+
+if(!e.subjects||!e.subjects.length){
+
+rows.push([
+s.name,
+"Class "+s.classNo,
+s.section,
+s.stream||"",
+e.examName,
+e.examDate,
+"",
+getExamTotal(e),
+getExamObtained(e),
+percentage.toFixed(1)+"%",
+result
+]);
+
+return;
+}
+
+e.subjects.forEach(sub=>{
+
+rows.push([
+s.name,
+"Class "+s.classNo,
+s.section,
+s.stream||"",
+e.examName,
+e.examDate,
+sub.name,
+sub.max,
+sub.obtained,
+percentage.toFixed(1)+"%",
+result
+]);
+
+});
+
+});
+
+});
+
+downloadCSV("SchoolHub_Result_Report.csv",rows);
+}
+
+/* SETTINGS */
+
+function saveSettings(){
+
+let school=document.getElementById("settingsSchool").value.trim();
+let email=document.getElementById("settingsEmail").value.trim();
+
+localStorage.setItem("schoolName",school);
+localStorage.setItem("schoolEmail",email);
+
+document.getElementById("displaySchool").innerText=school;
+
+alert("Settings saved successfully!");
+}
+
+/* FORMAT */
+
+function formatDate(date){
+
+if(!date)return "-";
+
+let p=date.split("-");
+
+if(p.length!==3)return date;
+
+return p[2]+"-"+p[1]+"-"+p[0];
+}
+
+function escapeHtml(text){
+
+return String(text??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+}
+
+</script>
+
+</body>
+</html>
