@@ -94,7 +94,99 @@ th{background:#fafbfd;color:#667085}
 .empty{padding:35px;text-align:center;color:#777}
 .action-buttons{display:flex;gap:7px;flex-wrap:wrap}
 .payment-row{background:#f8faff;border:1px solid #e5eaf1;border-radius:12px;padding:12px;margin-bottom:8px}
-@media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ATTENDANCE */
+.attendance-toolbar{
+padding:18px;
+background:#f8faff;
+border-bottom:1px solid #edf0f4;
+display:grid;
+grid-template-columns:1fr 1fr 1fr auto;
+gap:12px;
+align-items:end
+}
+.attendance-actions{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+.att-status-btn{
+border:1px solid #dce2eb;
+background:white;
+padding:9px 12px;
+border-radius:9px;
+font-weight:bold;
+}
+.att-status-btn.active-present{background:#e6f8ed;color:#15803d;border-color:#86d6a4}
+.att-status-btn.active-absent{background:#feecec;color:#dc2626;border-color:#f3a1a1}
+.att-status-btn.active-leave{background:#fff5d9;color:#b77900;border-color:#e6c76a}
+.att-student-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
+padding:14px 18px;
+border-bottom:1px solid #edf0f4;
+}
+.att-student-info{
+min-width:250px;
+}
+.att-student-info strong{
+display:block;
+margin-bottom:4px;
+}
+.att-student-info span{
+color:#777;
+font-size:12px;
+}
+.att-buttons{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+}
+.att-history{
+padding:15px 18px;
+border-bottom:1px solid #edf0f4;
+background:#fafbfd;
+}
+.att-history-title{
+font-weight:bold;
+margin-bottom:8px;
+}
+.att-history-list{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+}
+.att-history-item{
+border:1px solid #e5eaf1;
+background:white;
+border-radius:9px;
+padding:8px 10px;
+font-size:12px;
+}
+.att-percentage{
+font-weight:bold;
+color:#1769ff;
+}
+.month-box{
+display:flex;
+align-items:center;
+gap:8px;
+}
+.month-box select{
+height:40px;
+min-width:150px;
+}
+.section-filter{
+height:40px;
+min-width:130px;
+}
+
+@media(max-width:1000px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.attendance-toolbar{grid-template-columns:1fr 1fr}
+}
 @media(max-width:700px){
 .sidebar{transform:translateX(-100%);transition:.25s}
 .sidebar.open{transform:translateX(0)}
@@ -108,6 +200,10 @@ th{background:#fafbfd;color:#667085}
 .class-summary,.stream-summary{gap:10px;font-size:13px}
 .form-grid{grid-template-columns:1fr}
 .search-box{flex-direction:column}
+.attendance-toolbar{grid-template-columns:1fr}
+.att-student-row{align-items:flex-start;flex-direction:column}
+.att-buttons{width:100%}
+.att-status-btn{flex:1}
 }
 </style>
 </head>
@@ -382,34 +478,34 @@ Password: <b>123456</b>
 </div>
 </div>
 
-<!-- ATTENDANCE MODAL -->
-<div class="modal-bg" id="attendanceModal">
+<!-- ATTENDANCE EDIT MODAL -->
+<div class="modal-bg" id="attendanceEditModal">
 <div class="modal">
 <div class="modal-header">
-<h2>Attendance</h2>
-<button class="close-btn" onclick="closeAttendanceModal()">×</button>
+<h2>Edit Attendance</h2>
+<button class="close-btn" onclick="closeAttendanceEditModal()">×</button>
 </div>
 
 <div class="form-group">
 <label>Student</label>
-<input id="attStudentName" readonly>
+<input id="editAttStudentName" readonly>
 </div>
 
 <div class="form-group">
 <label>Date</label>
-<input id="attDate" type="date">
+<input id="editAttDate" type="date">
 </div>
 
 <div class="form-group">
 <label>Status</label>
-<select id="attStatus">
-<option value="Present">Present</option>
-<option value="Absent">Absent</option>
-<option value="Leave">Leave</option>
+<select id="editAttStatus">
+<option value="Present">🟢 Present</option>
+<option value="Absent">🔴 Absent</option>
+<option value="Leave">🟡 Leave</option>
 </select>
 </div>
 
-<button class="btn btn-primary" onclick="saveAttendanceRecord()">Save Attendance</button>
+<button class="btn btn-primary" onclick="updateAttendanceRecord()">Update Attendance</button>
 </div>
 </div>
 
@@ -709,6 +805,14 @@ function getStreamStudents(classNo,stream){
 return getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&s.stream===stream);
 }
 
+function getSectionStudents(classNo,stream,section){
+return getStudents().filter(s=>
+Number(s.classNo)===Number(classNo)&&
+(!stream||s.stream===stream)&&
+(!section||s.section===section)
+);
+}
+
 function getTypeTitle(type){
 let x={
 students:"Students",
@@ -949,6 +1053,12 @@ html+=`
 </div>`;
 }
 
+if(type==="attendance"){
+html+=buildAttendancePage(classNo,stream);
+document.getElementById("otherPage").innerHTML=html;
+return;
+}
+
 html+=`
 <div class="search-box">
 <input id="studentSearch" placeholder="🔍 Search student name, father name or mobile..." oninput="filterStudentTable('${type}',${classNo},'${stream||""}')">
@@ -992,15 +1102,6 @@ html+=`
 <th>Balance</th>
 <th>Last Payment</th>
 <th>Payment Details</th>
-<th>Action</th>`;
-}
-
-if(type==="attendance"){
-html+=`
-<th>Today Status</th>
-<th>Present</th>
-<th>Absent</th>
-<th>Leave</th>
 <th>Action</th>`;
 }
 
@@ -1080,30 +1181,6 @@ ${p.receipt?"<br>Receipt: "+escapeHtml(p.receipt):""}
 </td>
 <td>
 <span class="badge ${due<=0?"green":"yellow"}">${due<=0?"PAID":"PENDING"}</span>
-</td>`;
-}
-
-if(type==="attendance"){
-
-let records=getAttendanceForStudent(s.id);
-let todayRecord=records.filter(a=>a.date===today()).pop();
-let present=records.filter(a=>a.status==="Present").length;
-let absent=records.filter(a=>a.status==="Absent").length;
-let leave=records.filter(a=>a.status==="Leave").length;
-
-html+=`
-<td>
-<span class="badge ${
-todayRecord?.status==="Present"?"green":
-todayRecord?.status==="Absent"?"red":"yellow"}">
-${todayRecord?todayRecord.status:"Not Marked"}
-</span>
-</td>
-<td>${present}</td>
-<td>${absent}</td>
-<td>${leave}</td>
-<td>
-<button class="edit-btn" onclick="openAttendanceModal(${s.id},${classNo},'${stream||""}')">✏️ Mark/Edit</button>
 </td>`;
 }
 
@@ -1436,10 +1513,16 @@ document.getElementById("feeModal").style.display="none";
 window.editingFeeId=null;
 }
 
-/* ATTENDANCE */
+/* ================= ATTENDANCE ================= */
 
 function getAttendanceForStudent(studentId){
 return getAttendance().filter(x=>Number(x.studentId)===Number(studentId));
+}
+
+function getAttendanceRecord(studentId,date){
+return getAttendance()
+.filter(x=>Number(x.studentId)===Number(studentId)&&x.date===date)
+.pop();
 }
 
 function getTodayAttendanceForStudents(students){
@@ -1457,6 +1540,459 @@ leave:todayRecords.filter(x=>x.status==="Leave").length
 };
 }
 
+/* MONTHLY % */
+
+function getMonthlyAttendance(studentId,year,month){
+
+let records=getAttendanceForStudent(studentId);
+
+let total=records.filter(r=>{
+let d=new Date(r.date+"T00:00:00");
+return d.getFullYear()===Number(year)&&
+(d.getMonth()+1)===Number(month);
+});
+
+let working=total.length;
+let present=total.filter(r=>r.status==="Present").length;
+
+return {
+total:working,
+present:present,
+absent:total.filter(r=>r.status==="Absent").length,
+leave:total.filter(r=>r.status==="Leave").length,
+percentage:working?Math.round(present/working*100):0
+};
+}
+
+function getMonthOptions(){
+
+let now=new Date();
+let html="";
+
+for(let i=0;i<12;i++){
+
+let d=new Date(now.getFullYear(),now.getMonth()-i,1);
+
+let value=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+
+let label=d.toLocaleString("en-IN",{month:"long",year:"numeric"});
+
+html+=`<option value="${value}">${label}</option>`;
+}
+
+return html;
+}
+
+function buildAttendancePage(classNo,stream){
+
+let students=getClassStudents(classNo);
+
+if(stream){
+students=students.filter(s=>s.stream===stream);
+}
+
+let todayDate=today();
+
+let sections=[...new Set(students.map(s=>s.section))].sort();
+
+if(sections.length===0)sections=["A","B","C"];
+
+let html=`
+
+<div class="attendance-toolbar">
+
+<div class="form-group" style="margin:0">
+<label>Date</label>
+<input id="attendanceDate" type="date" value="${todayDate}" onchange="refreshAttendanceList()">
+</div>
+
+<div class="form-group" style="margin:0">
+<label>Section</label>
+<select id="attendanceSection" class="section-filter" onchange="refreshAttendanceList()">
+<option value="">All Sections</option>
+${sections.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("")}
+</select>
+</div>
+
+<div class="form-group" style="margin:0">
+<label>Monthly Attendance</label>
+<select id="attendanceMonth" class="section-filter" onchange="refreshAttendanceList()">
+${getMonthOptions()}
+</select>
+</div>
+
+<div class="attendance-actions">
+<button class="small-btn" onclick="markAllAttendance('Present')">🟢 Mark All Present</button>
+<button class="small-btn" style="background:#15803d" onclick="saveAllAttendance()">💾 Save Attendance</button>
+</div>
+
+</div>
+
+<div id="attendanceSummary"></div>
+
+<div id="attendanceStudentList">
+${buildAttendanceStudentList(classNo,stream,todayDate,"")}
+</div>
+
+<div class="att-history">
+<div class="att-history-title">📜 Attendance History</div>
+<div id="attendanceHistoryArea">
+${buildAttendanceHistory(classNo,stream)}
+</div>
+</div>
+`;
+
+return html;
+}
+
+function buildAttendanceStudentList(classNo,stream,date,section){
+
+let students=getClassStudents(classNo);
+
+if(stream){
+students=students.filter(s=>s.stream===stream);
+}
+
+if(section){
+students=students.filter(s=>s.section===section);
+}
+
+if(students.length===0){
+return `<div class="empty"><h3>No Students Found</h3><p style="margin-top:8px">No students in this section.</p></div>`;
+}
+
+let records=getAttendance();
+
+let html="";
+
+students.forEach(function(s,index){
+
+let record=records.find(r=>
+Number(r.studentId)===Number(s.id)&&
+r.date===date
+);
+
+let status=record?record.status:"";
+
+let monthly=getMonthlyAttendance(
+s.id,
+Number(document.getElementById("attendanceMonth")?.value?.split("-")[0]||new Date().getFullYear()),
+Number(document.getElementById("attendanceMonth")?.value?.split("-")[1]||new Date().getMonth()+1)
+);
+
+html+=`
+<div class="att-student-row" data-student-id="${s.id}">
+
+<div class="att-student-info">
+<strong>${index+1}. ${escapeHtml(s.name)}</strong>
+<span>Father: ${escapeHtml(s.father)} • Section ${escapeHtml(s.section)}${classNo>=11?" • "+escapeHtml(s.stream||""):""}</span>
+</div>
+
+<div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
+
+<div class="att-buttons">
+
+<button
+class="att-status-btn ${status==="Present"?"active-present":""}"
+onclick="setAttendanceStatus(${s.id},'Present')">
+🟢 Present
+</button>
+
+<button
+class="att-status-btn ${status==="Absent"?"active-absent":""}"
+onclick="setAttendanceStatus(${s.id},'Absent')">
+🔴 Absent
+</button>
+
+<button
+class="att-status-btn ${status==="Leave"?"active-leave":""}"
+onclick="setAttendanceStatus(${s.id},'Leave')">
+🟡 Leave
+</button>
+
+</div>
+
+<div class="att-percentage">
+${monthly.percentage}% / Month
+</div>
+
+</div>
+</div>`;
+});
+
+let dateRecords=students.map(s=>records.find(r=>
+Number(r.studentId)===Number(s.id)&&r.date===date
+)).filter(Boolean);
+
+let p=dateRecords.filter(r=>r.status==="Present").length;
+let a=dateRecords.filter(r=>r.status==="Absent").length;
+let l=dateRecords.filter(r=>r.status==="Leave").length;
+
+let marked=dateRecords.length;
+
+document.getElementById("attendanceSummary")?.remove();
+
+return html;
+}
+
+function refreshAttendanceList(){
+
+let classNo=window.currentClassNo;
+let stream=window.currentStream||"";
+
+let date=document.getElementById("attendanceDate")?.value||today();
+let section=document.getElementById("attendanceSection")?.value||"";
+
+let list=document.getElementById("attendanceStudentList");
+
+if(list){
+list.innerHTML=buildAttendanceStudentList(classNo,stream,date,section);
+}
+
+let history=document.getElementById("attendanceHistoryArea");
+
+if(history){
+history.innerHTML=buildAttendanceHistory(classNo,stream);
+}
+}
+
+function setAttendanceStatus(studentId,status){
+
+let date=document.getElementById("attendanceDate")?.value||today();
+
+let row=document.querySelector(`[data-student-id="${studentId}"]`);
+
+if(!row)return;
+
+row.dataset.status=status;
+
+row.querySelectorAll(".att-status-btn").forEach(btn=>{
+btn.classList.remove(
+"active-present",
+"active-absent",
+"active-leave"
+);
+});
+
+if(status==="Present"){
+row.querySelectorAll(".att-status-btn")[0].classList.add("active-present");
+}
+
+if(status==="Absent"){
+row.querySelectorAll(".att-status-btn")[1].classList.add("active-absent");
+}
+
+if(status==="Leave"){
+row.querySelectorAll(".att-status-btn")[2].classList.add("active-leave");
+}
+}
+
+function markAllAttendance(status){
+
+let rows=document.querySelectorAll(".att-student-row");
+
+rows.forEach(function(row){
+
+let id=Number(row.dataset.studentId);
+
+setAttendanceStatus(id,status);
+
+});
+
+}
+
+function saveAllAttendance(){
+
+let date=document.getElementById("attendanceDate")?.value;
+
+if(!date){
+alert("Please select date");
+return;
+}
+
+let rows=document.querySelectorAll(".att-student-row");
+
+if(rows.length===0){
+alert("No students found");
+return;
+}
+
+let data=getAttendance();
+
+let saved=0;
+
+rows.forEach(function(row){
+
+let studentId=Number(row.dataset.studentId);
+
+let status="";
+
+let buttons=row.querySelectorAll(".att-status-btn");
+
+if(buttons[0].classList.contains("active-present"))status="Present";
+else if(buttons[1].classList.contains("active-absent"))status="Absent";
+else if(buttons[2].classList.contains("active-leave"))status="Leave";
+
+if(!status)return;
+
+let existing=data.find(r=>
+Number(r.studentId)===studentId&&
+r.date===date
+);
+
+if(existing){
+
+existing.status=status;
+
+}else{
+
+data.push({
+id:Date.now()+Math.floor(Math.random()*100000),
+studentId:studentId,
+date:date,
+status:status
+});
+
+}
+
+saved++;
+});
+
+saveAttendance(data);
+
+let students=getStudents();
+
+students.forEach(s=>{
+
+let r=data.find(x=>
+Number(x.studentId)===Number(s.id)&&
+x.date===date
+);
+
+if(r)s.attendance=r.status;
+
+});
+
+saveStudents(students);
+
+updateDashboard();
+
+alert(saved+" attendance record(s) saved successfully.");
+
+refreshAttendanceList();
+}
+
+function buildAttendanceHistory(classNo,stream){
+
+let students=getClassStudents(classNo);
+
+if(stream){
+students=students.filter(s=>s.stream===stream);
+}
+
+let ids=students.map(s=>Number(s.id));
+
+let records=getAttendance()
+.filter(r=>ids.includes(Number(r.studentId)))
+.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
+let dates=[...new Set(records.map(r=>r.date))];
+
+if(dates.length===0){
+return `<div class="empty" style="padding:20px">No attendance history available.</div>`;
+}
+
+let html="";
+
+dates.forEach(function(date){
+
+let dayRecords=records.filter(r=>r.date===date);
+
+let p=dayRecords.filter(r=>r.status==="Present").length;
+let a=dayRecords.filter(r=>r.status==="Absent").length;
+let l=dayRecords.filter(r=>r.status==="Leave").length;
+
+html+=`
+<div style="padding:12px 0;border-bottom:1px solid #edf0f4">
+
+<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+
+<strong>📅 ${formatDate(date)}</strong>
+
+<div>
+<span class="badge green">🟢 ${p}</span>
+<span class="badge red">🔴 ${a}</span>
+<span class="badge yellow">🟡 ${l}</span>
+
+<button class="edit-btn" onclick="openAttendanceHistoryDate('${date}',${classNo},'${stream||""}')">
+✏️ Edit
+</button>
+
+<button class="delete-btn" onclick="deleteAttendanceDate('${date}',${classNo},'${stream||""}')">
+🗑️ Delete
+</button>
+</div>
+
+</div>
+
+<div style="margin-top:8px;color:#777;font-size:12px">
+${dayRecords.length} students marked
+</div>
+
+</div>`;
+});
+
+return html;
+}
+
+function openAttendanceHistoryDate(date,classNo,stream){
+
+document.getElementById("attendanceDate").value=date;
+
+let section=document.getElementById("attendanceSection");
+
+if(section)section.value="";
+
+let list=document.getElementById("attendanceStudentList");
+
+if(list){
+list.innerHTML=buildAttendanceStudentList(
+classNo,
+stream,
+date,
+""
+);
+}
+
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteAttendanceDate(date,classNo,stream){
+
+let students=getClassStudents(classNo);
+
+if(stream){
+students=students.filter(s=>s.stream===stream);
+}
+
+let ids=students.map(s=>Number(s.id));
+
+if(!confirm("Delete attendance for "+formatDate(date)+"?")){
+return;
+}
+
+let data=getAttendance().filter(r=>
+!(ids.includes(Number(r.studentId))&&r.date===date)
+);
+
+saveAttendance(data);
+
+updateDashboard();
+
+refreshAttendanceList();
+
+}
+
 function openAttendanceModal(studentId,classNo,stream){
 
 let s=getStudents().find(x=>Number(x.id)===Number(studentId));
@@ -1468,18 +2004,117 @@ window.attStream=stream||"";
 
 let old=getAttendanceForStudent(studentId).filter(x=>x.date===today()).pop();
 
-document.getElementById("attStudentName").value=s.name;
-document.getElementById("attDate").value=old?old.date:today();
-document.getElementById("attStatus").value=old?old.status:"Present";
+document.getElementById("attStudentName")?.value=s.name;
+document.getElementById("attDate")?.value=old?old.date:today();
+document.getElementById("attStatus")?.value=old?old.status:"Present";
 
-document.getElementById("attendanceModal").style.display="flex";
+document.getElementById("attendanceModal")?.style && (document.getElementById("attendanceModal").style.display="flex");
 }
+
+/* ATTENDANCE EDIT HISTORY */
+
+let editingAttendanceId=null;
+
+function openEditAttendanceRecord(id,classNo,stream){
+
+let record=getAttendance().find(x=>Number(x.id)===Number(id));
+
+if(!record)return;
+
+let s=getStudents().find(x=>Number(x.id)===Number(record.studentId));
+
+if(!s)return;
+
+editingAttendanceId=id;
+
+document.getElementById("editAttStudentName").value=s.name;
+document.getElementById("editAttDate").value=record.date;
+document.getElementById("editAttStatus").value=record.status;
+
+document.getElementById("attendanceEditModal").style.display="flex";
+
+window.editAttClassNo=classNo;
+window.editAttStream=stream||"";
+}
+
+function updateAttendanceRecord(){
+
+if(!editingAttendanceId)return;
+
+let date=document.getElementById("editAttDate").value;
+let status=document.getElementById("editAttStatus").value;
+
+if(!date){
+alert("Select date");
+return;
+}
+
+let data=getAttendance();
+
+let record=data.find(x=>Number(x.id)===Number(editingAttendanceId));
+
+if(!record)return;
+
+let duplicate=data.find(x=>
+Number(x.studentId)===Number(record.studentId)&&
+x.date===date&&
+Number(x.id)!==Number(record.id)
+);
+
+if(duplicate){
+
+duplicate.status=status;
+data=data.filter(x=>Number(x.id)!==Number(record.id));
+
+}else{
+
+record.date=date;
+record.status=status;
+
+}
+
+saveAttendance(data);
+
+closeAttendanceEditModal();
+
+updateDashboard();
+
+openStudentsData(
+"attendance",
+window.editAttClassNo,
+window.editAttStream
+);
+}
+
+function deleteAttendanceRecord(id,classNo,stream){
+
+if(!confirm("Delete this attendance record?"))return;
+
+saveAttendance(
+getAttendance().filter(x=>Number(x.id)!==Number(id))
+);
+
+updateDashboard();
+
+openStudentsData(
+"attendance",
+classNo,
+stream||""
+);
+}
+
+function closeAttendanceEditModal(){
+document.getElementById("attendanceEditModal").style.display="none";
+editingAttendanceId=null;
+}
+
+/* OLD SIMPLE ATTENDANCE MODAL - kept for compatibility */
 
 function saveAttendanceRecord(){
 
 let studentId=Number(window.attStudentId);
-let date=document.getElementById("attDate").value;
-let status=document.getElementById("attStatus").value;
+let date=document.getElementById("attDate")?.value;
+let status=document.getElementById("attStatus")?.value;
 
 if(!date){alert("Select date");return}
 
@@ -1505,8 +2140,11 @@ let s=students.find(x=>Number(x.id)===studentId);
 if(s&&date===today())s.attendance=status;
 saveStudents(students);
 
-closeAttendanceModal();
 updateDashboard();
+
+if(document.getElementById("attendanceModal")){
+document.getElementById("attendanceModal").style.display="none";
+}
 
 openStudentsData(
 "attendance",
@@ -1516,7 +2154,9 @@ window.attStream
 }
 
 function closeAttendanceModal(){
+if(document.getElementById("attendanceModal")){
 document.getElementById("attendanceModal").style.display="none";
+}
 }
 
 /* EXAMS */
