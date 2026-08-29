@@ -54,6 +54,10 @@ input,select{width:100%;height:47px;border:1px solid #dce2eb;border-radius:11px;
 .small-btn{border:0;background:#1769ff;color:white;padding:9px 13px;border-radius:9px;font-weight:bold}
 .edit-btn{background:#eef4ff;color:#1769ff;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
 .delete-btn{background:#feecec;color:#dc2626;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
+.green-btn{background:#16a34a;color:white;border:0;padding:9px 13px;border-radius:9px;font-weight:bold}
+.red-btn{background:#dc2626;color:white;border:0;padding:9px 13px;border-radius:9px;font-weight:bold}
+.yellow-btn{background:#d99a00;color:white;border:0;padding:9px 13px;border-radius:9px;font-weight:bold}
+.gray-btn{background:#667085;color:white;border:0;padding:9px 13px;border-radius:9px;font-weight:bold}
 
 .two-column{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .notice{padding:15px 20px;border-bottom:1px solid #edf0f4}
@@ -61,10 +65,10 @@ input,select{width:100%;height:47px;border:1px solid #dce2eb;border-radius:11px;
 .notice span{color:#777;font-size:12px}
 
 .table-container{overflow-x:auto}
-table{width:100%;min-width:1000px;border-collapse:collapse}
-th,td{padding:14px 18px;text-align:left;border-bottom:1px solid #edf0f4;font-size:14px}
+table{width:100%;min-width:900px;border-collapse:collapse}
+th,td{padding:13px 16px;text-align:left;border-bottom:1px solid #edf0f4;font-size:14px;vertical-align:top}
 th{background:#fafbfd;color:#667085}
-.badge{padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
+.badge{padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold;display:inline-block}
 .green{background:#e6f8ed;color:#15803d}
 .red{background:#feecec;color:#dc2626}
 .yellow{background:#fff5d9;color:#b77900}
@@ -106,10 +110,29 @@ th{background:#fafbfd;color:#667085}
 .empty{padding:35px;text-align:center;color:#777}
 .action-buttons{display:flex;gap:7px;flex-wrap:wrap}
 
-.result-box{padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4;display:flex;gap:20px;flex-wrap:wrap}
-.subject-mark{font-weight:bold}
-.pass-mark{color:#15803d;font-weight:bold}
-.fail-mark{color:#dc2626;font-weight:bold}
+.attendance-toolbar{padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4}
+.attendance-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.status-buttons{display:flex;gap:6px;flex-wrap:wrap}
+.status-btn{border:0;padding:7px 11px;border-radius:8px;font-weight:bold}
+.status-present{background:#e6f8ed;color:#15803d}
+.status-absent{background:#feecec;color:#dc2626}
+.status-leave{background:#fff5d9;color:#b77900}
+.status-active{outline:3px solid #1769ff}
+.student-att-status{min-width:250px}
+
+.payment-box{background:#f8faff;padding:10px;border-radius:10px;margin-bottom:7px}
+.payment-date{font-size:12px;color:#667085;margin-top:3px}
+.payment-mode{font-size:12px;color:#667085}
+.payment-actions{display:flex;gap:5px;margin-top:6px}
+.fee-summary{display:flex;gap:15px;flex-wrap:wrap;padding:18px;background:#f8faff}
+.fee-summary-box{background:white;padding:12px 18px;border-radius:12px;border:1px solid #e5eaf1}
+.fee-summary-box strong{display:block;font-size:20px;margin-top:4px}
+
+.history-panel{background:#f8faff;padding:15px;border-radius:12px;margin-top:10px}
+.history-item{background:white;border:1px solid #e6eaf0;border-radius:10px;padding:12px;margin-bottom:8px}
+.history-item:last-child{margin-bottom:0}
+
+.month-box{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:15px;background:#f8faff;border-bottom:1px solid #edf0f4}
 
 @media(max-width:1000px){
 .stats{grid-template-columns:repeat(2,1fr)}
@@ -128,6 +151,7 @@ th{background:#fafbfd;color:#667085}
 .class-summary,.stream-summary{gap:10px;font-size:13px}
 .form-grid{grid-template-columns:1fr}
 .search-box{flex-direction:column}
+.attendance-actions{flex-direction:column}
 }
 </style>
 </head>
@@ -197,27 +221,16 @@ SchoolHub
 <ul class="menu">
 
 <li class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</li>
-
 <li onclick="showPage('students',this)">👨‍🎓 Students</li>
-
 <li onclick="showPage('teachers',this)">👨‍🏫 Teachers</li>
-
 <li onclick="showPage('attendance',this)">📅 Attendance</li>
-
 <li onclick="showPage('fees',this)">💰 Fees</li>
-
 <li onclick="showPage('exams',this)">📝 Exam / Result</li>
-
 <li onclick="showPage('homework',this)">📚 Homework</li>
-
 <li onclick="showPage('timetable',this)">🕐 Timetable</li>
-
 <li onclick="showPage('notices',this)">📢 Notices</li>
-
 <li onclick="showPage('reports',this)">📊 Reports</li>
-
 <li onclick="showPage('settings',this)">⚙️ Settings</li>
-
 <li class="logout" onclick="logoutUser()">🚪 Logout</li>
 
 </ul>
@@ -229,19 +242,13 @@ SchoolHub
 <header class="topbar">
 
 <div style="display:flex;align-items:center;gap:15px">
-
 <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
-
 <div class="page-title" id="pageTitle">Dashboard</div>
-
 </div>
 
 <div class="user">
-
 <span class="user-name" id="topUser">School Admin</span>
-
 <div class="avatar">A</div>
-
 </div>
 
 </header>
@@ -284,11 +291,8 @@ SchoolHub
 <div class="card">
 
 <div class="card-header">
-
 <h3>Recent Notices</h3>
-
 <button class="small-btn" onclick="showPage('notices')">View</button>
-
 </div>
 
 <div class="notice">
@@ -311,11 +315,8 @@ SchoolHub
 <div class="card">
 
 <div class="card-header">
-
 <h3>Today's Attendance</h3>
-
 <button class="small-btn" onclick="showPage('attendance')">View</button>
-
 </div>
 
 <div class="notice">
@@ -351,11 +352,8 @@ SchoolHub
 <div class="modal">
 
 <div class="modal-header">
-
 <h2>Register New School</h2>
-
 <button class="close-btn" onclick="closeRegister()">×</button>
-
 </div>
 
 <div class="form-group">
@@ -395,11 +393,8 @@ SchoolHub
 <div class="modal">
 
 <div class="modal-header">
-
 <h2 id="studentModalTitle">Add Student</h2>
-
 <button class="close-btn" onclick="closeStudentModal()">×</button>
-
 </div>
 
 <div class="form-grid">
@@ -420,27 +415,18 @@ SchoolHub
 </div>
 
 <div class="form-group">
-
 <label>Gender *</label>
-
 <select id="studentGender">
-
 <option value="">Select Gender</option>
 <option value="Boy">Boy</option>
 <option value="Girl">Girl</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Class *</label>
-
 <select id="studentClass">
-
 <option value="">Select Class</option>
-
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
 <option value="3">Class 3</option>
@@ -453,46 +439,31 @@ SchoolHub
 <option value="10">Class 10</option>
 <option value="11">Class 11</option>
 <option value="12">Class 12</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Section</label>
-
 <select id="studentSection">
-
 <option value="A">A</option>
 <option value="B">B</option>
 <option value="C">C</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Stream</label>
-
 <select id="studentStream">
-
 <option value="">Not Applicable</option>
 <option value="Science">Science</option>
 <option value="Commerce">Commerce</option>
 <option value="Arts">Arts</option>
-
 </select>
-
 </div>
 
 <div class="form-group">
-
 <label>Total Fee</label>
-
 <input id="studentFee" type="number" value="35000">
-
 </div>
 
 </div>
@@ -504,6 +475,118 @@ SchoolHub
 </div>
 </div>
 
+<!-- FEE PAYMENT MODAL -->
+
+<div class="modal-bg" id="feeModal">
+
+<div class="modal">
+
+<div class="modal-header">
+<div>
+<h2 id="feeModalTitle">Add Fee Payment</h2>
+<p id="feeStudentNameText" style="color:#777;font-size:13px;margin-top:4px"></p>
+</div>
+<button class="close-btn" onclick="closeFeeModal()">×</button>
+</div>
+
+<div class="form-grid">
+
+<div class="form-group">
+<label>Payment Date *</label>
+<input id="feePaymentDate" type="date">
+</div>
+
+<div class="form-group">
+<label>Payment Amount *</label>
+<input id="feePaymentAmount" type="number" min="0" placeholder="Enter amount">
+</div>
+
+<div class="form-group">
+<label>Payment Mode</label>
+<select id="feePaymentMode">
+<option value="Cash">Cash</option>
+<option value="UPI">UPI</option>
+<option value="Bank Transfer">Bank Transfer</option>
+<option value="Cheque">Cheque</option>
+<option value="Online">Online</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Receipt Number</label>
+<input id="feeReceipt" placeholder="Optional">
+</div>
+
+</div>
+
+<div id="feeModalInfo" style="background:#f8faff;padding:14px;border-radius:12px;margin:10px 0 20px"></div>
+
+<button class="btn btn-primary" onclick="saveFeePayment()">Save Payment</button>
+
+</div>
+</div>
+
+<!-- ATTENDANCE MODAL -->
+
+<div class="modal-bg" id="attendanceModal">
+
+<div class="modal">
+
+<div class="modal-header">
+
+<div>
+<h2 id="attendanceModalTitle">Attendance</h2>
+<p id="attendanceStudentName" style="color:#777;font-size:13px;margin-top:4px"></p>
+</div>
+
+<button class="close-btn" onclick="closeAttendanceModal()">×</button>
+
+</div>
+
+<div class="form-group">
+<label>Date</label>
+<input id="attendanceModalDate" type="date" onchange="loadSingleAttendanceStatus()">
+</div>
+
+<div style="background:#f8faff;padding:15px;border-radius:12px">
+
+<div style="font-weight:bold;margin-bottom:12px">
+Select Attendance
+</div>
+
+<div class="status-buttons">
+
+<button id="singlePresentBtn"
+class="status-btn status-present"
+onclick="setSingleAttendance('Present')">
+🟢 Present
+</button>
+
+<button id="singleAbsentBtn"
+class="status-btn status-absent"
+onclick="setSingleAttendance('Absent')">
+🔴 Absent
+</button>
+
+<button id="singleLeaveBtn"
+class="status-btn status-leave"
+onclick="setSingleAttendance('Leave')">
+🟡 Leave
+</button>
+
+</div>
+
+</div>
+
+<br>
+
+<button class="btn btn-primary" onclick="saveSingleAttendance()">
+Save Attendance
+</button>
+
+</div>
+</div>
+
 <!-- EXAM MODAL -->
 
 <div class="modal-bg" id="examModal">
@@ -511,11 +594,8 @@ SchoolHub
 <div class="modal">
 
 <div class="modal-header">
-
 <h2 id="examModalTitle">Add Exam Result</h2>
-
 <button class="close-btn" onclick="closeExamModal()">×</button>
-
 </div>
 
 <div class="form-grid">
@@ -573,13 +653,37 @@ SchoolHub
 
 <script>
 
-/* BASIC */
+/* =========================
+   BASIC
+========================= */
 
 function today(){
 return new Date().toISOString().split("T")[0];
 }
 
-/* LOGIN */
+function escapeHtml(text){
+return String(text??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+}
+
+function formatDate(date){
+
+if(!date)return "-";
+
+let p=date.split("-");
+
+if(p.length!==3)return date;
+
+return p[2]+"-"+p[1]+"-"+p[0];
+}
+
+/* =========================
+   LOGIN
+========================= */
 
 function loginUser(){
 
@@ -599,8 +703,8 @@ return;
 if(email==="admin@school.com" && password==="123456"){
 
 openApplication("ABC Public School","School Administrator");
-
 return;
+
 }
 
 let savedEmail=localStorage.getItem("schoolEmail");
@@ -610,8 +714,8 @@ let savedSchool=localStorage.getItem("schoolName");
 if(email===savedEmail && password===savedPassword){
 
 openApplication(savedSchool,"School Administrator");
-
 return;
+
 }
 
 alert("Invalid Login Details.\n\nDemo:\nadmin@school.com\n123456");
@@ -621,13 +725,10 @@ alert("Invalid Login Details.\n\nDemo:\nadmin@school.com\n123456");
 function openApplication(school,role){
 
 document.getElementById("loginPage").style.display="none";
-
 document.getElementById("app").style.display="block";
 
-document.getElementById("displaySchool").innerText=school;
-
+document.getElementById("displaySchool").innerText=school||"ABC Public School";
 document.getElementById("displayRole").innerText=role;
-
 document.getElementById("topUser").innerText=role;
 
 updateDashboard();
@@ -637,21 +738,16 @@ updateDashboard();
 function logoutUser(){
 
 document.getElementById("app").style.display="none";
-
 document.getElementById("loginPage").style.display="flex";
 
 }
 
 function openRegister(){
-
 document.getElementById("registerModal").style.display="flex";
-
 }
 
 function closeRegister(){
-
 document.getElementById("registerModal").style.display="none";
-
 }
 
 function registerSchool(){
@@ -662,25 +758,10 @@ let mobile=document.getElementById("regSchoolMobile").value.trim();
 let city=document.getElementById("regSchoolCity").value.trim();
 let password=document.getElementById("regSchoolPassword").value;
 
-if(!school){
-alert("Enter School Name");
-return;
-}
-
-if(!email){
-alert("Enter School Email");
-return;
-}
-
-if(!mobile){
-alert("Enter Mobile Number");
-return;
-}
-
-if(!city){
-alert("Enter City");
-return;
-}
+if(!school){alert("Enter School Name");return}
+if(!email){alert("Enter School Email");return}
+if(!mobile){alert("Enter Mobile Number");return}
+if(!city){alert("Enter City");return}
 
 if(password.length<6){
 alert("Password must be at least 6 characters");
@@ -696,18 +777,19 @@ localStorage.setItem("schoolPassword",password);
 closeRegister();
 
 document.getElementById("loginEmail").value=email;
+document.getElementById("loginPassword").value="";
 
 alert("School Registered Successfully!\n\nNow login with your registered Email and Password.");
 
 }
 
 function toggleSidebar(){
-
 document.getElementById("sidebar").classList.toggle("open");
-
 }
 
-/* DATABASE */
+/* =========================
+   DATABASE
+========================= */
 
 function getStudents(){
 
@@ -715,18 +797,13 @@ let data=localStorage.getItem("schoolStudents");
 
 if(!data)return [];
 
-try{
-return JSON.parse(data);
-}catch(e){
-return [];
-}
+try{return JSON.parse(data)}
+catch(e){return []}
 
 }
 
 function saveStudents(data){
-
 localStorage.setItem("schoolStudents",JSON.stringify(data));
-
 }
 
 function getFees(){
@@ -735,18 +812,13 @@ let data=localStorage.getItem("schoolFees");
 
 if(!data)return [];
 
-try{
-return JSON.parse(data);
-}catch(e){
-return [];
-}
+try{return JSON.parse(data)}
+catch(e){return []}
 
 }
 
 function saveFees(data){
-
 localStorage.setItem("schoolFees",JSON.stringify(data));
-
 }
 
 function getAttendance(){
@@ -755,18 +827,13 @@ let data=localStorage.getItem("schoolAttendance");
 
 if(!data)return [];
 
-try{
-return JSON.parse(data);
-}catch(e){
-return [];
-}
+try{return JSON.parse(data)}
+catch(e){return []}
 
 }
 
 function saveAttendance(data){
-
 localStorage.setItem("schoolAttendance",JSON.stringify(data));
-
 }
 
 function getExams(){
@@ -775,18 +842,13 @@ let data=localStorage.getItem("schoolExams");
 
 if(!data)return [];
 
-try{
-return JSON.parse(data);
-}catch(e){
-return [];
-}
+try{return JSON.parse(data)}
+catch(e){return []}
 
 }
 
 function saveExams(data){
-
 localStorage.setItem("schoolExams",JSON.stringify(data));
-
 }
 
 function getHomework(){
@@ -795,21 +857,18 @@ let data=localStorage.getItem("schoolHomework");
 
 if(!data)return [];
 
-try{
-return JSON.parse(data);
-}catch(e){
-return [];
-}
+try{return JSON.parse(data)}
+catch(e){return []}
 
 }
 
 function saveHomework(data){
-
 localStorage.setItem("schoolHomework",JSON.stringify(data));
-
 }
 
-/* DEMO STUDENTS */
+/* =========================
+   DEMO DATA
+========================= */
 
 function createDemoStudents(){
 
@@ -834,21 +893,13 @@ for(let i=0;i<names.length;i++){
 students.push({
 
 id:Date.now()+i,
-
 name:names[i],
-
 father:fathers[i],
-
 mobile:"98"+String(76543210-i),
-
 gender:i%2===0?"Boy":"Girl",
-
 classNo:(i%10)+1,
-
 section:i%2===0?"A":"B",
-
 stream:"",
-
 fee:35000
 
 });
@@ -864,15 +915,10 @@ students.forEach(function(s,i){
 fees.push({
 
 id:Date.now()+100+i,
-
 studentId:s.id,
-
 amount:i%3===0?35000:i%3===1?20000:28000,
-
 date:today(),
-
 mode:i%2===0?"Cash":"UPI",
-
 receipt:"REC-"+(1001+i)
 
 });
@@ -888,11 +934,8 @@ students.forEach(function(s,i){
 attendance.push({
 
 id:Date.now()+200+i,
-
 studentId:s.id,
-
 date:today(),
-
 status:i%4===1?"Absent":"Present"
 
 });
@@ -908,21 +951,13 @@ students.forEach(function(s,i){
 exams.push({
 
 id:Date.now()+300+i,
-
 studentId:s.id,
-
 examName:"Annual Examination",
-
 examDate:today(),
-
 maths:70+(i%20),
-
 science:75+(i%15),
-
 english:68+(i%22),
-
 hindi:72+(i%18),
-
 social:65+(i%25)
 
 });
@@ -935,7 +970,9 @@ saveExams(exams);
 
 createDemoStudents();
 
-/* HELPERS */
+/* =========================
+   HELPERS
+========================= */
 
 function getClassStudents(classNo){
 
@@ -968,20 +1005,20 @@ return Number(s.classNo)===Number(classNo)
 function getTypeTitle(type){
 
 let x={
-
 students:"Students",
 fees:"Fees",
 attendance:"Attendance",
 exams:"Exam / Result",
 homework:"Homework"
-
 };
 
 return x[type]||type;
 
 }
 
-/* PAGE */
+/* =========================
+   PAGE
+========================= */
 
 function showPage(page,element){
 
@@ -993,7 +1030,6 @@ if(element)element.classList.add("active");
 document.getElementById("sidebar").classList.remove("open");
 
 let titles={
-
 dashboard:"Dashboard",
 students:"Students",
 teachers:"Teachers",
@@ -1005,7 +1041,6 @@ timetable:"Timetable",
 notices:"Notices",
 reports:"Reports",
 settings:"Settings"
-
 };
 
 document.getElementById("pageTitle").innerText=titles[page];
@@ -1016,7 +1051,6 @@ document.getElementById("dashboardPage").style.display="block";
 document.getElementById("otherPage").style.display="none";
 
 updateDashboard();
-
 return;
 
 }
@@ -1027,7 +1061,6 @@ document.getElementById("otherPage").style.display="block";
 if(["students","fees","attendance","exams","homework"].includes(page)){
 
 openClasses(page);
-
 return;
 
 }
@@ -1036,7 +1069,9 @@ document.getElementById("otherPage").innerHTML=getOtherPage(page);
 
 }
 
-/* CLASSES */
+/* =========================
+   CLASS PAGE
+========================= */
 
 function openClasses(type){
 
@@ -1045,9 +1080,7 @@ let html=`
 <div class="card">
 
 <div class="card-header">
-
 <h3>${getTypeTitle(type)} - Select Class</h3>
-
 </div>
 
 </div>
@@ -1059,7 +1092,6 @@ for(let i=1;i<=12;i++){
 let students=getClassStudents(i);
 
 let boys=students.filter(s=>s.gender==="Boy").length;
-
 let girls=students.filter(s=>s.gender==="Girl").length;
 
 let htmlSummary=`
@@ -1085,6 +1117,52 @@ htmlSummary+=`
 
 <span class="summary-item">
 👧 Girls: ${girls}
+</span>
+
+`;
+
+}
+
+if(type==="fees"){
+
+let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
+
+let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
+
+htmlSummary+=`
+
+<span class="summary-item summary-total">
+Total: ₹${total.toLocaleString("en-IN")}
+</span>
+
+<span class="summary-item summary-green">
+Paid: ₹${paid.toLocaleString("en-IN")}
+</span>
+
+<span class="summary-item summary-yellow">
+Due: ₹${Math.max(0,total-paid).toLocaleString("en-IN")}
+</span>
+
+`;
+
+}
+
+if(type==="attendance"){
+
+let result=getClassTodayAttendance(students);
+
+htmlSummary+=`
+
+<span class="summary-item summary-green">
+🟢 Present: ${result.present}
+</span>
+
+<span class="summary-item summary-red">
+🔴 Absent: ${result.absent}
+</span>
+
+<span class="summary-item summary-yellow">
+🟡 Leave: ${result.leave}
 </span>
 
 `;
@@ -1148,14 +1226,11 @@ document.getElementById("otherPage").innerHTML=html;
 
 }
 
-/* OPEN CLASS */
-
 function openClass(type,classNo){
 
 if(classNo===11||classNo===12){
 
 openStreams(type,classNo);
-
 return;
 
 }
@@ -1164,7 +1239,9 @@ openStudentsData(type,classNo,"");
 
 }
 
-/* STREAM */
+/* =========================
+   STREAM
+========================= */
 
 function openStreams(type,classNo){
 
@@ -1188,11 +1265,7 @@ onclick="openClasses('${type}')">
 <div class="card">
 
 <div class="card-header">
-
-<h3>
-Class ${classNo} - Select Stream
-</h3>
-
+<h3>Class ${classNo} - Select Stream</h3>
 </div>
 
 </div>
@@ -1207,9 +1280,7 @@ html+=`
 
 <div class="stream-section">
 
-<div class="stream-heading">
-${stream}
-</div>
+<div class="stream-heading">${stream}</div>
 
 <div class="stream-summary">
 
@@ -1222,9 +1293,7 @@ ${stream}
 <div class="stream-card"
 onclick="openStudentsData('${type}',${classNo},'${stream}')">
 
-<div class="stream-icon">
-${icons[stream]}
-</div>
+<div class="stream-icon">${icons[stream]}</div>
 
 <h3>${stream}</h3>
 
@@ -1242,7 +1311,9 @@ document.getElementById("otherPage").innerHTML=html;
 
 }
 
-/* DATA PAGE */
+/* =========================
+   DATA PAGE
+========================= */
 
 function openStudentsData(type,classNo,stream){
 
@@ -1262,8 +1333,7 @@ let back=stream
 
 let html=`
 
-<button class="back-btn"
-onclick="${back}">
+<button class="back-btn" onclick="${back}">
 ← Back
 </button>
 
@@ -1292,15 +1362,27 @@ onclick="openAddStudent(${classNo},'${stream||""}')">
 
 </div>
 
-`;
-
-html+=`
-
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
 
 👨‍🎓 <strong>Students:</strong> ${students.length}
 
 </div>
+
+`;
+
+if(type==="attendance"){
+
+html+=buildAttendanceToolbar(classNo,stream);
+
+}
+
+if(type==="fees"){
+
+html+=buildFeeSummaryForClass(students);
+
+}
+
+html+=`
 
 <div class="search-box">
 
@@ -1323,9 +1405,115 @@ ${buildStudentTable(type,classNo,stream,students)}
 
 document.getElementById("otherPage").innerHTML=html;
 
+if(type==="attendance"){
+loadAttendanceTable();
 }
 
-/* STUDENT TABLE */
+}
+
+/* =========================
+   FEE SUMMARY
+========================= */
+
+function buildFeeSummaryForClass(students){
+
+let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
+
+let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
+
+let due=Math.max(0,total-paid);
+
+return `
+
+<div class="fee-summary">
+
+<div class="fee-summary-box">
+Total Fee
+<strong>₹${total.toLocaleString("en-IN")}</strong>
+</div>
+
+<div class="fee-summary-box">
+<span class="summary-green">Paid Fee</span>
+<strong class="summary-green">₹${paid.toLocaleString("en-IN")}</strong>
+</div>
+
+<div class="fee-summary-box">
+<span class="summary-yellow">Remaining / Due</span>
+<strong class="summary-yellow">₹${due.toLocaleString("en-IN")}</strong>
+</div>
+
+</div>
+
+`;
+
+}
+
+/* =========================
+   ATTENDANCE TOOLBAR
+========================= */
+
+function buildAttendanceToolbar(classNo,stream){
+
+return `
+
+<div class="attendance-toolbar">
+
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+
+<div style="min-width:190px">
+
+<label style="font-size:13px;font-weight:bold;display:block;margin-bottom:5px">
+Attendance Date
+</label>
+
+<input
+id="attendanceDate"
+type="date"
+value="${window.attendanceDate||today()}"
+onchange="loadAttendanceTable()">
+
+</div>
+
+</div>
+
+<div class="attendance-actions">
+
+<button class="green-btn"
+onclick="markAllAttendance('Present')">
+🟢 Mark All Present
+</button>
+
+<button class="red-btn"
+onclick="markAllAttendance('Absent')">
+🔴 Mark All Absent
+</button>
+
+<button class="yellow-btn"
+onclick="markAllAttendance('Leave')">
+🟡 Mark All Leave
+</button>
+
+<button class="gray-btn"
+onclick="clearAttendanceMarks()">
+Clear
+</button>
+
+<button class="small-btn"
+onclick="saveClassAttendance()">
+💾 Save Attendance
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+/* =========================
+   STUDENT TABLE
+========================= */
 
 function buildStudentTable(type,classNo,stream,students){
 
@@ -1337,9 +1525,7 @@ return `
 
 <h3>No Students Found</h3>
 
-<p style="margin-top:8px">
-Add students first.
-</p>
+<p style="margin-top:8px">Add students first.</p>
 
 </div>
 
@@ -1369,15 +1555,9 @@ if(classNo>=11){
 html+=`<th>Stream</th>`;
 }
 
-/* STUDENTS */
-
 if(type==="students"){
-
 html+=`<th>Action</th>`;
-
 }
-
-/* FEES */
 
 if(type==="fees"){
 
@@ -1388,13 +1568,11 @@ html+=`
 <th>Due Fee</th>
 <th>Payment Count</th>
 <th>Payment History</th>
-<th>Action</th>
+<th>Fee Action</th>
 
 `;
 
 }
-
-/* ATTENDANCE */
 
 if(type==="attendance"){
 
@@ -1404,13 +1582,11 @@ html+=`
 <th>Absent</th>
 <th>Leave</th>
 <th>Attendance %</th>
-<th>Action</th>
+<th>Mark Attendance</th>
 
 `;
 
 }
-
-/* EXAM */
 
 if(type==="exams"){
 
@@ -1432,26 +1608,11 @@ html+=`
 
 }
 
-/* HOMEWORK */
-
-if(type==="homework"){
-
-html+=`
-
-<th>Subject</th>
-<th>Homework</th>
-<th>Due Date</th>
-<th>Status</th>
-<th>Action</th>
-
-`;
-
-}
-
 html+=`
 
 </tr>
 </thead>
+
 <tbody>
 
 `;
@@ -1479,13 +1640,11 @@ html+=`
 
 if(classNo>=11){
 
-html+=`
-<td>${s.stream||"-"}</td>
-`;
+html+=`<td>${s.stream||"-"}</td>`;
 
 }
 
-/* STUDENT */
+/* STUDENTS */
 
 if(type==="students"){
 
@@ -1497,16 +1656,12 @@ html+=`
 
 <button class="edit-btn"
 onclick="editStudent(${s.id},${classNo},'${stream||""}','students')">
-
 ✏️ Edit
-
 </button>
 
 <button class="delete-btn"
 onclick="deleteStudent(${s.id},${classNo},'${stream||""}','students')">
-
 🗑️ Delete
-
 </button>
 
 </div>
@@ -1523,60 +1678,70 @@ if(type==="fees"){
 
 let paid=getStudentPaid(s.id);
 
-let due=Math.max(
-0,
-Number(s.fee||0)-paid
-);
+let due=Math.max(0,Number(s.fee||0)-paid);
 
 let payments=getStudentPayments(s.id);
 
 html+=`
 
 <td>
-₹${Number(s.fee||0).toLocaleString("en-IN")}
+<strong>₹${Number(s.fee||0).toLocaleString("en-IN")}</strong>
 </td>
 
 <td class="summary-green">
-₹${paid.toLocaleString("en-IN")}
+<strong>₹${paid.toLocaleString("en-IN")}</strong>
 </td>
 
 <td class="${due>0?"summary-yellow":"summary-green"}">
-₹${due.toLocaleString("en-IN")}
+<strong>₹${due.toLocaleString("en-IN")}</strong>
 </td>
 
 <td>
-${payments.length}
+<strong>${payments.length}</strong>
 </td>
 
 <td>
+
+<div>
 
 ${payments.length
 
 ?payments.map(p=>`
 
-<div style="background:#f8faff;padding:9px;border-radius:9px;margin-bottom:6px">
+<div class="payment-box">
 
-<b>
-₹${Number(p.amount).toLocaleString("en-IN")}
-</b>
+<b>₹${Number(p.amount||0).toLocaleString("en-IN")}</b>
 
-<br>
+<div class="payment-date">
+📅 ${formatDate(p.date)}
+</div>
 
-${formatDate(p.date)}
-
-<br>
-
+<div class="payment-mode">
 ${escapeHtml(p.mode||"")}
+${p.receipt?" • Receipt: "+escapeHtml(p.receipt):""}
+</div>
 
-${p.receipt
-?`<br>Receipt: ${escapeHtml(p.receipt)}`
-:""}
+<div class="payment-actions">
+
+<button class="edit-btn"
+onclick="editFeePayment(${p.id},${s.id},${classNo},'${stream||""}')">
+✏️ Edit
+</button>
+
+<button class="delete-btn"
+onclick="deleteFeePayment(${p.id},${s.id},${classNo},'${stream||""}')">
+🗑️ Delete
+</button>
+
+</div>
 
 </div>
 
 `).join("")
 
-:"No Payment"}
+:"<span style='color:#777'>No Payment</span>"}
+
+</div>
 
 </td>
 
@@ -1584,9 +1749,7 @@ ${p.receipt
 
 <button class="small-btn"
 onclick="openFeeModal(${s.id},${classNo},'${stream||""}')">
-
 + Payment
-
 </button>
 
 </td>
@@ -1611,32 +1774,56 @@ let percentage=total
 ?((present/total)*100).toFixed(1)
 :0;
 
+let currentDate=document.getElementById("attendanceDate")
+?document.getElementById("attendanceDate").value
+:(window.attendanceDate||today());
+
+let current=getAttendanceRecord(s.id,currentDate);
+
 html+=`
 
-<td class="summary-green">
-${present}
-</td>
+<td class="summary-green">${present}</td>
 
-<td class="summary-red">
-${absent}
-</td>
+<td class="summary-red">${absent}</td>
 
-<td class="summary-yellow">
-${leave}
-</td>
+<td class="summary-yellow">${leave}</td>
 
 <td>
 <strong>${percentage}%</strong>
 </td>
 
-<td>
+<td class="student-att-status">
+
+<div class="status-buttons">
+
+<button
+class="status-btn status-present ${current&&current.status==="Present"?"status-active":""}"
+onclick="setTableAttendance(${s.id},'Present')">
+🟢 Present
+</button>
+
+<button
+class="status-btn status-absent ${current&&current.status==="Absent"?"status-active":""}"
+onclick="setTableAttendance(${s.id},'Absent')">
+🔴 Absent
+</button>
+
+<button
+class="status-btn status-leave ${current&&current.status==="Leave"?"status-active":""}"
+onclick="setTableAttendance(${s.id},'Leave')">
+🟡 Leave
+</button>
+
+</div>
+
+<div style="margin-top:8px">
 
 <button class="edit-btn"
-onclick="openAttendanceModal(${s.id},${classNo},'${stream||""}')">
-
-✏️ Attendance
-
+onclick="openAttendanceHistory(${s.id},${classNo},'${stream||""}')">
+📜 History / Edit
 </button>
+
+</div>
 
 </td>
 
@@ -1653,57 +1840,29 @@ let e=getExamForStudent(s.id);
 if(e){
 
 let total=getExamTotal(e);
-
 let percentage=getExamPercentage(e);
-
 let pass=percentage>=33;
 
 html+=`
 
-<td>
-${escapeHtml(e.examName||"")}
-</td>
+<td>${escapeHtml(e.examName||"")}</td>
+
+<td>${formatDate(e.examDate)}</td>
+
+<td>${e.maths}</td>
+<td>${e.science}</td>
+<td>${e.english}</td>
+<td>${e.hindi}</td>
+<td>${e.social}</td>
+
+<td><strong>${total}/500</strong></td>
+
+<td><strong>${percentage.toFixed(1)}%</strong></td>
 
 <td>
-${formatDate(e.examDate)}
-</td>
-
-<td>
-${e.maths}
-</td>
-
-<td>
-${e.science}
-</td>
-
-<td>
-${e.english}
-</td>
-
-<td>
-${e.hindi}
-</td>
-
-<td>
-${e.social}
-</td>
-
-<td>
-<strong>${total}/500</strong>
-</td>
-
-<td>
-<strong>${percentage.toFixed(1)}%</strong>
-</td>
-
-<td>
-
 <span class="badge ${pass?"green":"red"}">
-
 ${pass?"PASS":"FAIL"}
-
 </span>
-
 </td>
 
 <td>
@@ -1712,16 +1871,12 @@ ${pass?"PASS":"FAIL"}
 
 <button class="edit-btn"
 onclick="openExamModal(${s.id},${classNo},'${stream||""}')">
-
 ✏️ Edit
-
 </button>
 
 <button class="delete-btn"
 onclick="deleteExam(${e.id},${classNo},'${stream||""}')">
-
 🗑️ Delete
-
 </button>
 
 </div>
@@ -1735,20 +1890,16 @@ onclick="deleteExam(${e.id},${classNo},'${stream||""}')">
 html+=`
 
 <td colspan="10">
-
 <span class="badge yellow">
 Result Not Added
 </span>
-
 </td>
 
 <td>
 
 <button class="small-btn"
 onclick="openExamModal(${s.id},${classNo},'${stream||""}')">
-
 + Add Result
-
 </button>
 
 </td>
@@ -1759,49 +1910,7 @@ onclick="openExamModal(${s.id},${classNo},'${stream||""}')">
 
 }
 
-/* HOMEWORK */
-
-if(type==="homework"){
-
-let hw=getHomeworkForStudent(s.id);
-
-let latest=hw.length?hw[hw.length-1]:null;
-
-html+=`
-
-<td>
-${latest?escapeHtml(latest.subject):"-"}
-</td>
-
-<td>
-${latest?escapeHtml(latest.title):"-"}
-</td>
-
-<td>
-${latest?formatDate(latest.dueDate):"-"}
-</td>
-
-<td>
-${latest?escapeHtml(latest.status):"No Homework"}
-</td>
-
-<td>
-
-<button class="edit-btn">
-✏️ Edit
-</button>
-
-</td>
-
-`;
-
-}
-
-html+=`
-
-</tr>
-
-`;
+html+=`</tr>`;
 
 });
 
@@ -1817,15 +1926,15 @@ return html;
 
 }
 
-/* SEARCH */
+/* =========================
+   SEARCH
+========================= */
 
 function filterStudentTable(type,classNo,stream){
 
 let search=document
 .getElementById("studentSearch")
-.value
-.toLowerCase()
-.trim();
+.value.toLowerCase().trim();
 
 let students=stream
 ?getStreamStudents(classNo,stream)
@@ -1834,13 +1943,9 @@ let students=stream
 if(search){
 
 students=students.filter(s=>
-
 String(s.name).toLowerCase().includes(search)||
-
 String(s.father).toLowerCase().includes(search)||
-
 String(s.mobile).toLowerCase().includes(search)
-
 );
 
 }
@@ -1850,7 +1955,9 @@ buildStudentTable(type,classNo,stream,students);
 
 }
 
-/* STUDENT */
+/* =========================
+   STUDENT
+========================= */
 
 let editingStudentId=null;
 
@@ -1924,18 +2031,13 @@ s.fee=fee;
 students.push({
 
 id:Date.now(),
-
 name,
 father,
 mobile,
 gender,
-
 classNo:Number(classNo),
-
 section,
-
 stream,
-
 fee
 
 });
@@ -1945,7 +2047,6 @@ fee
 saveStudents(students);
 
 closeStudentModal();
-
 updateDashboard();
 
 openStudentsData(
@@ -2036,12 +2137,13 @@ openStudentsData(type,classNo,stream||"");
 function closeStudentModal(){
 
 document.getElementById("studentModal").style.display="none";
-
 editingStudentId=null;
 
 }
 
-/* FEES */
+/* =====================================================
+   FEES MODULE
+===================================================== */
 
 function getStudentPayments(studentId){
 
@@ -2051,9 +2153,11 @@ return getFees()
 x=>Number(x.studentId)===Number(studentId)
 )
 
-.sort(
-(a,b)=>String(a.date).localeCompare(String(b.date))
-);
+.sort(function(a,b){
+
+return String(a.date).localeCompare(String(b.date));
+
+});
 
 }
 
@@ -2067,6 +2171,11 @@ return getStudentPayments(studentId)
 
 }
 
+let editingFeeId=null;
+let feeStudentId=null;
+let feeClassNo=null;
+let feeStream="";
+
 function openFeeModal(studentId,classNo,stream){
 
 let s=getStudents().find(
@@ -2075,21 +2184,772 @@ x=>Number(x.id)===Number(studentId)
 
 if(!s)return;
 
-alert("Fee module is already connected. Add/Edit payment from Fees page.");
+editingFeeId=null;
+feeStudentId=studentId;
+feeClassNo=classNo;
+feeStream=stream||"";
+
+document.getElementById("feeModalTitle").innerText="Add Fee Payment";
+
+document.getElementById("feeStudentNameText").innerText=
+"Student: "+s.name;
+
+document.getElementById("feePaymentDate").value=today();
+document.getElementById("feePaymentAmount").value="";
+document.getElementById("feePaymentMode").value="Cash";
+document.getElementById("feeReceipt").value="";
+
+updateFeeModalInfo();
+
+document.getElementById("feeModal").style.display="flex";
 
 }
 
-/* ATTENDANCE */
+function updateFeeModalInfo(){
 
-function getAttendanceForStudent(studentId){
+let s=getStudents().find(
+x=>Number(x.id)===Number(feeStudentId)
+);
 
-return getAttendance().filter(
-x=>Number(x.studentId)===Number(studentId)
+if(!s)return;
+
+let paid=getStudentPaid(s.id);
+let due=Math.max(0,Number(s.fee||0)-paid);
+
+document.getElementById("feeModalInfo").innerHTML=`
+
+<div style="display:flex;gap:20px;flex-wrap:wrap">
+
+<div>
+Total Fee<br>
+<strong>₹${Number(s.fee||0).toLocaleString("en-IN")}</strong>
+</div>
+
+<div class="summary-green">
+Paid<br>
+<strong>₹${paid.toLocaleString("en-IN")}</strong>
+</div>
+
+<div class="summary-yellow">
+Due<br>
+<strong>₹${due.toLocaleString("en-IN")}</strong>
+</div>
+
+</div>
+
+`;
+
+}
+
+function saveFeePayment(){
+
+let date=document.getElementById("feePaymentDate").value;
+let amount=Number(document.getElementById("feePaymentAmount").value);
+let mode=document.getElementById("feePaymentMode").value;
+let receipt=document.getElementById("feeReceipt").value.trim();
+
+if(!date){
+alert("Select Payment Date");
+return;
+}
+
+if(!amount||amount<=0){
+alert("Enter valid Payment Amount");
+return;
+}
+
+let data=getFees();
+
+if(editingFeeId){
+
+let p=data.find(
+x=>Number(x.id)===Number(editingFeeId)
+);
+
+if(!p)return;
+
+p.date=date;
+p.amount=amount;
+p.mode=mode;
+p.receipt=receipt;
+
+}else{
+
+data.push({
+
+id:Date.now(),
+studentId:Number(feeStudentId),
+amount:amount,
+date:date,
+mode:mode,
+receipt:receipt
+
+});
+
+}
+
+saveFees(data);
+
+closeFeeModal();
+
+updateDashboard();
+
+openStudentsData(
+"fees",
+feeClassNo,
+feeStream
 );
 
 }
 
-/* EXAMS */
+function editFeePayment(paymentId,studentId,classNo,stream){
+
+let p=getFees().find(
+x=>Number(x.id)===Number(paymentId)
+);
+
+let s=getStudents().find(
+x=>Number(x.id)===Number(studentId)
+);
+
+if(!p||!s)return;
+
+editingFeeId=paymentId;
+feeStudentId=studentId;
+feeClassNo=classNo;
+feeStream=stream||"";
+
+document.getElementById("feeModalTitle").innerText="Edit Fee Payment";
+
+document.getElementById("feeStudentNameText").innerText=
+"Student: "+s.name;
+
+document.getElementById("feePaymentDate").value=p.date;
+document.getElementById("feePaymentAmount").value=p.amount;
+document.getElementById("feePaymentMode").value=p.mode||"Cash";
+document.getElementById("feeReceipt").value=p.receipt||"";
+
+updateFeeModalInfo();
+
+document.getElementById("feeModal").style.display="flex";
+
+}
+
+function deleteFeePayment(paymentId,studentId,classNo,stream){
+
+let p=getFees().find(
+x=>Number(x.id)===Number(paymentId)
+);
+
+if(!p)return;
+
+if(!confirm(
+"Delete this fee payment?\n\n₹"+
+Number(p.amount).toLocaleString("en-IN")+
+" on "+formatDate(p.date)
+))return;
+
+saveFees(
+getFees().filter(
+x=>Number(x.id)!==Number(paymentId)
+)
+);
+
+updateDashboard();
+
+openStudentsData(
+"fees",
+classNo,
+stream||""
+);
+
+}
+
+function closeFeeModal(){
+
+document.getElementById("feeModal").style.display="none";
+
+editingFeeId=null;
+feeStudentId=null;
+
+}
+
+/* =====================================================
+   ATTENDANCE MODULE
+===================================================== */
+
+let attendanceTemp={};
+let attendanceDateValue=today();
+
+function getAttendanceRecord(studentId,date){
+
+return getAttendance().find(function(x){
+
+return Number(x.studentId)===Number(studentId)
+&&x.date===date;
+
+});
+
+}
+
+function getClassTodayAttendance(students){
+
+let records=getAttendance();
+
+let ids=students.map(
+s=>Number(s.id)
+);
+
+let date=window.attendanceDate||today();
+
+let r=records.filter(x=>
+x.date===date &&
+ids.includes(Number(x.studentId))
+);
+
+return {
+
+present:r.filter(x=>x.status==="Present").length,
+
+absent:r.filter(x=>x.status==="Absent").length,
+
+leave:r.filter(x=>x.status==="Leave").length
+
+};
+
+}
+
+function loadAttendanceTable(){
+
+let date=document.getElementById("attendanceDate")
+?document.getElementById("attendanceDate").value
+:today();
+
+window.attendanceDate=date;
+
+let students=window.currentStream
+?getStreamStudents(window.currentClassNo,window.currentStream)
+:getClassStudents(window.currentClassNo);
+
+students.forEach(function(s){
+
+let r=getAttendanceRecord(s.id,date);
+
+if(r){
+attendanceTemp[s.id]=r.status;
+}else{
+delete attendanceTemp[s.id];
+}
+
+});
+
+let search=document.getElementById("studentSearch");
+
+if(search&&search.value.trim()){
+filterStudentTable(
+"attendance",
+window.currentClassNo,
+window.currentStream
+);
+}else{
+
+document.getElementById("studentTableArea").innerHTML=
+buildStudentTable(
+"attendance",
+window.currentClassNo,
+window.currentStream,
+students
+);
+
+}
+
+}
+
+function setTableAttendance(studentId,status){
+
+let date=document.getElementById("attendanceDate")
+?document.getElementById("attendanceDate").value
+:today();
+
+window.attendanceDate=date;
+
+attendanceTemp[studentId]=status;
+
+let students=window.currentStream
+?getStreamStudents(window.currentClassNo,window.currentStream)
+:getClassStudents(window.currentClassNo);
+
+let search=document.getElementById("studentSearch");
+
+if(search&&search.value.trim()){
+filterStudentTable(
+"attendance",
+window.currentClassNo,
+window.currentStream
+);
+}else{
+
+document.getElementById("studentTableArea").innerHTML=
+buildStudentTable(
+"attendance",
+window.currentClassNo,
+window.currentStream,
+students
+);
+
+}
+
+}
+
+function markAllAttendance(status){
+
+let date=document.getElementById("attendanceDate")
+?document.getElementById("attendanceDate").value
+:today();
+
+if(!date){
+alert("Select Attendance Date");
+return;
+}
+
+window.attendanceDate=date;
+
+let students=window.currentStream
+?getStreamStudents(window.currentClassNo,window.currentStream)
+:getClassStudents(window.currentClassNo);
+
+students.forEach(function(s){
+attendanceTemp[s.id]=status;
+});
+
+let search=document.getElementById("studentSearch");
+
+if(search&&search.value.trim()){
+filterStudentTable(
+"attendance",
+window.currentClassNo,
+window.currentStream
+);
+}else{
+
+document.getElementById("studentTableArea").innerHTML=
+buildStudentTable(
+"attendance",
+window.currentClassNo,
+window.currentStream,
+students
+);
+
+}
+
+}
+
+function clearAttendanceMarks(){
+
+let students=window.currentStream
+?getStreamStudents(window.currentClassNo,window.currentStream)
+:getClassStudents(window.currentClassNo);
+
+students.forEach(function(s){
+delete attendanceTemp[s.id];
+});
+
+loadAttendanceTable();
+
+}
+
+function saveClassAttendance(){
+
+let date=document.getElementById("attendanceDate")
+?document.getElementById("attendanceDate").value
+:today();
+
+if(!date){
+alert("Select Attendance Date");
+return;
+}
+
+let students=window.currentStream
+?getStreamStudents(window.currentClassNo,window.currentStream)
+:getClassStudents(window.currentClassNo);
+
+let data=getAttendance();
+
+students.forEach(function(s){
+
+let status=attendanceTemp[s.id];
+
+if(!status)return;
+
+let existing=data.find(function(x){
+
+return Number(x.studentId)===Number(s.id)
+&&x.date===date;
+
+});
+
+if(existing){
+
+existing.status=status;
+
+}else{
+
+data.push({
+
+id:Date.now()+Math.floor(Math.random()*100000),
+studentId:Number(s.id),
+date:date,
+status:status
+
+});
+
+}
+
+});
+
+saveAttendance(data);
+
+alert("Attendance saved successfully!");
+
+updateDashboard();
+
+loadAttendanceTable();
+
+}
+
+/* SINGLE ATTENDANCE */
+
+let singleAttendanceStudentId=null;
+let singleAttendanceClassNo=null;
+let singleAttendanceStream="";
+let singleAttendanceStatus=null;
+
+function openAttendanceModal(studentId,classNo,stream){
+
+let s=getStudents().find(
+x=>Number(x.id)===Number(studentId)
+);
+
+if(!s)return;
+
+singleAttendanceStudentId=studentId;
+singleAttendanceClassNo=classNo;
+singleAttendanceStream=stream||"";
+
+document.getElementById("attendanceModalTitle").innerText=
+"Attendance";
+
+document.getElementById("attendanceStudentName").innerText=
+"Student: "+s.name;
+
+document.getElementById("attendanceModalDate").value=
+today();
+
+loadSingleAttendanceStatus();
+
+document.getElementById("attendanceModal").style.display="flex";
+
+}
+
+function loadSingleAttendanceStatus(){
+
+let date=document.getElementById("attendanceModalDate").value;
+
+let r=getAttendanceRecord(
+singleAttendanceStudentId,
+date
+);
+
+singleAttendanceStatus=r?r.status:null;
+
+updateSingleAttendanceButtons();
+
+}
+
+function setSingleAttendance(status){
+
+singleAttendanceStatus=status;
+
+updateSingleAttendanceButtons();
+
+}
+
+function updateSingleAttendanceButtons(){
+
+["Present","Absent","Leave"].forEach(function(status){
+
+let id=status==="Present"
+?"singlePresentBtn"
+:status==="Absent"
+?"singleAbsentBtn"
+:"singleLeaveBtn";
+
+let btn=document.getElementById(id);
+
+if(btn){
+
+btn.classList.toggle(
+"status-active",
+singleAttendanceStatus===status
+);
+
+}
+
+});
+
+}
+
+function saveSingleAttendance(){
+
+let date=document.getElementById("attendanceModalDate").value;
+
+if(!date){
+alert("Select Date");
+return;
+}
+
+if(!singleAttendanceStatus){
+alert("Select Present, Absent or Leave");
+return;
+}
+
+let data=getAttendance();
+
+let existing=data.find(function(x){
+
+return Number(x.studentId)===Number(singleAttendanceStudentId)
+&&x.date===date;
+
+});
+
+if(existing){
+
+existing.status=singleAttendanceStatus;
+
+}else{
+
+data.push({
+
+id:Date.now(),
+studentId:Number(singleAttendanceStudentId),
+date:date,
+status:singleAttendanceStatus
+
+});
+
+}
+
+saveAttendance(data);
+
+closeAttendanceModal();
+
+updateDashboard();
+
+openStudentsData(
+"attendance",
+singleAttendanceClassNo,
+singleAttendanceStream
+);
+
+}
+
+function closeAttendanceModal(){
+
+document.getElementById("attendanceModal").style.display="none";
+
+singleAttendanceStudentId=null;
+singleAttendanceStatus=null;
+
+}
+
+function openAttendanceHistory(studentId,classNo,stream){
+
+let s=getStudents().find(
+x=>Number(x.id)===Number(studentId)
+);
+
+if(!s)return;
+
+let records=getAttendanceForStudent(studentId)
+.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
+let html=`
+
+<button class="back-btn"
+onclick="openStudentsData('attendance',${classNo},'${stream||""}')">
+← Back
+</button>
+
+<div class="card">
+
+<div class="card-header">
+
+<div>
+
+<h3>Attendance History</h3>
+
+<p style="color:#777;font-size:13px">
+${escapeHtml(s.name)}
+</p>
+
+</div>
+
+</div>
+
+`;
+
+if(!records.length){
+
+html+=`
+<div class="empty">
+No attendance records found.
+</div>
+`;
+
+}else{
+
+html+=`
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Date</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+`;
+
+records.forEach(function(r){
+
+let cls=
+r.status==="Present"
+?"green"
+:r.status==="Absent"
+?"red"
+:"yellow";
+
+html+=`
+
+<tr>
+
+<td>
+${formatDate(r.date)}
+</td>
+
+<td>
+<span class="badge ${cls}">
+${r.status==="Present"?"🟢":r.status==="Absent"?"🔴":"🟡"}
+${r.status}
+</span>
+</td>
+
+<td>
+
+<div class="action-buttons">
+
+<button class="edit-btn"
+onclick="openAttendanceEdit(${r.id},${studentId},${classNo},'${stream||""}')">
+✏️ Edit
+</button>
+
+<button class="delete-btn"
+onclick="deleteAttendanceRecord(${r.id},${studentId},${classNo},'${stream||""}')">
+🗑️ Delete
+</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+html+=`
+
+</tbody>
+</table>
+</div>
+
+`;
+
+}
+
+html+=`
+
+</div>
+
+`;
+
+document.getElementById("otherPage").innerHTML=html;
+
+}
+
+function openAttendanceEdit(recordId,studentId,classNo,stream){
+
+let r=getAttendance().find(
+x=>Number(x.id)===Number(recordId)
+);
+
+let s=getStudents().find(
+x=>Number(x.id)===Number(studentId)
+);
+
+if(!r||!s)return;
+
+singleAttendanceStudentId=studentId;
+singleAttendanceClassNo=classNo;
+singleAttendanceStream=stream||"";
+singleAttendanceStatus=r.status;
+
+document.getElementById("attendanceModalTitle").innerText=
+"Edit Attendance";
+
+document.getElementById("attendanceStudentName").innerText=
+"Student: "+s.name;
+
+document.getElementById("attendanceModalDate").value=r.date;
+
+updateSingleAttendanceButtons();
+
+document.getElementById("attendanceModal").style.display="flex";
+
+}
+
+function deleteAttendanceRecord(recordId,studentId,classNo,stream){
+
+if(!confirm("Delete this attendance record?"))return;
+
+saveAttendance(
+getAttendance().filter(
+x=>Number(x.id)!==Number(recordId)
+)
+);
+
+openAttendanceHistory(
+studentId,
+classNo,
+stream||""
+);
+
+updateDashboard();
+
+}
+
+/* =====================================================
+   EXAMS
+===================================================== */
 
 function getExamForStudent(studentId){
 
@@ -2112,9 +2972,7 @@ return Number(e.maths||0)
 }
 
 function getExamPercentage(e){
-
 return getExamTotal(e)/5;
-
 }
 
 function openExamModal(studentId,classNo,stream){
@@ -2167,7 +3025,6 @@ function saveExam(){
 let studentId=Number(window.examStudentId);
 
 let examName=document.getElementById("examName").value.trim();
-
 let examDate=document.getElementById("examDate").value;
 
 let maths=Number(document.getElementById("examMaths").value)||0;
@@ -2177,26 +3034,20 @@ let hindi=Number(document.getElementById("examHindi").value)||0;
 let social=Number(document.getElementById("examSocial").value)||0;
 
 if(!examName){
-
 alert("Enter Exam Name");
 return;
-
 }
 
 if(!examDate){
-
 alert("Select Exam Date");
 return;
-
 }
 
 let marks=[maths,science,english,hindi,social];
 
 if(marks.some(x=>x<0||x>100)){
-
 alert("Each subject marks must be between 0 and 100");
 return;
-
 }
 
 let data=getExams();
@@ -2224,21 +3075,13 @@ e.social=social;
 data.push({
 
 id:Date.now(),
-
 studentId:studentId,
-
 examName:examName,
-
 examDate:examDate,
-
 maths:maths,
-
 science:science,
-
 english:english,
-
 hindi:hindi,
-
 social:social
 
 });
@@ -2259,9 +3102,7 @@ window.examStream
 
 function deleteExam(examId,classNo,stream){
 
-if(!confirm(
-"Delete this exam result?"
-))return;
+if(!confirm("Delete this exam result?"))return;
 
 saveExams(
 getExams().filter(
@@ -2280,12 +3121,13 @@ stream||""
 function closeExamModal(){
 
 document.getElementById("examModal").style.display="none";
-
 window.editingExamId=null;
 
 }
 
-/* DASHBOARD */
+/* =========================
+   DASHBOARD
+========================= */
 
 function updateDashboard(){
 
@@ -2356,7 +3198,9 @@ x=>x.status==="Leave"
 
 }
 
-/* OTHER PAGES */
+/* =========================
+   OTHER PAGES
+========================= */
 
 function getOtherPage(page){
 
@@ -2644,7 +3488,9 @@ return "";
 
 }
 
-/* SETTINGS */
+/* =========================
+   SETTINGS
+========================= */
 
 function saveSettings(){
 
@@ -2657,38 +3503,24 @@ document.getElementById("settingsEmail").value.trim();
 localStorage.setItem("schoolName",school);
 localStorage.setItem("schoolEmail",email);
 
-document.getElementById("displaySchool").innerText=
-school;
+document.getElementById("displaySchool").innerText=school;
 
 alert("Settings saved successfully!");
 
 }
 
-/* FORMAT */
+/* =========================
+   STARTUP
+========================= */
 
-function formatDate(date){
+window.addEventListener("load",function(){
 
-if(!date)return "-";
+/*
+  Purane localStorage ka data automatically
+  preserve rahega.
+*/
 
-let p=date.split("-");
-
-if(p.length!==3)return date;
-
-return p[2]+"-"+p[1]+"-"+p[0];
-
-}
-
-function escapeHtml(text){
-
-return String(text??"")
-
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
-}
+});
 
 </script>
 
