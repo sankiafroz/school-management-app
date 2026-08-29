@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SchoolHub</title>
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#f4f7fb;color:#172033}
@@ -16,15 +15,12 @@ button{cursor:pointer}
 .login-subtitle{text-align:center;color:#777;margin:7px 0 25px}
 .form-group{margin-bottom:15px}
 .form-group label{display:block;font-size:14px;font-weight:bold;margin-bottom:7px}
-input,select,textarea{width:100%;border:1px solid #dce2eb;border-radius:11px;padding:12px 13px;font-size:15px;outline:none;background:#fff}
-input,select{height:47px}
-textarea{min-height:100px;resize:vertical}
+input,select{width:100%;height:47px;border:1px solid #dce2eb;border-radius:11px;padding:0 13px;font-size:15px;outline:none;background:#fff}
 input[type=file]{padding:10px;height:auto}
 .btn{width:100%;height:48px;border:0;border-radius:11px;font-size:16px;font-weight:bold}
 .btn-primary{background:#1769ff;color:#fff}
 .btn-outline{background:#fff;color:#1769ff;border:1px solid #1769ff;margin-top:10px}
 .demo{margin-top:18px;background:#f3f6fb;padding:13px;border-radius:12px;font-size:13px;line-height:1.6}
-
 .app{display:none;min-height:100vh}
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:250px;background:#101828;color:#fff;padding:20px 15px;z-index:100;overflow-y:auto}
 .brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:bold;margin-bottom:22px}
@@ -55,14 +51,14 @@ input[type=file]{padding:10px;height:auto}
 .small-btn{border:0;background:#1769ff;color:#fff;padding:9px 13px;border-radius:9px;font-weight:bold}
 .edit-btn{background:#eef4ff;color:#1769ff;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
 .delete-btn{background:#feecec;color:#dc2626;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
-.profile-btn{background:#ecfdf3;color:#15803d;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
+.green-btn{background:#e6f8ed;color:#15803d;border:0;padding:7px 10px;border-radius:7px;font-weight:bold}
 .two-column{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .notice{padding:15px 20px;border-bottom:1px solid #edf0f4}
 .notice strong{display:block;margin-bottom:5px}
 .notice span{color:#777;font-size:12px}
 .table-container{overflow-x:auto}
-table{width:100%;min-width:850px;border-collapse:collapse}
-th,td{padding:14px 18px;text-align:left;border-bottom:1px solid #edf0f4;font-size:14px}
+table{width:100%;min-width:1100px;border-collapse:collapse}
+th,td{padding:14px 18px;text-align:left;border-bottom:1px solid #edf0f4;font-size:14px;vertical-align:top}
 th{background:#fafbfd;color:#667085}
 .badge{padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
 .green{background:#e6f8ed;color:#15803d}
@@ -94,31 +90,32 @@ th{background:#fafbfd;color:#667085}
 .search-box{display:flex;gap:10px;padding:18px;border-bottom:1px solid #edf0f4}
 .search-box input{flex:1}
 .modal-bg{display:none;position:fixed;inset:0;background:#0008;z-index:300;align-items:center;justify-content:center;padding:20px}
-.modal{width:100%;max-width:780px;background:#fff;border-radius:20px;padding:25px;max-height:92vh;overflow-y:auto}
+.modal{width:100%;max-width:800px;background:#fff;border-radius:20px;padding:25px;max-height:92vh;overflow-y:auto}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .close-btn{border:0;width:35px;height:35px;border-radius:50%;font-size:20px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .empty{padding:35px;text-align:center;color:#777}
 .action-buttons{display:flex;gap:7px;flex-wrap:wrap}
 .student-photo{width:45px;height:45px;border-radius:50%;object-fit:cover;background:#eef4ff;display:block}
-.teacher-photo{width:50px;height:50px;border-radius:50%;object-fit:cover;background:#eef4ff}
-.profile-photo{width:130px;height:130px;border-radius:18px;object-fit:cover;background:#eef4ff;border:1px solid #dce2eb}
+.profile-photo{width:110px;height:110px;border-radius:18px;object-fit:cover;background:#eef4ff;border:1px solid #dce2eb}
 .photo-wrap{text-align:center;margin-bottom:15px}
-.photo-placeholder{width:130px;height:130px;border-radius:18px;background:#eef4ff;display:flex;align-items:center;justify-content:center;margin:auto;font-size:45px;color:#1769ff}
+.photo-placeholder{width:110px;height:110px;border-radius:18px;background:#eef4ff;display:flex;align-items:center;justify-content:center;margin:auto;font-size:35px;color:#1769ff}
 .subject-row{display:grid;grid-template-columns:1.3fr .8fr .8fr auto;gap:8px;margin-bottom:8px;align-items:center}
 .subject-list{background:#f8faff;padding:14px;border-radius:12px;margin:10px 0 18px}
 .section-hidden{display:none!important}
-.homework-card{background:#fff;border:1px solid #e5eaf1;border-radius:15px;padding:18px;margin-bottom:12px}
-.homework-card h3{margin-bottom:7px}
-.homework-meta{display:flex;gap:12px;flex-wrap:wrap;color:#667085;font-size:13px;margin-bottom:10px}
-.profile-box{padding:22px}
-.profile-head{display:flex;gap:20px;align-items:center;padding-bottom:20px;border-bottom:1px solid #edf0f4;margin-bottom:18px}
-.profile-large{width:120px;height:120px;border-radius:20px;object-fit:cover;background:#eef4ff}
-.profile-details{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.detail-item{background:#f8faff;padding:13px;border-radius:10px}
-.detail-item small{display:block;color:#777;margin-bottom:4px}
-.detail-item strong{display:block}
-.teacher-card{display:flex;align-items:center;gap:15px}
+.profile-card{display:grid;grid-template-columns:130px 1fr;gap:20px;padding:20px}
+.big-student-photo{width:120px;height:140px;border-radius:15px;object-fit:cover;background:#eef4ff}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.info-item{background:#f8faff;padding:12px;border-radius:10px}
+.info-item small{display:block;color:#777;margin-bottom:5px}
+.info-item strong{font-size:14px}
+.report-actions{display:flex;gap:10px;flex-wrap:wrap;padding:20px}
+.report-section{margin-bottom:20px}
+.report-title{padding:15px 20px;background:#f8faff;font-weight:bold}
+.homework-filter{padding:20px;background:#f8faff;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px}
+.homework-item{padding:18px;border-bottom:1px solid #edf0f4}
+.homework-item h4{margin-bottom:6px}
+.homework-item p{color:#555;font-size:14px}
 @media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){
 .sidebar{transform:translateX(-100%);transition:.25s}
@@ -130,12 +127,12 @@ th{background:#fafbfd;color:#667085}
 .stats{grid-template-columns:1fr 1fr}
 .two-column{grid-template-columns:1fr}
 .user-name{display:none}
-.class-summary,.stream-summary{gap:10px;font-size:13px}
 .form-grid{grid-template-columns:1fr}
 .search-box{flex-direction:column}
 .subject-row{grid-template-columns:1fr 1fr}
-.profile-details{grid-template-columns:1fr}
-.profile-head{align-items:flex-start;flex-direction:column}
+.profile-card{grid-template-columns:1fr;text-align:center}
+.info-grid{grid-template-columns:1fr 1fr}
+.homework-filter{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -224,7 +221,6 @@ SchoolHub
 <div class="content">
 
 <div id="dashboardPage">
-
 <div class="welcome">
 <h2>Welcome 👋</h2>
 <p>Manage your school from one place.</p>
@@ -235,17 +231,14 @@ SchoolHub
 <div class="stat-number" id="dashStudents">0</div>
 <div class="stat-label">Total Students</div>
 </div>
-
 <div class="stat-card">
 <div class="stat-number" id="dashTeachers">0</div>
 <div class="stat-label">Total Teachers</div>
 </div>
-
 <div class="stat-card">
 <div class="stat-number" id="dashAttendance">0%</div>
 <div class="stat-label">Today's Attendance</div>
 </div>
-
 <div class="stat-card">
 <div class="stat-number" id="dashFees">₹0</div>
 <div class="stat-label">Fee Collection</div>
@@ -253,27 +246,14 @@ SchoolHub
 </div>
 
 <div class="two-column">
-
 <div class="card">
 <div class="card-header">
 <h3>Recent Notices</h3>
 <button class="small-btn" onclick="showPage('notices')">View</button>
 </div>
-
-<div class="notice">
-<strong>Independence Day Holiday</strong>
-<span>School holiday notice</span>
-</div>
-
-<div class="notice">
-<strong>Parent Teacher Meeting</strong>
-<span>PTM scheduled Saturday</span>
-</div>
-
-<div class="notice">
-<strong>Annual Examination</strong>
-<span>Exam schedule published</span>
-</div>
+<div class="notice"><strong>Independence Day Holiday</strong><span>School holiday notice</span></div>
+<div class="notice"><strong>Parent Teacher Meeting</strong><span>PTM scheduled Saturday</span></div>
+<div class="notice"><strong>Annual Examination</strong><span>Exam schedule published</span></div>
 </div>
 
 <div class="card">
@@ -281,23 +261,10 @@ SchoolHub
 <h3>Today's Attendance</h3>
 <button class="small-btn" onclick="showPage('attendance')">View</button>
 </div>
-
-<div class="notice">
-<strong>Present</strong>
-<span id="dashPresent">0 Students</span>
+<div class="notice"><strong>Present</strong><span id="dashPresent">0 Students</span></div>
+<div class="notice"><strong>Absent</strong><span id="dashAbsent">0 Students</span></div>
+<div class="notice"><strong>Leave</strong><span id="dashLeave">0 Students</span></div>
 </div>
-
-<div class="notice">
-<strong>Absent</strong>
-<span id="dashAbsent">0 Students</span>
-</div>
-
-<div class="notice">
-<strong>Leave</strong>
-<span id="dashLeave">0 Students</span>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -314,32 +281,11 @@ SchoolHub
 <h2>Register New School</h2>
 <button class="close-btn" onclick="closeRegister()">×</button>
 </div>
-
-<div class="form-group">
-<label>School Name</label>
-<input id="regSchoolName" placeholder="Enter school name">
-</div>
-
-<div class="form-group">
-<label>School Email</label>
-<input id="regSchoolEmail" type="email" placeholder="school@example.com">
-</div>
-
-<div class="form-group">
-<label>Mobile Number</label>
-<input id="regSchoolMobile" placeholder="Enter mobile number">
-</div>
-
-<div class="form-group">
-<label>City</label>
-<input id="regSchoolCity" placeholder="Enter city">
-</div>
-
-<div class="form-group">
-<label>Create Password</label>
-<input id="regSchoolPassword" type="password" placeholder="Minimum 6 characters">
-</div>
-
+<div class="form-group"><label>School Name</label><input id="regSchoolName"></div>
+<div class="form-group"><label>School Email</label><input id="regSchoolEmail" type="email"></div>
+<div class="form-group"><label>Mobile Number</label><input id="regSchoolMobile"></div>
+<div class="form-group"><label>City</label><input id="regSchoolCity"></div>
+<div class="form-group"><label>Create Password</label><input id="regSchoolPassword" type="password"></div>
 <button class="btn btn-primary" onclick="registerSchool()">Register School</button>
 </div>
 </div>
@@ -347,7 +293,6 @@ SchoolHub
 <!-- STUDENT MODAL -->
 <div class="modal-bg" id="studentModal">
 <div class="modal">
-
 <div class="modal-header">
 <h2 id="studentModalTitle">Add Student</h2>
 <button class="close-btn" onclick="closeStudentModal()">×</button>
@@ -363,97 +308,31 @@ SchoolHub
 </div>
 
 <div class="form-grid">
-
-<div class="form-group">
-<label>Student Name *</label>
-<input id="studentName">
+<div class="form-group"><label>Student Name *</label><input id="studentName"></div>
+<div class="form-group"><label>Father Name *</label><input id="fatherName"></div>
+<div class="form-group"><label>Mother Name</label><input id="motherName"></div>
+<div class="form-group"><label>Mobile *</label><input id="studentMobile"></div>
+<div class="form-group"><label>Gender *</label>
+<select id="studentGender"><option value="">Select Gender</option><option>Boy</option><option>Girl</option></select>
 </div>
-
-<div class="form-group">
-<label>Father Name *</label>
-<input id="fatherName">
-</div>
-
-<div class="form-group">
-<label>Mother Name</label>
-<input id="motherName">
-</div>
-
-<div class="form-group">
-<label>Mobile *</label>
-<input id="studentMobile">
-</div>
-
-<div class="form-group">
-<label>Gender *</label>
-<select id="studentGender">
-<option value="">Select Gender</option>
-<option value="Boy">Boy</option>
-<option value="Girl">Girl</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Date of Birth</label>
-<input id="studentDOB" type="date" onchange="calculateStudentAge()">
-</div>
-
-<div class="form-group">
-<label>Age</label>
-<input id="studentAge" readonly>
-</div>
-
-<div class="form-group">
-<label>Class *</label>
+<div class="form-group"><label>Date of Birth</label><input id="studentDOB" type="date" onchange="calculateStudentAge()"></div>
+<div class="form-group"><label>Age</label><input id="studentAge" readonly></div>
+<div class="form-group"><label>Class *</label>
 <select id="studentClass">
 <option value="">Select Class</option>
-<option value="1">Class 1</option>
-<option value="2">Class 2</option>
-<option value="3">Class 3</option>
-<option value="4">Class 4</option>
-<option value="5">Class 5</option>
-<option value="6">Class 6</option>
-<option value="7">Class 7</option>
-<option value="8">Class 8</option>
-<option value="9">Class 9</option>
-<option value="10">Class 10</option>
-<option value="11">Class 11</option>
-<option value="12">Class 12</option>
+<option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+<option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+<option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+<option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
 </select>
 </div>
-
-<div class="form-group" id="studentSectionGroup">
-<label>Section</label>
-<select id="studentSection">
-<option value="">No Section</option>
-</select>
+<div class="form-group" id="studentSectionGroup"><label>Section</label><select id="studentSection"><option value="">No Section</option></select></div>
+<div class="form-group"><label>Stream</label>
+<select id="studentStream"><option value="">Not Applicable</option><option>Science</option><option>Commerce</option><option>Arts</option></select>
 </div>
-
-<div class="form-group">
-<label>Stream</label>
-<select id="studentStream">
-<option value="">Not Applicable</option>
-<option value="Science">Science</option>
-<option value="Commerce">Commerce</option>
-<option value="Arts">Arts</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Caste</label>
-<input id="studentCaste">
-</div>
-
-<div class="form-group">
-<label>Religion</label>
-<input id="studentReligion">
-</div>
-
-<div class="form-group">
-<label>Total Fee</label>
-<input id="studentFee" type="number" value="35000">
-</div>
-
+<div class="form-group"><label>Caste</label><input id="studentCaste"></div>
+<div class="form-group"><label>Religion</label><input id="studentReligion"></div>
+<div class="form-group"><label>Total Fee</label><input id="studentFee" type="number" value="35000"></div>
 </div>
 
 <br>
@@ -461,24 +340,53 @@ SchoolHub
 </div>
 </div>
 
-<!-- STUDENT PROFILE -->
-<div class="modal-bg" id="studentProfileModal">
+<!-- FEE MODAL -->
+<div class="modal-bg" id="feeModal">
 <div class="modal">
-<div class="modal-header">
-<h2>Student Profile</h2>
-<button class="close-btn" onclick="closeStudentProfile()">×</button>
+<div class="modal-header"><h2>Add Fee Payment</h2><button class="close-btn" onclick="closeFeeModal()">×</button></div>
+<div class="form-grid">
+<div class="form-group"><label>Student</label><input id="feeStudentName" readonly></div>
+<div class="form-group"><label>Payment Amount *</label><input id="feeAmount" type="number"></div>
+<div class="form-group"><label>Payment Date *</label><input id="feeDate" type="date"></div>
+<div class="form-group"><label>Payment Mode</label><select id="feeMode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option></select></div>
+<div class="form-group"><label>Receipt Number</label><input id="feeReceipt"></div>
 </div>
-<div id="studentProfileContent"></div>
+<button class="btn btn-primary" onclick="saveFeePayment()">Save Payment</button>
+</div>
+</div>
+
+<!-- ATTENDANCE MODAL -->
+<div class="modal-bg" id="attendanceModal">
+<div class="modal">
+<div class="modal-header"><h2 id="attendanceModalTitle">Attendance</h2><button class="close-btn" onclick="closeAttendanceModal()">×</button></div>
+<div class="form-group"><label>Date</label><input id="attendanceDate" type="date"></div>
+<div class="card"><div class="card-header"><h3>Attendance Status</h3><button class="small-btn" onclick="markAllAttendancePresent()">🟢 Mark Present</button></div><div id="attendanceStudentList"></div></div>
+<button class="btn btn-primary" onclick="saveAttendanceData()">Save Attendance</button>
+</div>
+</div>
+
+<!-- EXAM MODAL -->
+<div class="modal-bg" id="examModal">
+<div class="modal">
+<div class="modal-header"><h2 id="examModalTitle">Add Exam Result</h2><button class="close-btn" onclick="closeExamModal()">×</button></div>
+<div class="form-group"><label>Student</label><input id="examStudentName" readonly></div>
+<div class="form-grid">
+<div class="form-group"><label>Exam Name *</label><input id="examName" placeholder="Annual Examination"></div>
+<div class="form-group"><label>Exam Date *</label><input id="examDate" type="date"></div>
+</div>
+<div class="subject-list">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><strong>Subjects</strong><button class="small-btn" onclick="addSubjectRow()">+ Add Subject</button></div>
+<div id="subjectRows"></div>
+</div>
+<div id="examSummary" style="background:#f8faff;padding:15px;border-radius:12px;margin-bottom:15px"></div>
+<button class="btn btn-primary" onclick="saveExam()">Save Result</button>
 </div>
 </div>
 
 <!-- TEACHER MODAL -->
 <div class="modal-bg" id="teacherModal">
 <div class="modal">
-<div class="modal-header">
-<h2 id="teacherModalTitle">Add Teacher</h2>
-<button class="close-btn" onclick="closeTeacherModal()">×</button>
-</div>
+<div class="modal-header"><h2 id="teacherModalTitle">Add Teacher</h2><button class="close-btn" onclick="closeTeacherModal()">×</button></div>
 
 <div class="photo-wrap">
 <div id="teacherPhotoPreview" class="photo-placeholder">👨‍🏫</div>
@@ -490,63 +398,22 @@ SchoolHub
 </div>
 
 <div class="form-grid">
-
-<div class="form-group">
-<label>Teacher Name *</label>
-<input id="teacherName">
-</div>
-
-<div class="form-group">
-<label>Employee ID *</label>
-<input id="teacherEmployeeId">
-</div>
-
-<div class="form-group">
-<label>Mobile *</label>
-<input id="teacherMobile">
-</div>
-
-<div class="form-group">
-<label>Email</label>
-<input id="teacherEmail" type="email">
-</div>
-
-<div class="form-group">
-<label>Subject *</label>
-<input id="teacherSubject" placeholder="Mathematics">
-</div>
-
-<div class="form-group">
-<label>Class</label>
+<div class="form-group"><label>Teacher Name *</label><input id="teacherName"></div>
+<div class="form-group"><label>Employee ID *</label><input id="teacherEmployeeId"></div>
+<div class="form-group"><label>Mobile *</label><input id="teacherMobile"></div>
+<div class="form-group"><label>Email</label><input id="teacherEmail"></div>
+<div class="form-group"><label>Subject *</label><input id="teacherSubject"></div>
+<div class="form-group"><label>Class *</label>
 <select id="teacherClass">
-<option value="">All / Not Assigned</option>
-<option value="1">Class 1</option>
-<option value="2">Class 2</option>
-<option value="3">Class 3</option>
-<option value="4">Class 4</option>
-<option value="5">Class 5</option>
-<option value="6">Class 6</option>
-<option value="7">Class 7</option>
-<option value="8">Class 8</option>
-<option value="9">Class 9</option>
-<option value="10">Class 10</option>
-<option value="11">Class 11</option>
-<option value="12">Class 12</option>
+<option value="">Select Class</option>
+<option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+<option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+<option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+<option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
 </select>
 </div>
-
-<div class="form-group">
-<label>Section</label>
-<select id="teacherSection">
-<option value="">All / Not Assigned</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Qualification</label>
-<input id="teacherQualification" placeholder="B.Ed / M.Sc etc.">
-</div>
-
+<div class="form-group"><label>Section</label><input id="teacherSection" placeholder="A / B / C"></div>
+<div class="form-group"><label>Stream</label><select id="teacherStream"><option value="">Not Applicable</option><option>Science</option><option>Commerce</option><option>Arts</option></select></div>
 </div>
 
 <br>
@@ -554,2631 +421,834 @@ SchoolHub
 </div>
 </div>
 
-<!-- FEE MODAL -->
-<div class="modal-bg" id="feeModal">
-<div class="modal">
-<div class="modal-header">
-<h2>Add Fee Payment</h2>
-<button class="close-btn" onclick="closeFeeModal()">×</button>
-</div>
-
-<div class="form-grid">
-<div class="form-group">
-<label>Student</label>
-<input id="feeStudentName" readonly>
-</div>
-
-<div class="form-group">
-<label>Payment Amount *</label>
-<input id="feeAmount" type="number">
-</div>
-
-<div class="form-group">
-<label>Payment Date *</label>
-<input id="feeDate" type="date">
-</div>
-
-<div class="form-group">
-<label>Payment Mode</label>
-<select id="feeMode">
-<option>Cash</option>
-<option>UPI</option>
-<option>Bank Transfer</option>
-<option>Cheque</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Receipt Number</label>
-<input id="feeReceipt">
-</div>
-</div>
-
-<button class="btn btn-primary" onclick="saveFeePayment()">Save Payment</button>
-</div>
-</div>
-
-<!-- ATTENDANCE MODAL -->
-<div class="modal-bg" id="attendanceModal">
-<div class="modal">
-<div class="modal-header">
-<h2 id="attendanceModalTitle">Attendance</h2>
-<button class="close-btn" onclick="closeAttendanceModal()">×</button>
-</div>
-
-<div class="form-group">
-<label>Date</label>
-<input id="attendanceDate" type="date">
-</div>
-
-<div class="card">
-<div class="card-header">
-<h3>Attendance Status</h3>
-</div>
-<div id="attendanceStudentList"></div>
-</div>
-
-<button class="btn btn-primary" onclick="saveAttendanceData()">Save Attendance</button>
-</div>
-</div>
-
-<!-- EXAM MODAL -->
-<div class="modal-bg" id="examModal">
-<div class="modal">
-<div class="modal-header">
-<h2 id="examModalTitle">Add Exam Result</h2>
-<button class="close-btn" onclick="closeExamModal()">×</button>
-</div>
-
-<div class="form-group">
-<label>Student</label>
-<input id="examStudentName" readonly>
-</div>
-
-<div class="form-grid">
-<div class="form-group">
-<label>Exam Name *</label>
-<input id="examName" placeholder="Annual Examination">
-</div>
-
-<div class="form-group">
-<label>Exam Date *</label>
-<input id="examDate" type="date">
-</div>
-</div>
-
-<div class="subject-list">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-<strong>Subjects</strong>
-<button class="small-btn" onclick="addSubjectRow()">+ Add Subject</button>
-</div>
-<div id="subjectRows"></div>
-</div>
-
-<div id="examSummary" style="background:#f8faff;padding:15px;border-radius:12px;margin-bottom:15px"></div>
-
-<button class="btn btn-primary" onclick="saveExam()">Save Result</button>
-</div>
-</div>
-
-<!-- HOMEWORK MODAL -->
-<div class="modal-bg" id="homeworkModal">
-<div class="modal">
-<div class="modal-header">
-<h2 id="homeworkModalTitle">Add Homework</h2>
-<button class="close-btn" onclick="closeHomeworkModal()">×</button>
-</div>
-
-<div class="form-grid">
-
-<div class="form-group">
-<label>Class *</label>
-<select id="homeworkClass" onchange="updateHomeworkSections()">
-<option value="">Select Class</option>
-<option value="1">Class 1</option>
-<option value="2">Class 2</option>
-<option value="3">Class 3</option>
-<option value="4">Class 4</option>
-<option value="5">Class 5</option>
-<option value="6">Class 6</option>
-<option value="7">Class 7</option>
-<option value="8">Class 8</option>
-<option value="9">Class 9</option>
-<option value="10">Class 10</option>
-<option value="11">Class 11</option>
-<option value="12">Class 12</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Section</label>
-<select id="homeworkSection">
-<option value="">All Sections</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Stream</label>
-<select id="homeworkStream">
-<option value="">Not Applicable</option>
-<option value="Science">Science</option>
-<option value="Commerce">Commerce</option>
-<option value="Arts">Arts</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Subject *</label>
-<input id="homeworkSubject" placeholder="Mathematics">
-</div>
-
-<div class="form-group">
-<label>Teacher *</label>
-<select id="homeworkTeacher">
-<option value="">Select Teacher</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Homework Date *</label>
-<input id="homeworkDate" type="date">
-</div>
-
-<div class="form-group">
-<label>Due Date</label>
-<input id="homeworkDueDate" type="date">
-</div>
-
-</div>
-
-<div class="form-group">
-<label>Homework / Assignment *</label>
-<textarea id="homeworkText" placeholder="Enter homework details..."></textarea>
-</div>
-
-<button class="btn btn-primary" onclick="saveHomeworkData()">Save Homework</button>
-</div>
-</div>
-
 <script>
-
-function today(){
-return new Date().toISOString().split("T")[0];
-}
+function today(){return new Date().toISOString().split("T")[0]}
 
 function getData(key){
-let data=localStorage.getItem(key);
-if(!data)return [];
-try{return JSON.parse(data)}catch(e){return []}
+let d=localStorage.getItem(key);
+if(!d)return[];
+try{return JSON.parse(d)}catch(e){return[]}
 }
-
-function setData(key,data){
-localStorage.setItem(key,JSON.stringify(data));
-}
-
+function setData(key,data){localStorage.setItem(key,JSON.stringify(data))}
 function getStudents(){return getData("schoolStudents")}
 function saveStudents(x){setData("schoolStudents",x)}
-
-function getTeachers(){return getData("schoolTeachers")}
-function saveTeachers(x){setData("schoolTeachers",x)}
-
 function getFees(){return getData("schoolFees")}
 function saveFees(x){setData("schoolFees",x)}
-
 function getAttendance(){return getData("schoolAttendance")}
 function saveAttendance(x){setData("schoolAttendance",x)}
-
 function getExams(){return getData("schoolExams")}
 function saveExams(x){setData("schoolExams",x)}
-
+function getSections(){return getData("schoolSections")}
+function saveSections(x){setData("schoolSections",x)}
+function getTeachers(){return getData("schoolTeachers")}
+function saveTeachers(x){setData("schoolTeachers",x)}
 function getHomework(){return getData("schoolHomework")}
 function saveHomework(x){setData("schoolHomework",x)}
 
-function getSections(){return getData("schoolSections")}
-function saveSections(x){setData("schoolSections",x)}
-
 function escapeHtml(text){
-return String(text??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+return String(text??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")
 }
-
 function formatDate(date){
-if(!date)return "-";
+if(!date)return"-";
 let p=date.split("-");
-return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:date;
+return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:date
 }
 
 /* LOGIN */
-
 function loginUser(){
-
 let email=document.getElementById("loginEmail").value.trim();
 let password=document.getElementById("loginPassword").value;
-
-if(!email||!password){
-alert("Please enter login details");
-return;
-}
+if(!email||!password){alert("Please enter login details");return}
 
 if(email==="admin@school.com"&&password==="123456"){
-openApplication("ABC Public School","School Administrator");
-return;
+openApplication("ABC Public School","School Administrator");return
 }
 
-if(email===localStorage.getItem("schoolEmail")&&
-password===localStorage.getItem("schoolPassword")){
-openApplication(localStorage.getItem("schoolName"),"School Administrator");
-return;
+if(email===localStorage.getItem("schoolEmail")&&password===localStorage.getItem("schoolPassword")){
+openApplication(localStorage.getItem("schoolName"),"School Administrator");return
 }
 
-let teacher=getTeachers().find(t=>
-(t.email===email||t.mobile===email)&&t.password===password
-);
-
-if(teacher){
-openApplication(
-localStorage.getItem("schoolName")||"ABC Public School",
-"Teacher - "+teacher.name
-);
-return;
+alert("Invalid Login Details.\n\nDemo:\nadmin@school.com\n123456")
 }
-
-alert("Invalid Login Details.");
-}
-
 function openApplication(school,role){
-
 document.getElementById("loginPage").style.display="none";
 document.getElementById("app").style.display="block";
-
 document.getElementById("displaySchool").innerText=school||"ABC Public School";
 document.getElementById("displayRole").innerText=role;
 document.getElementById("topUser").innerText=role;
-
-updateDashboard();
+updateDashboard()
 }
-
 function logoutUser(){
 document.getElementById("app").style.display="none";
-document.getElementById("loginPage").style.display="flex";
+document.getElementById("loginPage").style.display="flex"
 }
-
-function openRegister(){
-document.getElementById("registerModal").style.display="flex";
-}
-
-function closeRegister(){
-document.getElementById("registerModal").style.display="none";
-}
-
+function openRegister(){document.getElementById("registerModal").style.display="flex"}
+function closeRegister(){document.getElementById("registerModal").style.display="none"}
 function registerSchool(){
-
 let school=document.getElementById("regSchoolName").value.trim();
 let email=document.getElementById("regSchoolEmail").value.trim();
 let mobile=document.getElementById("regSchoolMobile").value.trim();
 let city=document.getElementById("regSchoolCity").value.trim();
 let password=document.getElementById("regSchoolPassword").value;
-
-if(!school||!email||!mobile||!city){
-alert("Please fill all fields");
-return;
-}
-
-if(password.length<6){
-alert("Password must be at least 6 characters");
-return;
-}
-
+if(!school||!email||!mobile||!city){alert("Please fill all fields");return}
+if(password.length<6){alert("Password must be at least 6 characters");return}
 localStorage.setItem("schoolName",school);
 localStorage.setItem("schoolEmail",email);
 localStorage.setItem("schoolMobile",mobile);
 localStorage.setItem("schoolCity",city);
 localStorage.setItem("schoolPassword",password);
-
 closeRegister();
 document.getElementById("loginEmail").value=email;
-
-alert("School Registered Successfully!");
-}
-
-/* DEMO STUDENTS */
-
-function createDemoStudents(){
-
-if(getStudents().length)return;
-
-let names=[
-"Rahul Sharma","Priya Singh","Arjun Kumar","Anjali Verma",
-"Rohit Gupta","Neha Sharma","Aman Khan","Simran Kaur",
-"Vikas Yadav","Pooja Meena","Aditya Singh","Kajal Sharma"
-];
-
-let fathers=[
-"Rakesh Sharma","Mahesh Singh","Suresh Kumar","Rajesh Verma",
-"Manoj Gupta","Ajay Sharma","Salim Khan","Harpreet Kaur",
-"Vijay Yadav","Ramesh Meena","Sunil Singh","Deepak Sharma"
-];
-
-let students=[];
-
-for(let i=0;i<names.length;i++){
-
-students.push({
-id:Date.now()+i,
-name:names[i],
-father:fathers[i],
-mother:"Mother Name",
-mobile:"98"+String(76543210-i),
-gender:i%2===0?"Boy":"Girl",
-dob:"",
-age:"",
-caste:"",
-religion:"",
-classNo:(i%10)+1,
-section:"",
-stream:"",
-fee:35000,
-photo:""
-});
-}
-
-saveStudents(students);
-
-let fees=students.map((s,i)=>({
-id:Date.now()+100+i,
-studentId:s.id,
-amount:i%3===0?35000:i%3===1?20000:28000,
-date:today(),
-mode:i%2===0?"Cash":"UPI",
-receipt:"REC-"+(1001+i)
-}));
-
-saveFees(fees);
-
-let att=students.map((s,i)=>({
-id:Date.now()+200+i,
-studentId:s.id,
-date:today(),
-status:i%4===1?"Absent":"Present"
-}));
-
-saveAttendance(att);
-}
-
-createDemoStudents();
-
-/* HELPERS */
-
-function getClassStudents(classNo){
-return getStudents().filter(s=>Number(s.classNo)===Number(classNo));
-}
-
-function getStreamStudents(classNo,stream){
-return getStudents().filter(s=>
-Number(s.classNo)===Number(classNo)&&s.stream===stream
-);
-}
-
-function getStudentPaid(id){
-return getFees()
-.filter(x=>Number(x.studentId)===Number(id))
-.reduce((a,x)=>a+Number(x.amount||0),0);
-}
-
-function getStudentPayments(id){
-return getFees()
-.filter(x=>Number(x.studentId)===Number(id));
-}
-
-function getAttendanceForStudent(id){
-return getAttendance().filter(x=>Number(x.studentId)===Number(id));
-}
-
-function getExamForStudent(id){
-let a=getExams().filter(x=>Number(x.studentId)===Number(id));
-return a.length?a[a.length-1]:null;
-}
-
-function getExamTotal(e){
-return (e.subjects||[]).reduce((a,x)=>a+Number(x.max||0),0);
-}
-
-function getExamObtained(e){
-return (e.subjects||[]).reduce((a,x)=>a+Number(x.obtained||0),0);
-}
-
-function getExamPercentage(e){
-let t=getExamTotal(e);
-return t?getExamObtained(e)/t*100:0;
-}
-
-function getTypeTitle(type){
-return {
-students:"Students",
-fees:"Fees",
-attendance:"Attendance",
-exams:"Exam / Result",
-homework:"Homework"
-}[type]||type;
+alert("School Registered Successfully!")
 }
 
 /* PAGE */
-
 function showPage(page,element){
-
 document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
-
 if(element)element.classList.add("active");
-
 document.getElementById("sidebar").classList.remove("open");
 
-let titles={
-dashboard:"Dashboard",
-students:"Students",
-teachers:"Teachers",
-attendance:"Attendance",
-fees:"Fees",
-exams:"Exam / Result",
-homework:"Homework",
-timetable:"Timetable",
-notices:"Notices",
-reports:"Reports",
-settings:"Settings"
-};
-
-document.getElementById("pageTitle").innerText=titles[page];
+let titles={dashboard:"Dashboard",students:"Students",teachers:"Teachers",attendance:"Attendance",fees:"Fees",exams:"Exam / Result",homework:"Homework",timetable:"Timetable",notices:"Notices",reports:"Reports",settings:"Settings"};
+document.getElementById("pageTitle").innerText=titles[page]||page;
 
 if(page==="dashboard"){
 document.getElementById("dashboardPage").style.display="block";
 document.getElementById("otherPage").style.display="none";
-updateDashboard();
-return;
+updateDashboard();return
 }
 
 document.getElementById("dashboardPage").style.display="none";
 document.getElementById("otherPage").style.display="block";
 
-if(["students","fees","attendance","exams"].includes(page)){
-openClasses(page);
-return;
+if(["students","fees","attendance","exams"].includes(page)){openClasses(page);return}
+if(page==="homework"){renderHomeworkPage();return}
+document.getElementById("otherPage").innerHTML=getOtherPage(page)
 }
 
-if(page==="homework"){
-openHomeworkClasses();
-return;
-}
-
-document.getElementById("otherPage").innerHTML=getOtherPage(page);
-}
-
-/* CLASS */
+/* CLASSES */
+function getClassStudents(c){return getStudents().filter(s=>Number(s.classNo)===Number(c))}
+function getStreamStudents(c,st){return getStudents().filter(s=>Number(s.classNo)===Number(c)&&s.stream===st)}
 
 function openClasses(type){
-
-let html=`
-<div class="card">
-<div class="card-header">
-<h3>${getTypeTitle(type)} - Select Class</h3>
-</div>
-</div>
-`;
+let html=`<div class="card"><div class="card-header"><h3>${type==="exams"?"Exam / Result":type==="fees"?"Fees":type==="attendance"?"Attendance":"Students"} - Select Class</h3></div></div>`;
 
 for(let i=1;i<=12;i++){
-
 let students=getClassStudents(i);
 let boys=students.filter(s=>s.gender==="Boy").length;
 let girls=students.filter(s=>s.gender==="Girl").length;
 
-html+=`
-<div class="class-section">
+html+=`<div class="class-section">
 <div class="class-heading">Class ${i}</div>
 <div class="class-summary">
-<span class="summary-item summary-total">👨‍🎓 Students: ${students.length}</span>
-`;
+<span class="summary-item summary-total">👨‍🎓 Students: ${students.length}</span>`;
 
-if(type==="students"){
-html+=`
-<span class="summary-item">👦 Boys: ${boys}</span>
-<span class="summary-item">👧 Girls: ${girls}</span>
-`;
-}
+if(type==="students")html+=`<span class="summary-item">👦 Boys: ${boys}</span><span class="summary-item">👧 Girls: ${girls}</span>`;
 
 if(type==="fees"){
-
 let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
 let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
-
-html+=`
-<span class="summary-item summary-total">Total: ₹${total.toLocaleString("en-IN")}</span>
-<span class="summary-item summary-green">Paid: ₹${paid.toLocaleString("en-IN")}</span>
-<span class="summary-item summary-yellow">Pending: ₹${Math.max(0,total-paid).toLocaleString("en-IN")}</span>
-`;
-}
-
-if(type==="attendance"){
-
-let ids=students.map(s=>Number(s.id));
-let r=getAttendance().filter(x=>
-x.date===today()&&ids.includes(Number(x.studentId))
-);
-
-html+=`
-<span class="summary-item summary-green">🟢 Present: ${r.filter(x=>x.status==="Present").length}</span>
-<span class="summary-item summary-red">🔴 Absent: ${r.filter(x=>x.status==="Absent").length}</span>
-<span class="summary-item summary-yellow">🟡 Leave: ${r.filter(x=>x.status==="Leave").length}</span>
-`;
+html+=`<span class="summary-item summary-total">Total: ₹${total.toLocaleString("en-IN")}</span><span class="summary-item summary-green">Paid: ₹${paid.toLocaleString("en-IN")}</span><span class="summary-item summary-yellow">Pending: ₹${Math.max(0,total-paid).toLocaleString("en-IN")}</span>`
 }
 
 if(type==="exams"){
-
 let results=students.map(s=>getExamForStudent(s.id)).filter(Boolean);
 let pass=results.filter(e=>getExamPercentage(e)>=33).length;
-
-html+=`
-<span class="summary-item summary-green">Results: ${results.length}</span>
-<span class="summary-item summary-green">PASS: ${pass}</span>
-<span class="summary-item summary-red">FAIL: ${results.length-pass}</span>
-`;
+html+=`<span class="summary-item summary-green">Results: ${results.length}</span><span class="summary-item summary-green">PASS: ${pass}</span><span class="summary-item summary-red">FAIL: ${results.length-pass}</span>`
 }
 
-html+=`
-</div>
+if(type==="attendance"){
+let ids=students.map(s=>Number(s.id));
+let r=getAttendance().filter(x=>x.date===today()&&ids.includes(Number(x.studentId)));
+html+=`<span class="summary-item summary-green">🟢 Present: ${r.filter(x=>x.status==="Present").length}</span><span class="summary-item summary-red">🔴 Absent: ${r.filter(x=>x.status==="Absent").length}</span><span class="summary-item summary-yellow">🟡 Leave: ${r.filter(x=>x.status==="Leave").length}</span>`
+}
 
+html+=`</div>
 <div class="class-card" onclick="openClass('${type}',${i})">
 <div class="class-number">Class ${i}</div>
 <div class="class-info">${students.length} Students</div>
 <div class="open-text">Open Class →</div>
-</div>
-</div>
-`;
+</div></div>`
 }
-
-document.getElementById("otherPage").innerHTML=html;
+document.getElementById("otherPage").innerHTML=html
 }
 
 function openClass(type,classNo){
-
-if(classNo===11||classNo===12){
-openStreams(type,classNo);
-return;
+if(classNo===11||classNo===12)openStreams(type,classNo);
+else openSections(type,classNo,"")
 }
-
-openSections(type,classNo,"");
-}
-
-/* SECTION */
-
-function openSections(type,classNo,stream){
-
-let students=stream?
-getStreamStudents(classNo,stream):
-getClassStudents(classNo);
-
-let sections=getSections().filter(x=>
-Number(x.classNo)===Number(classNo)&&
-(!stream||x.stream===stream)
-);
-
-let used=[...new Set(students.map(s=>s.section).filter(Boolean))];
-
-sections.forEach(x=>{
-if(x.name&&!used.includes(x.name))used.push(x.name);
-});
-
-let html=`
-<button class="back-btn" onclick="${stream?`openStreams('${type}',${classNo})`:`openClasses('${type}')`}">← Back</button>
-
-<div class="card">
-<div class="card-header">
-<h3>Class ${classNo}${stream?" - "+stream:""} - Select Section</h3>
-</div>
-</div>
-`;
-
-if(!used.length){
-
-html+=`
-<div class="card">
-<div class="empty">
-<h3>No Section Added</h3>
-<p style="margin-top:8px">Add sections from Teacher management.</p>
-</div>
-</div>
-`;
-
-}else{
-
-used.forEach(sec=>{
-
-let count=students.filter(s=>s.section===sec).length;
-
-html+=`
-<div class="class-section">
-<div class="class-heading">Section ${escapeHtml(sec)}</div>
-
-<div class="class-summary">
-<span class="summary-item summary-total">👨‍🎓 Students: ${count}</span>
-</div>
-
-<div class="class-card" onclick="openStudentsData('${type}',${classNo},'${escapeHtml(stream||"")}','${escapeHtml(sec)}')">
-<div class="class-number">Section ${escapeHtml(sec)}</div>
-<div class="class-info">${count} Students</div>
-<div class="open-text">Open Section →</div>
-</div>
-</div>
-`;
-});
-}
-
-document.getElementById("otherPage").innerHTML=html;
-}
-
-/* STREAM */
 
 function openStreams(type,classNo){
-
+let all=getClassStudents(classNo);
 let streams=["Science","Commerce","Arts"];
 let icons={Science:"🔬",Commerce:"💼",Arts:"🎨"};
 
-let html=`
-<button class="back-btn" onclick="openClasses('${type}')">← Back to Classes</button>
+let html=`<button class="back-btn" onclick="openClasses('${type}')">← Back to Classes</button>
+<div class="card"><div class="card-header"><h3>Class ${classNo} - Select Stream</h3></div></div>`;
 
-<div class="card">
-<div class="card-header">
-<h3>Class ${classNo} - Select Stream</h3>
-</div>
-</div>
-`;
-
-streams.forEach(stream=>{
-
-let students=getStreamStudents(classNo,stream);
-
-html+=`
-<div class="stream-section">
-
-<div class="stream-heading">${stream}</div>
-
-<div class="stream-summary">
-<span class="summary-item summary-total">👨‍🎓 Students: ${students.length}</span>
-</div>
-
-<div class="stream-card" onclick="openSections('${type}',${classNo},'${stream}')">
-
-<div class="stream-icon">${icons[stream]}</div>
-<h3>${stream}</h3>
-<p>${students.length} Students</p>
-
-</div>
-</div>
-`;
+streams.forEach(st=>{
+let students=all.filter(s=>s.stream===st);
+html+=`<div class="stream-section">
+<div class="stream-heading">${st}</div>
+<div class="stream-summary"><span class="summary-item summary-total">👨‍🎓 Students: ${students.length}</span></div>
+<div class="stream-card" onclick="openSections('${type}',${classNo},'${st}')">
+<div class="stream-icon">${icons[st]}</div><h3>${st}</h3><p>${students.length} Students</p>
+</div></div>`
 });
+document.getElementById("otherPage").innerHTML=html
+}
 
-document.getElementById("otherPage").innerHTML=html;
+function openSections(type,classNo,stream){
+let students=stream?getStreamStudents(classNo,stream):getClassStudents(classNo);
+let sections=getSections().filter(x=>Number(x.classNo)===Number(classNo)&&(!stream||x.stream===stream));
+let used=[...new Set(students.map(s=>s.section).filter(Boolean))];
+sections.forEach(x=>{if(x.name&&!used.includes(x.name))used.push(x.name)});
+
+let html=`<button class="back-btn" onclick="${stream?`openStreams('${type}',${classNo})`:`openClasses('${type}')`}">← Back</button>
+<div class="card"><div class="card-header"><h3>Class ${classNo}${stream?" - "+stream:""} - Select Section</h3></div></div>`;
+
+if(!used.length){
+html+=`<div class="card"><div class="empty"><h3>No Section Added</h3><p style="margin-top:8px">Students can be viewed without section by using the unsectioned class option.</p>
+<button class="small-btn" style="margin-top:12px" onclick="openStudentsData('${type}',${classNo},'${stream||""}','')">Open All Students</button></div></div>`
+}else{
+used.forEach(sec=>{
+let count=students.filter(s=>s.section===sec).length;
+html+=`<div class="class-section"><div class="class-heading">Section ${escapeHtml(sec)}</div>
+<div class="class-summary"><span class="summary-item summary-total">👨‍🎓 Students: ${count}</span></div>
+<div class="class-card" onclick="openStudentsData('${type}',${classNo},'${stream||""}','${String(sec).replace(/'/g,"\\'")}')">
+<div class="class-number">Section ${escapeHtml(sec)}</div><div class="class-info">${count} Students</div><div class="open-text">Open Section →</div>
+</div></div>`
+})
+}
+document.getElementById("otherPage").innerHTML=html
 }
 
 /* STUDENT DATA */
-
 function openStudentsData(type,classNo,stream,section){
-
 window.currentStudentType=type;
 window.currentClassNo=classNo;
 window.currentStream=stream||"";
 window.currentSection=section||"";
 
-let students=getStudents().filter(s=>
-Number(s.classNo)===Number(classNo)&&
-(!stream||s.stream===stream)&&
-(!section||s.section===section)
-);
+let students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||s.section===section));
 
 let title=`Class ${classNo}${stream?" - "+stream:""}${section?" - Section "+section:""}`;
+let back=section?`openSections('${type}',${classNo},'${stream||""}')`:stream?`openStreams('${type}',${classNo})`:`openClasses('${type}')`;
 
-let back=section?
-`openSections('${type}',${classNo},'${stream||""}')`:
-stream?
-`openStreams('${type}',${classNo})`:
-`openClasses('${type}')`;
-
-let html=`
-<button class="back-btn" onclick="${back}">← Back</button>
-
+let html=`<button class="back-btn" onclick="${back}">← Back</button>
 <div class="card">
-
 <div class="card-header">
-
-<div>
-<h3>${title}</h3>
-<p style="color:#777;font-size:12px;margin-top:4px">${getTypeTitle(type)} Details</p>
+<div><h3>${title}</h3><p style="color:#777;font-size:12px;margin-top:4px">${type==="exams"?"Result Details":type.toUpperCase()+" Details"}</p></div>
+${type==="students"?`<button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>`:""}
 </div>
+<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">👨‍🎓 <strong>Students:</strong> ${students.length}</div>
+<div class="search-box"><input id="studentSearch" placeholder="🔍 Search student..." oninput="filterStudentTable('${type}',${classNo},'${stream||""}','${section||""}')"></div>
+<div id="studentTableArea">${buildStudentTable(type,classNo,stream,section,students)}</div>
+</div>`;
 
-${type==="students"?
-`<button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>`:""}
-
-</div>
-
-<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
-👨‍🎓 <strong>Students:</strong> ${students.length}
-</div>
-
-<div class="search-box">
-<input id="studentSearch" placeholder="🔍 Search student or father name..." oninput="filterStudentTable('${type}',${classNo},'${stream||""}','${section||""}')">
-</div>
-
-<div id="studentTableArea">
-${buildStudentTable(type,classNo,stream,section,students)}
-</div>
-
-</div>
-`;
-
-document.getElementById("otherPage").innerHTML=html;
+document.getElementById("otherPage").innerHTML=html
 }
-
-/*
-STUDENTS:
-Full profile information is available ONLY in Students module.
-Fees / Attendance / Exam:
-only Name + Father + relevant card data.
-*/
 
 function buildStudentTable(type,classNo,stream,section,students){
+if(!students.length)return`<div class="empty"><h3>No Students Found</h3><p style="margin-top:8px">No student is available in this class/section.</p></div>`;
 
-if(!students.length){
-return `<div class="empty"><h3>No Students Found</h3></div>`;
-}
-
-let html=`<div class="table-container"><table><thead><tr>`;
+let html=`<div class="table-container"><table><thead><tr>
+<th>Photo</th><th>Roll</th><th>Student Name</th><th>Father Name</th><th>Mother Name</th><th>Mobile</th><th>Section</th>`;
 
 if(type==="students"){
-
-html+=`
-<th>Photo</th>
-<th>Roll</th>
-<th>Student Name</th>
-<th>Father Name</th>
-<th>Mother Name</th>
-<th>Mobile</th>
-<th>DOB</th>
-<th>Age</th>
-<th>Caste</th>
-<th>Religion</th>
-<th>Class</th>
-<th>Section</th>
-<th>Stream</th>
-<th>Action</th>
-`;
+html+=`<th>DOB</th><th>Age</th><th>Caste</th><th>Religion</th><th>Stream</th><th>Action</th>`
+}else if(type==="fees"){
+html+=`<th>Total Fee</th><th>Paid</th><th>Due</th><th>Payments</th><th>Action</th>`
+}else if(type==="attendance"){
+html+=`<th>Present</th><th>Absent</th><th>Leave</th><th>Attendance %</th><th>Action</th>`
+}else if(type==="exams"){
+html+=`<th>Exam</th><th>Date</th><th>Total</th><th>Obtained</th><th>%</th><th>Result</th><th>Subjects</th><th>Action</th>`
 }
-
-if(type==="fees"){
-
-html+=`
-<th>Student Name</th>
-<th>Father Name</th>
-<th>Total Fee</th>
-<th>Paid Fee</th>
-<th>Due Fee</th>
-<th>Payment Count</th>
-<th>Payment History</th>
-<th>Action</th>
-`;
-}
-
-if(type==="attendance"){
-
-html+=`
-<th>Student Name</th>
-<th>Father Name</th>
-<th>Present</th>
-<th>Absent</th>
-<th>Leave</th>
-<th>Attendance %</th>
-<th>Action</th>
-`;
-}
-
-if(type==="exams"){
-
-html+=`
-<th>Student Name</th>
-<th>Father Name</th>
-<th>Exam</th>
-<th>Date</th>
-<th>Total</th>
-<th>Obtained</th>
-<th>%</th>
-<th>Result</th>
-<th>Subjects</th>
-<th>Action</th>
-`;
-}
-
 html+=`</tr></thead><tbody>`;
 
 students.forEach((s,index)=>{
+let photo=s.photo?`<img class="student-photo" src="${s.photo}">`:`<div class="student-photo" style="display:flex;align-items:center;justify-content:center">👨‍🎓</div>`;
 
-if(type==="students"){
-
-let photo=s.photo?
-`<img class="student-photo" src="${s.photo}">`:
-`<div class="student-photo" style="display:flex;align-items:center;justify-content:center">👨‍🎓</div>`;
-
-html+=`
-<tr>
+html+=`<tr>
 <td>${photo}</td>
 <td>${index+1}</td>
-<td><strong>${escapeHtml(s.name)}</strong></td>
-<td>${escapeHtml(s.father)}</td>
+<td><strong>${escapeHtml(s.name)}</strong><br><button class="edit-btn" onclick="openStudentProfile(${s.id})">👤 Profile</button></td>
+<td>${escapeHtml(s.father||"-")}</td>
 <td>${escapeHtml(s.mother||"-")}</td>
-<td>${escapeHtml(s.mobile)}</td>
-<td>${formatDate(s.dob)}</td>
-<td>${escapeHtml(s.age||"-")}</td>
-<td>${escapeHtml(s.caste||"-")}</td>
-<td>${escapeHtml(s.religion||"-")}</td>
-<td>Class ${s.classNo}</td>
-<td>${escapeHtml(s.section||"-")}</td>
-<td>${escapeHtml(s.stream||"-")}</td>
+<td>${escapeHtml(s.mobile||"-")}</td>
+<td>${escapeHtml(s.section||"-")}</td>`;
 
-<td>
-<div class="action-buttons">
-<button class="profile-btn" onclick="openStudentProfile(${s.id})">👤 Profile</button>
-<button class="edit-btn" onclick="editStudent(${s.id})">✏️ Edit</button>
-<button class="delete-btn" onclick="deleteStudent(${s.id})">🗑️ Delete</button>
-</div>
-</td>
-</tr>
-`;
+if(type==="students"){
+html+=`<td>${formatDate(s.dob)}</td><td>${escapeHtml(s.age||"-")}</td><td>${escapeHtml(s.caste||"-")}</td><td>${escapeHtml(s.religion||"-")}</td><td>${escapeHtml(s.stream||"-")}</td>
+<td><div class="action-buttons"><button class="edit-btn" onclick="editStudent(${s.id},${classNo},'${stream||""}','${section||""}')">✏️ Edit</button><button class="delete-btn" onclick="deleteStudent(${s.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button></div></td>`
 }
 
 if(type==="fees"){
-
-let paid=getStudentPaid(s.id);
-let due=Math.max(0,Number(s.fee||0)-paid);
-let payments=getStudentPayments(s.id);
-
-html+=`
-<tr>
-<td><strong>${escapeHtml(s.name)}</strong></td>
-<td>${escapeHtml(s.father)}</td>
-<td>₹${Number(s.fee||0).toLocaleString("en-IN")}</td>
-<td class="summary-green">₹${paid.toLocaleString("en-IN")}</td>
-<td class="${due>0?"summary-yellow":"summary-green"}">₹${due.toLocaleString("en-IN")}</td>
-<td>${payments.length}</td>
-<td>
-${payments.length?
-payments.map(p=>`
-<div style="background:#f8faff;padding:9px;border-radius:9px;margin-bottom:6px">
-<b>₹${Number(p.amount).toLocaleString("en-IN")}</b>
-<br>${formatDate(p.date)}
-<br>${escapeHtml(p.mode||"")}
-${p.receipt?`<br>Receipt: ${escapeHtml(p.receipt)}`:""}
-<br>
-<button class="delete-btn" onclick="deleteFee(${p.id},${classNo},'${stream||""}','${section||""}')">Delete</button>
-</div>
-`).join(""):"No Payment"}
-</td>
-<td>
-<button class="small-btn" onclick="openFeeModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Payment</button>
-</td>
-</tr>
-`;
+let paid=getStudentPaid(s.id),due=Math.max(0,Number(s.fee||0)-paid),payments=getStudentPayments(s.id);
+html+=`<td>₹${Number(s.fee||0).toLocaleString("en-IN")}</td><td class="summary-green">₹${paid.toLocaleString("en-IN")}</td><td class="${due?"summary-yellow":"summary-green"}">₹${due.toLocaleString("en-IN")}</td>
+<td>${payments.length?payments.map(p=>`<div style="padding:8px;background:#f8faff;border-radius:8px;margin-bottom:5px">₹${Number(p.amount).toLocaleString("en-IN")} • ${formatDate(p.date)}<br>${escapeHtml(p.mode||"")} ${p.receipt?"• "+escapeHtml(p.receipt):""}<br><button class="delete-btn" onclick="deleteFee(${p.id},${classNo},'${stream||""}','${section||""}')">Delete</button></div>`).join(""):"No Payment"}</td>
+<td><button class="small-btn" onclick="openFeeModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Payment</button></td>`
 }
 
 if(type==="attendance"){
-
-let records=getAttendanceForStudent(s.id);
-let present=records.filter(x=>x.status==="Present").length;
-let absent=records.filter(x=>x.status==="Absent").length;
-let leave=records.filter(x=>x.status==="Leave").length;
-let total=present+absent+leave;
-let percentage=total?(present/total*100).toFixed(1):0;
-
-html+=`
-<tr>
-<td><strong>${escapeHtml(s.name)}</strong></td>
-<td>${escapeHtml(s.father)}</td>
-<td class="summary-green">${present}</td>
-<td class="summary-red">${absent}</td>
-<td class="summary-yellow">${leave}</td>
-<td><strong>${percentage}%</strong></td>
-<td>
-<button class="edit-btn" onclick="openAttendanceModal(${s.id},${classNo},'${stream||""}','${section||""}')">✏️ Attendance</button>
-</td>
-</tr>
-`;
+let r=getAttendanceForStudent(s.id),p=r.filter(x=>x.status==="Present").length,a=r.filter(x=>x.status==="Absent").length,l=r.filter(x=>x.status==="Leave").length,total=p+a+l;
+html+=`<td class="summary-green">${p}</td><td class="summary-red">${a}</td><td class="summary-yellow">${l}</td><td><strong>${total?(p/total*100).toFixed(1):0}%</strong></td>
+<td><button class="edit-btn" onclick="openAttendanceModal(${s.id},${classNo},'${stream||""}','${section||""}')">✏️ Attendance</button></td>`
 }
 
 if(type==="exams"){
-
 let e=getExamForStudent(s.id);
-
 if(e){
-
-let total=getExamTotal(e);
-let obtained=getExamObtained(e);
-let percentage=getExamPercentage(e);
-let pass=percentage>=33;
-
-html+=`
-<tr>
-<td><strong>${escapeHtml(s.name)}</strong></td>
-<td>${escapeHtml(s.father)}</td>
-<td>${escapeHtml(e.examName)}</td>
-<td>${formatDate(e.examDate)}</td>
-<td>${total}</td>
-<td>${obtained}</td>
-<td>${percentage.toFixed(1)}%</td>
-<td><span class="badge ${pass?"green":"red"}">${pass?"PASS":"FAIL"}</span></td>
-<td>
-${e.subjects.map(x=>`
-<div style="font-size:12px;margin-bottom:4px">
-<b>${escapeHtml(x.name)}</b>: ${x.obtained}/${x.max}
-</div>`).join("")}
-</td>
-<td>
-<button class="edit-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">✏️ Edit</button>
-<button class="delete-btn" onclick="deleteExam(${e.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button>
-</td>
-</tr>
-`;
-
+let total=getExamTotal(e),obt=getExamObtained(e),pct=getExamPercentage(e);
+html+=`<td>${escapeHtml(e.examName)}</td><td>${formatDate(e.examDate)}</td><td>${total}</td><td>${obt}</td><td>${pct.toFixed(1)}%</td><td><span class="badge ${pct>=33?"green":"red"}">${pct>=33?"PASS":"FAIL"}</span></td>
+<td>${e.subjects.map(x=>`<div style="font-size:12px;margin-bottom:4px"><b>${escapeHtml(x.name)}</b>: ${x.obtained}/${x.max}</div>`).join("")}</td>
+<td><button class="edit-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">✏️ Edit</button><button class="delete-btn" onclick="deleteExam(${e.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button></td>`
 }else{
-
-html+=`
-<tr>
-<td><strong>${escapeHtml(s.name)}</strong></td>
-<td>${escapeHtml(s.father)}</td>
-<td colspan="7"><span class="badge yellow">Result Not Added</span></td>
-<td>
-<button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button>
-</td>
-</tr>
-`;
+html+=`<td colspan="7"><span class="badge yellow">Result Not Added</span></td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button></td>`
 }
 }
+html+=`</tr>`
 });
-
-html+=`</tbody></table></div>`;
-
-return html;
+return html+`</tbody></table></div>`
 }
 
 function filterStudentTable(type,classNo,stream,section){
+let q=(document.getElementById("studentSearch").value||"").toLowerCase().trim();
+let students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||s.section===section));
+if(q)students=students.filter(s=>[s.name,s.father,s.mother,s.mobile].some(x=>String(x||"").toLowerCase().includes(q)));
+document.getElementById("studentTableArea").innerHTML=buildStudentTable(type,classNo,stream,section,students)
+}
 
-let q=document.getElementById("studentSearch").value.toLowerCase();
+/* STUDENT PROFILE */
+function openStudentProfile(id){
+let s=getStudents().find(x=>Number(x.id)===Number(id));
+if(!s)return;
 
-let students=getStudents().filter(s=>
-Number(s.classNo)===Number(classNo)&&
-(!stream||s.stream===stream)&&
-(!section||s.section===section)&&
-(
-s.name.toLowerCase().includes(q)||
-s.father.toLowerCase().includes(q)||
-String(s.mobile).includes(q)
-)
-);
+let photo=s.photo?`<img class="big-student-photo" src="${s.photo}">`:`<div class="big-student-photo" style="display:flex;align-items:center;justify-content:center;font-size:50px">👨‍🎓</div>`;
 
-document.getElementById("studentTableArea").innerHTML=
-buildStudentTable(type,classNo,stream,section,students);
+let paid=getStudentPaid(id);
+let attendance=getAttendanceForStudent(id);
+let p=attendance.filter(x=>x.status==="Present").length;
+let exam=getExamForStudent(id);
+
+document.getElementById("otherPage").innerHTML=`
+<button class="back-btn" onclick="openStudentsData(window.currentStudentType||'students',window.currentClassNo||${s.classNo},window.currentStream||'',window.currentSection||'')">← Back</button>
+<div class="card">
+<div class="card-header"><h3>Student Profile</h3><button class="small-btn" onclick="editStudent(${s.id},${s.classNo},'${s.stream||""}','${s.section||""}')">✏️ Edit</button></div>
+<div class="profile-card">
+<div>${photo}</div>
+<div>
+<h2>${escapeHtml(s.name)}</h2>
+<p style="color:#777;margin:5px 0 15px">Class ${s.classNo}${s.stream?" • "+escapeHtml(s.stream):""}${s.section?" • Section "+escapeHtml(s.section):""}</p>
+<div class="info-grid">
+<div class="info-item"><small>Father Name</small><strong>${escapeHtml(s.father||"-")}</strong></div>
+<div class="info-item"><small>Mother Name</small><strong>${escapeHtml(s.mother||"-")}</strong></div>
+<div class="info-item"><small>Mobile</small><strong>${escapeHtml(s.mobile||"-")}</strong></div>
+<div class="info-item"><small>Date of Birth</small><strong>${formatDate(s.dob)}</strong></div>
+<div class="info-item"><small>Age</small><strong>${escapeHtml(s.age||"-")}</strong></div>
+<div class="info-item"><small>Gender</small><strong>${escapeHtml(s.gender||"-")}</strong></div>
+<div class="info-item"><small>Caste</small><strong>${escapeHtml(s.caste||"-")}</strong></div>
+<div class="info-item"><small>Religion</small><strong>${escapeHtml(s.religion||"-")}</strong></div>
+<div class="info-item"><small>Total Fee</small><strong>₹${Number(s.fee||0).toLocaleString("en-IN")}</strong></div>
+<div class="info-item"><small>Paid Fee</small><strong>₹${paid.toLocaleString("en-IN")}</strong></div>
+<div class="info-item"><small>Attendance</small><strong>${attendance.length?((p/attendance.length)*100).toFixed(1):0}%</strong></div>
+<div class="info-item"><small>Latest Result</small><strong>${exam?getExamPercentage(exam).toFixed(1)+"%":"Not Added"}</strong></div>
+</div>
+</div></div></div>`
 }
 
 /* STUDENT */
-
-let editingStudentId=null;
-let studentPhotoData="";
+let editingStudentId=null,studentPhotoData="";
 
 function updateSectionOptions(selected=""){
-
-let classNo=Number(document.getElementById("studentClass").value);
-let sections=getSections().filter(x=>Number(x.classNo)===classNo);
-
-let select=document.getElementById("studentSection");
-let group=document.getElementById("studentSectionGroup");
-
-if(!sections.length){
-group.classList.add("section-hidden");
-select.innerHTML=`<option value="">No Section</option>`;
-return;
-}
-
+let c=Number(document.getElementById("studentClass").value);
+let sections=getSections().filter(x=>Number(x.classNo)===c);
+let select=document.getElementById("studentSection"),group=document.getElementById("studentSectionGroup");
+if(!sections.length){group.classList.add("section-hidden");select.innerHTML=`<option value="">No Section</option>`;return}
 group.classList.remove("section-hidden");
 select.innerHTML=`<option value="">Select Section</option>`;
-
-sections.forEach(x=>{
-select.innerHTML+=`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
-});
-
-select.value=selected||"";
+sections.forEach(x=>select.innerHTML+=`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`);
+select.value=selected||""
 }
-
 function openAddStudent(classNo,stream,section){
-
-editingStudentId=null;
-studentPhotoData="";
-
+editingStudentId=null;studentPhotoData="";
 document.getElementById("studentModalTitle").innerText="Add Student";
-
-[
-"studentName","fatherName","motherName","studentMobile",
-"studentDOB","studentAge","studentCaste","studentReligion"
-].forEach(id=>document.getElementById(id).value="");
-
+["studentName","fatherName","motherName","studentMobile","studentDOB","studentAge","studentCaste","studentReligion"].forEach(id=>document.getElementById(id).value="");
 document.getElementById("studentGender").value="";
 document.getElementById("studentClass").value=classNo;
 document.getElementById("studentStream").value=stream||"";
 document.getElementById("studentFee").value=35000;
 document.getElementById("studentPhoto").value="";
-
 document.getElementById("studentPhotoPreview").innerHTML="👨‍🎓";
 document.getElementById("studentPhotoPreview").className="photo-placeholder";
-
 updateSectionOptions(section||"");
-document.getElementById("studentModal").style.display="flex";
+document.getElementById("studentModal").style.display="flex"
 }
-
-function previewStudentPhoto(event){
-
-let file=event.target.files[0];
-if(!file)return;
-
+function previewStudentPhoto(e){
+let file=e.target.files[0];if(!file)return;
 let reader=new FileReader();
-
-reader.onload=function(e){
-
-studentPhotoData=e.target.result;
-
-document.getElementById("studentPhotoPreview").className="photo-placeholder";
-
-document.getElementById("studentPhotoPreview").innerHTML=
-`<img class="profile-photo" src="${studentPhotoData}">`;
+reader.onload=x=>{
+studentPhotoData=x.target.result;
+document.getElementById("studentPhotoPreview").innerHTML=`<img class="profile-photo" src="${studentPhotoData}">`;
+document.getElementById("studentPhotoPreview").className="";
 };
-
-reader.readAsDataURL(file);
+reader.readAsDataURL(file)
 }
-
 function calculateAgeFromDOB(dob){
-
-if(!dob)return "";
-
-let birth=new Date(dob);
-let now=new Date();
-
-let age=now.getFullYear()-birth.getFullYear();
-let month=now.getMonth()-birth.getMonth();
-
-if(month<0||(month===0&&now.getDate()<birth.getDate()))age--;
-
-return age>=0?age:"";
+if(!dob)return"";
+let birth=new Date(dob),now=new Date(),age=now.getFullYear()-birth.getFullYear(),m=now.getMonth()-birth.getMonth();
+if(m<0||(m===0&&now.getDate()<birth.getDate()))age--;
+return age>=0?age:""
 }
-
-function calculateStudentAge(){
-document.getElementById("studentAge").value=
-calculateAgeFromDOB(document.getElementById("studentDOB").value);
-}
+function calculateStudentAge(){document.getElementById("studentAge").value=calculateAgeFromDOB(document.getElementById("studentDOB").value)}
 
 function saveStudent(){
+let name=document.getElementById("studentName").value.trim(),father=document.getElementById("fatherName").value.trim(),mother=document.getElementById("motherName").value.trim(),mobile=document.getElementById("studentMobile").value.trim(),gender=document.getElementById("studentGender").value,classNo=Number(document.getElementById("studentClass").value),section=document.getElementById("studentSection").value,stream=document.getElementById("studentStream").value,dob=document.getElementById("studentDOB").value,age=document.getElementById("studentAge").value||calculateAgeFromDOB(dob),caste=document.getElementById("studentCaste").value.trim(),religion=document.getElementById("studentReligion").value.trim(),fee=Number(document.getElementById("studentFee").value)||0;
 
-let name=document.getElementById("studentName").value.trim();
-let father=document.getElementById("fatherName").value.trim();
-let mother=document.getElementById("motherName").value.trim();
-let mobile=document.getElementById("studentMobile").value.trim();
-let gender=document.getElementById("studentGender").value;
-let classNo=document.getElementById("studentClass").value;
-let section=document.getElementById("studentSection").value;
-let stream=document.getElementById("studentStream").value;
-let dob=document.getElementById("studentDOB").value;
-let age=document.getElementById("studentAge").value||calculateAgeFromDOB(dob);
-let caste=document.getElementById("studentCaste").value.trim();
-let religion=document.getElementById("studentReligion").value.trim();
-let fee=Number(document.getElementById("studentFee").value)||0;
+if(!name||!father||!mobile||!gender||!classNo){alert("Please fill all required fields");return}
+if((classNo===11||classNo===12)&&!stream){alert("Select Stream");return}
 
-if(!name||!father||!mobile||!gender||!classNo){
-alert("Please fill all required fields");
-return;
-}
-
-if((Number(classNo)===11||Number(classNo)===12)&&!stream){
-alert("Select Stream for Class 11 / 12");
-return;
-}
+let sections=getSections().filter(x=>Number(x.classNo)===classNo);
+if(sections.length&&!section){alert("Select Section");return}
 
 let students=getStudents();
 
 if(editingStudentId){
-
 let s=students.find(x=>Number(x.id)===Number(editingStudentId));
-
-if(!s)return;
-
-Object.assign(s,{
-name,father,mother,mobile,gender,dob,age,caste,religion,
-classNo:Number(classNo),section,stream,fee
-});
-
+if(s){
+Object.assign(s,{name,father,mother,mobile,gender,dob,age,caste,religion,classNo,section,stream,fee});
 if(studentPhotoData)s.photo=studentPhotoData;
-
-}else{
-
-students.push({
-id:Date.now(),
-name,father,mother,mobile,gender,dob,age,caste,religion,
-classNo:Number(classNo),section,stream,fee,
-photo:studentPhotoData||""
-});
 }
-
+}else{
+students.push({id:Date.now(),name,father,mother,mobile,gender,dob,age,caste,religion,classNo,section,stream,fee,photo:studentPhotoData||""})
+}
 saveStudents(students);
-
 closeStudentModal();
 updateDashboard();
-
-openStudentsData(
-window.currentStudentType||"students",
-window.currentClassNo||Number(classNo),
-window.currentStream||"",
-window.currentSection||""
-);
+openStudentsData(window.currentStudentType||"students",window.currentClassNo||classNo,window.currentStream||"",window.currentSection||"")
 }
-
-function editStudent(id){
-
-let s=getStudents().find(x=>Number(x.id)===Number(id));
-if(!s)return;
-
+function editStudent(id,classNo,stream,section){
+let s=getStudents().find(x=>Number(x.id)===Number(id));if(!s)return;
 editingStudentId=id;
-studentPhotoData=s.photo||"";
-
+window.currentStudentType="students";window.currentClassNo=classNo;window.currentStream=stream||"";window.currentSection=section||"";
 document.getElementById("studentModalTitle").innerText="Edit Student";
-
 document.getElementById("studentName").value=s.name||"";
 document.getElementById("fatherName").value=s.father||"";
 document.getElementById("motherName").value=s.mother||"";
 document.getElementById("studentMobile").value=s.mobile||"";
 document.getElementById("studentGender").value=s.gender||"";
-document.getElementById("studentClass").value=s.classNo||"";
+document.getElementById("studentClass").value=s.classNo;
 document.getElementById("studentDOB").value=s.dob||"";
 document.getElementById("studentAge").value=s.age||calculateAgeFromDOB(s.dob);
 document.getElementById("studentCaste").value=s.caste||"";
 document.getElementById("studentReligion").value=s.religion||"";
 document.getElementById("studentStream").value=s.stream||"";
 document.getElementById("studentFee").value=s.fee||0;
-document.getElementById("studentPhoto").value="";
-
-if(s.photo){
-document.getElementById("studentPhotoPreview").innerHTML=
-`<img class="profile-photo" src="${s.photo}">`;
-document.getElementById("studentPhotoPreview").className="photo-placeholder";
-}else{
-document.getElementById("studentPhotoPreview").innerHTML="👨‍🎓";
-document.getElementById("studentPhotoPreview").className="photo-placeholder";
-}
-
+studentPhotoData=s.photo||"";
+document.getElementById("studentPhotoPreview").innerHTML=s.photo?`<img class="profile-photo" src="${s.photo}">`:"👨‍🎓";
+document.getElementById("studentPhotoPreview").className=s.photo?"":"photo-placeholder";
 updateSectionOptions(s.section||"");
-
-document.getElementById("studentModal").style.display="flex";
+document.getElementById("studentModal").style.display="flex"
 }
-
-function deleteStudent(id){
-
-let s=getStudents().find(x=>Number(x.id)===Number(id));
-if(!s)return;
-
-if(!confirm("Delete "+s.name+" and all related records?"))return;
-
+function deleteStudent(id,classNo,stream,section){
+let s=getStudents().find(x=>Number(x.id)===Number(id));if(!s)return;
+if(!confirm("Delete "+s.name+" and related records?"))return;
 saveStudents(getStudents().filter(x=>Number(x.id)!==Number(id)));
 saveFees(getFees().filter(x=>Number(x.studentId)!==Number(id)));
 saveAttendance(getAttendance().filter(x=>Number(x.studentId)!==Number(id)));
 saveExams(getExams().filter(x=>Number(x.studentId)!==Number(id)));
-
 updateDashboard();
-
-openStudentsData(
-window.currentStudentType||"students",
-window.currentClassNo||s.classNo,
-window.currentStream||"",
-window.currentSection||""
-);
+openStudentsData("students",classNo,stream||"",section||"")
 }
+function closeStudentModal(){document.getElementById("studentModal").style.display="none";editingStudentId=null}
 
-function closeStudentModal(){
-document.getElementById("studentModal").style.display="none";
-editingStudentId=null;
+/* FEES */
+function getStudentPayments(id){return getFees().filter(x=>Number(x.studentId)===Number(id)).sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
+function getStudentPaid(id){return getStudentPayments(id).reduce((a,x)=>a+Number(x.amount||0),0)}
+function openFeeModal(id,classNo,stream,section){
+let s=getStudents().find(x=>Number(x.id)===Number(id));if(!s)return;
+window.feeStudentId=id;window.feeClassNo=classNo;window.feeStream=stream||"";window.feeSection=section||"";
+document.getElementById("feeStudentName").value=s.name;
+document.getElementById("feeAmount").value="";
+document.getElementById("feeDate").value=today();
+document.getElementById("feeMode").value="Cash";
+document.getElementById("feeReceipt").value="";
+document.getElementById("feeModal").style.display="flex"
 }
-
-/* STUDENT PROFILE */
-
-function openStudentProfile(id){
-
-let s=getStudents().find(x=>Number(x.id)===Number(id));
-if(!s)return;
-
-let photo=s.photo?
-`<img class="profile-large" src="${s.photo}">`:
-`<div class="profile-large" style="display:flex;align-items:center;justify-content:center;font-size:50px">👨‍🎓</div>`;
-
-document.getElementById("studentProfileContent").innerHTML=`
-
-<div class="profile-box">
-
-<div class="profile-head">
-${photo}
-
-<div>
-<h2>${escapeHtml(s.name)}</h2>
-<p style="color:#777;margin-top:6px">
-Class ${s.classNo}
-${s.section?" • Section "+escapeHtml(s.section):""}
-${s.stream?" • "+escapeHtml(s.stream):""}
-</p>
-</div>
-</div>
-
-<div class="profile-details">
-
-<div class="detail-item">
-<small>Student Name</small>
-<strong>${escapeHtml(s.name)}</strong>
-</div>
-
-<div class="detail-item">
-<small>Father Name</small>
-<strong>${escapeHtml(s.father)}</strong>
-</div>
-
-<div class="detail-item">
-<small>Mother Name</small>
-<strong>${escapeHtml(s.mother||"-")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Mobile</small>
-<strong>${escapeHtml(s.mobile)}</strong>
-</div>
-
-<div class="detail-item">
-<small>Date of Birth</small>
-<strong>${formatDate(s.dob)}</strong>
-</div>
-
-<div class="detail-item">
-<small>Age</small>
-<strong>${escapeHtml(s.age||"-")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Gender</small>
-<strong>${escapeHtml(s.gender||"-")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Caste</small>
-<strong>${escapeHtml(s.caste||"-")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Religion</small>
-<strong>${escapeHtml(s.religion||"-")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Class</small>
-<strong>Class ${s.classNo}</strong>
-</div>
-
-<div class="detail-item">
-<small>Section</small>
-<strong>${escapeHtml(s.section||"-")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Stream</small>
-<strong>${escapeHtml(s.stream||"-")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Total Fee</small>
-<strong>₹${Number(s.fee||0).toLocaleString("en-IN")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Fee Paid</small>
-<strong>₹${getStudentPaid(s.id).toLocaleString("en-IN")}</strong>
-</div>
-
-<div class="detail-item">
-<small>Fee Due</small>
-<strong>₹${Math.max(0,Number(s.fee||0)-getStudentPaid(s.id)).toLocaleString("en-IN")}</strong>
-</div>
-
-</div>
-</div>
-`;
-
-document.getElementById("studentProfileModal").style.display="flex";
+function saveFeePayment(){
+let amount=Number(document.getElementById("feeAmount").value),date=document.getElementById("feeDate").value;
+if(amount<=0||!date){alert("Enter amount and date");return}
+let f=getFees();f.push({id:Date.now(),studentId:Number(window.feeStudentId),amount,date,mode:document.getElementById("feeMode").value,receipt:document.getElementById("feeReceipt").value.trim()});
+saveFees(f);closeFeeModal();updateDashboard();openStudentsData("fees",window.feeClassNo,window.feeStream,window.feeSection)
 }
-
-function closeStudentProfile(){
-document.getElementById("studentProfileModal").style.display="none";
+function deleteFee(id,classNo,stream,section){
+if(!confirm("Delete payment?"))return;
+saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
+updateDashboard();openStudentsData("fees",classNo,stream||"",section||"")
 }
+function closeFeeModal(){document.getElementById("feeModal").style.display="none"}
+
+/* ATTENDANCE */
+function getAttendanceForStudent(id){return getAttendance().filter(x=>Number(x.studentId)===Number(id))}
+let attendanceStudentId,attendanceClassNo,attendanceStream="",attendanceSection="";
+function openAttendanceModal(id,classNo,stream,section){
+let s=getStudents().find(x=>Number(x.id)===Number(id));if(!s)return;
+attendanceStudentId=id;attendanceClassNo=classNo;attendanceStream=stream||"";attendanceSection=section||"";
+document.getElementById("attendanceModalTitle").innerText="Attendance - "+s.name;
+document.getElementById("attendanceDate").value=today();
+renderAttendanceStudentList();
+document.getElementById("attendanceModal").style.display="flex"
+}
+function renderAttendanceStudentList(){
+let date=document.getElementById("attendanceDate").value,s=getStudents().find(x=>Number(x.id)===Number(attendanceStudentId));
+let e=getAttendance().find(x=>Number(x.studentId)===Number(s.id)&&x.date===date);
+window.selectedAttendanceStatus=e?e.status:"Present";
+document.getElementById("attendanceStudentList").innerHTML=`<div style="padding:20px"><strong>${escapeHtml(s.name)}</strong><div style="display:flex;gap:8px;margin-top:15px"><button class="small-btn" onclick="setSingleAttendance('Present')">🟢 Present</button><button class="delete-btn" onclick="setSingleAttendance('Absent')">🔴 Absent</button><button class="yellow" style="border:0;padding:7px 10px;border-radius:7px;font-weight:bold" onclick="setSingleAttendance('Leave')">🟡 Leave</button></div><div id="selectedAttendanceStatus" style="margin-top:12px;font-weight:bold">Selected: ${window.selectedAttendanceStatus}</div></div>`
+}
+function setSingleAttendance(x){window.selectedAttendanceStatus=x;document.getElementById("selectedAttendanceStatus").innerText="Selected: "+x}
+function markAllAttendancePresent(){setSingleAttendance("Present")}
+function saveAttendanceData(){
+let date=document.getElementById("attendanceDate").value;if(!date)return;
+let d=getAttendance(),i=d.findIndex(x=>Number(x.studentId)===Number(attendanceStudentId)&&x.date===date);
+if(i>=0)d[i].status=window.selectedAttendanceStatus;else d.push({id:Date.now(),studentId:Number(attendanceStudentId),date,status:window.selectedAttendanceStatus});
+saveAttendance(d);closeAttendanceModal();updateDashboard();openStudentsData("attendance",attendanceClassNo,attendanceStream,attendanceSection)
+}
+function closeAttendanceModal(){document.getElementById("attendanceModal").style.display="none"}
+document.addEventListener("change",e=>{if(e.target.id==="attendanceDate")renderAttendanceStudentList()})
+
+/* EXAMS */
+let examSubjects=[];
+function getExamForStudent(id){let x=getExams().filter(e=>Number(e.studentId)===Number(id));return x.length?x[x.length-1]:null}
+function getExamTotal(e){return(e.subjects||[]).reduce((a,x)=>a+Number(x.max||0),0)}
+function getExamObtained(e){return(e.subjects||[]).reduce((a,x)=>a+Number(x.obtained||0),0)}
+function getExamPercentage(e){let t=getExamTotal(e);return t?getExamObtained(e)/t*100:0}
+
+function openExamModal(id,classNo,stream,section){
+let s=getStudents().find(x=>Number(x.id)===Number(id));if(!s)return;
+let e=getExamForStudent(id);
+window.examStudentId=id;window.examClassNo=classNo;window.examStream=stream||"";window.examSection=section||"";window.editingExamId=e?e.id:null;
+examSubjects=e?JSON.parse(JSON.stringify(e.subjects||[])):[{name:"Maths",max:100,obtained:0},{name:"Science",max:100,obtained:0},{name:"English",max:100,obtained:0}];
+document.getElementById("examModalTitle").innerText=e?"Edit Exam Result":"Add Exam Result";
+document.getElementById("examStudentName").value=s.name;
+document.getElementById("examName").value=e?e.examName:"Annual Examination";
+document.getElementById("examDate").value=e?e.examDate:today();
+renderSubjectRows();document.getElementById("examModal").style.display="flex"
+}
+function addSubjectRow(){examSubjects.push({name:"",max:100,obtained:0});renderSubjectRows()}
+function removeSubjectRow(i){examSubjects.splice(i,1);renderSubjectRows()}
+function renderSubjectRows(){
+document.getElementById("subjectRows").innerHTML=examSubjects.map((x,i)=>`<div class="subject-row">
+<input placeholder="Subject Name" value="${escapeHtml(x.name)}" oninput="examSubjects[${i}].name=this.value;updateExamSummary()">
+<input type="number" min="1" value="${x.max}" oninput="examSubjects[${i}].max=Number(this.value)||0;updateExamSummary()">
+<input type="number" min="0" value="${x.obtained}" oninput="examSubjects[${i}].obtained=Number(this.value)||0;updateExamSummary()">
+<button class="delete-btn" onclick="removeSubjectRow(${i})">×</button></div>`).join("");
+updateExamSummary()
+}
+function updateExamSummary(){
+let t=examSubjects.reduce((a,x)=>a+Number(x.max||0),0),o=examSubjects.reduce((a,x)=>a+Number(x.obtained||0),0);
+document.getElementById("examSummary").innerHTML=`<strong>Total Marks:</strong> ${t} &nbsp; | &nbsp; <strong>Obtained:</strong> ${o} &nbsp; | &nbsp; <strong>Percentage:</strong> ${t?(o/t*100).toFixed(1):0}%`
+}
+function saveExam(){
+let name=document.getElementById("examName").value.trim(),date=document.getElementById("examDate").value;
+if(!name||!date){alert("Enter exam name and date");return}
+for(let x of examSubjects){
+x.name=String(x.name||"").trim();x.max=Number(x.max)||0;x.obtained=Number(x.obtained)||0;
+if(!x.name||x.max<=0||x.obtained<0||x.obtained>x.max){alert("Check subject details");return}
+}
+let d=getExams(),result={id:window.editingExamId||Date.now(),studentId:Number(window.examStudentId),examName:name,examDate:date,subjects:examSubjects};
+let i=d.findIndex(x=>Number(x.id)===Number(result.id));
+if(i>=0)d[i]=result;else d.push(result);
+saveExams(d);closeExamModal();openStudentsData("exams",window.examClassNo,window.examStream,window.examSection)
+}
+function deleteExam(id,classNo,stream,section){
+if(!confirm("Delete result?"))return;
+saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
+openStudentsData("exams",classNo,stream||"",section||"")
+}
+function closeExamModal(){document.getElementById("examModal").style.display="none";window.editingExamId=null}
 
 /* TEACHERS */
-
-let editingTeacherId=null;
-let teacherPhotoData="";
+let editingTeacherId=null,teacherPhotoData="";
 
 function openTeacherModal(id=null){
-
 editingTeacherId=id;
 teacherPhotoData="";
-
 let t=id?getTeachers().find(x=>Number(x.id)===Number(id)):null;
 
 document.getElementById("teacherModalTitle").innerText=t?"Edit Teacher":"Add Teacher";
-
 document.getElementById("teacherName").value=t?.name||"";
 document.getElementById("teacherEmployeeId").value=t?.employeeId||"";
 document.getElementById("teacherMobile").value=t?.mobile||"";
 document.getElementById("teacherEmail").value=t?.email||"";
 document.getElementById("teacherSubject").value=t?.subject||"";
 document.getElementById("teacherClass").value=t?.classNo||"";
-document.getElementById("teacherQualification").value=t?.qualification||"";
-document.getElementById("teacherPhoto").value="";
-
+document.getElementById("teacherSection").value=t?.section||"";
+document.getElementById("teacherStream").value=t?.stream||"";
 teacherPhotoData=t?.photo||"";
 
-if(t?.photo){
-document.getElementById("teacherPhotoPreview").innerHTML=
-`<img class="profile-photo" src="${t.photo}">`;
-}else{
-document.getElementById("teacherPhotoPreview").innerHTML="👨‍🏫";
+document.getElementById("teacherPhotoPreview").innerHTML=t?.photo?`<img class="profile-photo" src="${t.photo}">`:"👨‍🏫";
+document.getElementById("teacherPhotoPreview").className=t?.photo?"":"photo-placeholder";
+document.getElementById("teacherPhoto").value="";
+document.getElementById("teacherModal").style.display="flex"
 }
 
-updateTeacherSections(t?.section||"");
-
-document.getElementById("teacherModal").style.display="flex";
-}
-
-function previewTeacherPhoto(event){
-
-let file=event.target.files[0];
-if(!file)return;
-
-let reader=new FileReader();
-
-reader.onload=function(e){
-
-teacherPhotoData=e.target.result;
-
-document.getElementById("teacherPhotoPreview").innerHTML=
-`<img class="profile-photo" src="${teacherPhotoData}">`;
+function previewTeacherPhoto(e){
+let file=e.target.files[0];if(!file)return;
+let r=new FileReader();
+r.onload=x=>{
+teacherPhotoData=x.target.result;
+document.getElementById("teacherPhotoPreview").innerHTML=`<img class="profile-photo" src="${teacherPhotoData}">`;
+document.getElementById("teacherPhotoPreview").className="";
 };
-
-reader.readAsDataURL(file);
-}
-
-function updateTeacherSections(selected=""){
-
-let classNo=Number(document.getElementById("teacherClass").value);
-let select=document.getElementById("teacherSection");
-
-select.innerHTML=`<option value="">All / Not Assigned</option>`;
-
-if(!classNo)return;
-
-getSections()
-.filter(x=>Number(x.classNo)===classNo)
-.forEach(x=>{
-select.innerHTML+=
-`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
-});
-
-select.value=selected||"";
+r.readAsDataURL(file)
 }
 
 function saveTeacher(){
-
 let name=document.getElementById("teacherName").value.trim();
 let employeeId=document.getElementById("teacherEmployeeId").value.trim();
 let mobile=document.getElementById("teacherMobile").value.trim();
 let email=document.getElementById("teacherEmail").value.trim();
 let subject=document.getElementById("teacherSubject").value.trim();
 let classNo=document.getElementById("teacherClass").value;
-let section=document.getElementById("teacherSection").value;
-let qualification=document.getElementById("teacherQualification").value.trim();
+let section=document.getElementById("teacherSection").value.trim();
+let stream=document.getElementById("teacherStream").value;
 
-if(!name||!employeeId||!mobile||!subject){
-alert("Please fill Teacher Name, Employee ID, Mobile and Subject");
-return;
-}
+if(!name||!employeeId||!mobile||!subject||!classNo){alert("Please fill required teacher fields");return}
 
-let teachers=getTeachers();
+let data=getTeachers();
 
 if(editingTeacherId){
-
-let t=teachers.find(x=>Number(x.id)===Number(editingTeacherId));
-
+let t=data.find(x=>Number(x.id)===Number(editingTeacherId));
 if(t){
-
-Object.assign(t,{
-name,employeeId,mobile,email,subject,
-classNo,section,qualification
-});
-
+Object.assign(t,{name,employeeId,mobile,email,subject,classNo:Number(classNo),section,stream});
 if(teacherPhotoData)t.photo=teacherPhotoData;
 }
-
 }else{
-
-teachers.push({
-id:Date.now(),
-name,
-employeeId,
-mobile,
-email,
-subject,
-classNo,
-section,
-qualification,
-photo:teacherPhotoData||"",
-password:"123456"
-});
-
+data.push({id:Date.now(),name,employeeId,mobile,email,subject,classNo:Number(classNo),section,stream,photo:teacherPhotoData||""})
 }
 
-saveTeachers(teachers);
-
+saveTeachers(data);
 closeTeacherModal();
+updateDashboard();
 showPage("teachers");
-
-alert("Teacher saved successfully.");
 }
 
 function deleteTeacher(id){
-
-let t=getTeachers().find(x=>Number(x.id)===Number(id));
-if(!t)return;
-
-if(!confirm("Delete teacher "+t.name+"?"))return;
-
+if(!confirm("Delete teacher?"))return;
 saveTeachers(getTeachers().filter(x=>Number(x.id)!==Number(id)));
-
-showPage("teachers");
+showPage("teachers")
 }
-
-function closeTeacherModal(){
-document.getElementById("teacherModal").style.display="none";
-editingTeacherId=null;
-teacherPhotoData="";
-}
-
-/* SECTION MANAGEMENT */
-
-function addTeacherSection(){
-
-let classNo=document.getElementById("sectionClass").value;
-let name=document.getElementById("sectionName").value.trim();
-let stream=document.getElementById("sectionStream").value;
-
-if(!classNo||!name){
-alert("Select class and enter section");
-return;
-}
-
-let sections=getSections();
-
-let exists=sections.some(x=>
-Number(x.classNo)===Number(classNo)&&
-x.name.toLowerCase()===name.toLowerCase()&&
-x.stream===stream
-);
-
-if(exists){
-alert("Section already exists");
-return;
-}
-
-sections.push({
-id:Date.now(),
-classNo:Number(classNo),
-name,
-stream
-});
-
-saveSections(sections);
-
-document.getElementById("sectionName").value="";
-
-renderTeacherPage();
-}
-
-/* TEACHER PAGE */
-
-function renderTeacherPage(){
-
-let teachers=getTeachers();
-
-let html=`
-
-<div class="card">
-
-<div class="card-header">
-<h3>Teachers</h3>
-<button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
-</div>
-
-<div class="search-box">
-<input id="teacherSearch" placeholder="🔍 Search teacher, employee ID, subject..." oninput="filterTeachers()">
-</div>
-
-<div id="teacherTableArea">
-${buildTeacherTable(teachers)}
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-header">
-<h3>Class / Section Management</h3>
-</div>
-
-<div style="padding:20px">
-
-<div class="form-grid">
-
-<div class="form-group">
-<label>Class</label>
-<select id="sectionClass">
-<option value="">Select Class</option>
-${Array.from({length:12},(_,i)=>`<option value="${i+1}">Class ${i+1}</option>`).join("")}
-</select>
-</div>
-
-<div class="form-group">
-<label>Section Name</label>
-<input id="sectionName" placeholder="A / B / C">
-</div>
-
-<div class="form-group">
-<label>Stream</label>
-<select id="sectionStream">
-<option value="">General</option>
-<option value="Science">Science</option>
-<option value="Commerce">Commerce</option>
-<option value="Arts">Arts</option>
-</select>
-</div>
-
-</div>
-
-<button class="small-btn" onclick="addTeacherSection()">+ Add Section</button>
-
-<div style="margin-top:20px">
-${buildSectionsList()}
-</div>
-
-</div>
-</div>
-`;
-
-document.getElementById("otherPage").innerHTML=html;
-}
-
-function buildTeacherTable(teachers){
-
-if(!teachers.length){
-return `<div class="empty"><h3>No Teachers Added</h3><p style="margin-top:8px">Click + Add Teacher to create teacher profile.</p></div>`;
-}
-
-let html=`
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>Photo</th>
-<th>Employee ID</th>
-<th>Name</th>
-<th>Father/Basic</th>
-<th>Subject</th>
-<th>Class</th>
-<th>Section</th>
-<th>Mobile</th>
-<th>Qualification</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-`;
-
-teachers.forEach(t=>{
-
-let photo=t.photo?
-`<img class="teacher-photo" src="${t.photo}">`:
-`<div class="teacher-photo" style="display:flex;align-items:center;justify-content:center">👨‍🏫</div>`;
-
-html+=`
-<tr>
-<td>${photo}</td>
-<td>${escapeHtml(t.employeeId)}</td>
-<td><strong>${escapeHtml(t.name)}</strong></td>
-<td>-</td>
-<td>${escapeHtml(t.subject)}</td>
-<td>${t.classNo?"Class "+t.classNo:"All"}</td>
-<td>${escapeHtml(t.section||"All")}</td>
-<td>${escapeHtml(t.mobile)}</td>
-<td>${escapeHtml(t.qualification||"-")}</td>
-<td>
-<div class="action-buttons">
-<button class="edit-btn" onclick="openTeacherModal(${t.id})">✏️ Edit</button>
-<button class="delete-btn" onclick="deleteTeacher(${t.id})">🗑️ Delete</button>
-</div>
-</td>
-</tr>
-`;
-});
-
-html+=`</tbody></table></div>`;
-
-return html;
-}
-
-function filterTeachers(){
-
-let q=document.getElementById("teacherSearch").value.toLowerCase();
-
-let teachers=getTeachers().filter(t=>
-t.name.toLowerCase().includes(q)||
-t.employeeId.toLowerCase().includes(q)||
-t.subject.toLowerCase().includes(q)||
-t.mobile.includes(q)
-);
-
-document.getElementById("teacherTableArea").innerHTML=
-buildTeacherTable(teachers);
-}
-
-function buildSectionsList(){
-
-let sections=getSections();
-
-if(!sections.length){
-return `<div class="empty">No sections created.</div>`;
-}
-
-return sections.map(x=>`
-
-<div style="display:flex;justify-content:space-between;align-items:center;background:#f8faff;padding:12px;border-radius:10px;margin-bottom:8px">
-
-<div>
-<strong>Class ${x.classNo} - Section ${escapeHtml(x.name)}</strong>
-${x.stream?`<span style="color:#777"> • ${escapeHtml(x.stream)}</span>`:""}
-</div>
-
-<button class="delete-btn" onclick="deleteSection(${x.id})">Delete</button>
-
-</div>
-
-`).join("");
-}
-
-function deleteSection(id){
-
-if(!confirm("Delete this section?"))return;
-
-saveSections(getSections().filter(x=>Number(x.id)!==Number(id)));
-
-renderTeacherPage();
-}
-
-/* FEES */
-
-function openFeeModal(studentId,classNo,stream,section){
-
-let s=getStudents().find(x=>Number(x.id)===Number(studentId));
-if(!s)return;
-
-window.feeStudentId=studentId;
-window.feeClassNo=classNo;
-window.feeStream=stream||"";
-window.feeSection=section||"";
-
-document.getElementById("feeStudentName").value=s.name;
-document.getElementById("feeAmount").value="";
-document.getElementById("feeDate").value=today();
-document.getElementById("feeMode").value="Cash";
-document.getElementById("feeReceipt").value="";
-
-document.getElementById("feeModal").style.display="flex";
-}
-
-function saveFeePayment(){
-
-let amount=Number(document.getElementById("feeAmount").value);
-let date=document.getElementById("feeDate").value;
-
-if(amount<=0||!date){
-alert("Enter valid payment details");
-return;
-}
-
-let fees=getFees();
-
-fees.push({
-id:Date.now(),
-studentId:Number(window.feeStudentId),
-amount,
-date,
-mode:document.getElementById("feeMode").value,
-receipt:document.getElementById("feeReceipt").value.trim()
-});
-
-saveFees(fees);
-
-closeFeeModal();
-updateDashboard();
-
-openStudentsData("fees",window.feeClassNo,window.feeStream,window.feeSection);
-}
-
-function deleteFee(id,classNo,stream,section){
-
-if(!confirm("Delete this payment?"))return;
-
-saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
-
-updateDashboard();
-openStudentsData("fees",classNo,stream,section);
-}
-
-function closeFeeModal(){
-document.getElementById("feeModal").style.display="none";
-}
-
-/* ATTENDANCE */
-
-let attendanceStudentId=null;
-let attendanceClassNo=null;
-let attendanceStream="";
-let attendanceSection="";
-let selectedAttendanceStatus="Present";
-
-function openAttendanceModal(studentId,classNo,stream,section){
-
-let s=getStudents().find(x=>Number(x.id)===Number(studentId));
-if(!s)return;
-
-attendanceStudentId=studentId;
-attendanceClassNo=classNo;
-attendanceStream=stream||"";
-attendanceSection=section||"";
-
-document.getElementById("attendanceModalTitle").innerText=
-"Attendance - "+s.name;
-
-document.getElementById("attendanceDate").value=today();
-
-renderAttendanceStudentList();
-
-document.getElementById("attendanceModal").style.display="flex";
-}
-
-function renderAttendanceStudentList(){
-
-let date=document.getElementById("attendanceDate").value;
-
-let existing=getAttendance().find(x=>
-Number(x.studentId)===Number(attendanceStudentId)&&x.date===date
-);
-
-selectedAttendanceStatus=existing?existing.status:"Present";
-
-document.getElementById("attendanceStudentList").innerHTML=`
-
-<div style="padding:20px">
-
-<strong>${escapeHtml(
-getStudents().find(x=>Number(x.id)===Number(attendanceStudentId)).name
-)}</strong>
-
-<div style="display:flex;gap:8px;margin-top:15px;flex-wrap:wrap">
-
-<button class="small-btn" onclick="setAttendance('Present')">🟢 Present</button>
-
-<button class="delete-btn" onclick="setAttendance('Absent')">🔴 Absent</button>
-
-<button style="background:#fff5d9;color:#b77900;border:0;padding:7px 10px;border-radius:7px;font-weight:bold" onclick="setAttendance('Leave')">🟡 Leave</button>
-
-</div>
-
-<div id="selectedAttendanceStatus" style="margin-top:12px;font-weight:bold">
-Selected: ${selectedAttendanceStatus}
-</div>
-
-</div>
-`;
-}
-
-function setAttendance(status){
-
-selectedAttendanceStatus=status;
-
-document.getElementById("selectedAttendanceStatus").innerText=
-"Selected: "+status;
-}
-
-function saveAttendanceData(){
-
-let date=document.getElementById("attendanceDate").value;
-
-if(!date){
-alert("Select date");
-return;
-}
-
-let data=getAttendance();
-
-let i=data.findIndex(x=>
-Number(x.studentId)===Number(attendanceStudentId)&&x.date===date
-);
-
-let record={
-id:i>=0?data[i].id:Date.now(),
-studentId:Number(attendanceStudentId),
-date,
-status:selectedAttendanceStatus
-};
-
-if(i>=0)data[i]=record;
-else data.push(record);
-
-saveAttendance(data);
-
-closeAttendanceModal();
-updateDashboard();
-
-openStudentsData(
-"attendance",
-attendanceClassNo,
-attendanceStream,
-attendanceSection
-);
-}
-
-function closeAttendanceModal(){
-document.getElementById("attendanceModal").style.display="none";
-}
-
-/* EXAMS */
-
-let examSubjects=[];
-let editingExamId=null;
-
-function openExamModal(studentId,classNo,stream,section){
-
-let s=getStudents().find(x=>Number(x.id)===Number(studentId));
-if(!s)return;
-
-let e=getExamForStudent(studentId);
-
-window.examStudentId=studentId;
-window.examClassNo=classNo;
-window.examStream=stream||"";
-window.examSection=section||"";
-editingExamId=e?e.id:null;
-
-examSubjects=e?.subjects?
-JSON.parse(JSON.stringify(e.subjects)):
-[
-{name:"Maths",max:100,obtained:0},
-{name:"Science",max:100,obtained:0},
-{name:"English",max:100,obtained:0},
-{name:"Hindi",max:100,obtained:0},
-{name:"Social Science",max:100,obtained:0}
-];
-
-document.getElementById("examModalTitle").innerText=
-e?"Edit Exam Result":"Add Exam Result";
-
-document.getElementById("examStudentName").value=s.name;
-document.getElementById("examName").value=e?.examName||"Annual Examination";
-document.getElementById("examDate").value=e?.examDate||today();
-
-renderSubjectRows();
-
-document.getElementById("examModal").style.display="flex";
-}
-
-function addSubjectRow(){
-examSubjects.push({name:"",max:100,obtained:0});
-renderSubjectRows();
-}
-
-function removeSubjectRow(i){
-examSubjects.splice(i,1);
-renderSubjectRows();
-}
-
-function renderSubjectRows(){
-
-let html="";
-
-examSubjects.forEach((x,i)=>{
-
-html+=`
-<div class="subject-row">
-
-<input placeholder="Subject Name"
-value="${escapeHtml(x.name)}"
-oninput="examSubjects[${i}].name=this.value;updateExamSummary()">
-
-<input type="number" value="${x.max}"
-oninput="examSubjects[${i}].max=Number(this.value)||0;updateExamSummary()">
-
-<input type="number" value="${x.obtained}"
-oninput="examSubjects[${i}].obtained=Number(this.value)||0;updateExamSummary()">
-
-<button class="delete-btn" onclick="removeSubjectRow(${i})">×</button>
-
-</div>
-`;
-});
-
-document.getElementById("subjectRows").innerHTML=html;
-updateExamSummary();
-}
-
-function updateExamSummary(){
-
-let total=getExamTotal({subjects:examSubjects});
-let obtained=getExamObtained({subjects:examSubjects});
-let percentage=total?obtained/total*100:0;
-
-document.getElementById("examSummary").innerHTML=`
-<strong>Total Marks:</strong> ${total}
-&nbsp; | &nbsp;
-<strong>Obtained:</strong> ${obtained}
-&nbsp; | &nbsp;
-<strong>Percentage:</strong> ${percentage.toFixed(1)}%
-`;
-}
-
-function saveExam(){
-
-let examName=document.getElementById("examName").value.trim();
-let examDate=document.getElementById("examDate").value;
-
-if(!examName||!examDate){
-alert("Enter exam name and date");
-return;
-}
-
-if(!examSubjects.length){
-alert("Add at least one subject");
-return;
-}
-
-for(let s of examSubjects){
-
-s.name=s.name.trim();
-s.max=Number(s.max)||0;
-s.obtained=Number(s.obtained)||0;
-
-if(!s.name||s.max<=0||s.obtained<0||s.obtained>s.max){
-alert("Please check subject marks");
-return;
-}
-}
-
-let data=getExams();
-
-let result={
-id:editingExamId||Date.now(),
-studentId:Number(window.examStudentId),
-examName,
-examDate,
-subjects:examSubjects
-};
-
-let i=data.findIndex(x=>Number(x.id)===Number(editingExamId));
-
-if(i>=0)data[i]=result;
-else data.push(result);
-
-saveExams(data);
-
-closeExamModal();
-
-openStudentsData(
-"exams",
-window.examClassNo,
-window.examStream,
-window.examSection
-);
-}
-
-function deleteExam(id,classNo,stream,section){
-
-if(!confirm("Delete this result?"))return;
-
-saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
-
-openStudentsData("exams",classNo,stream,section);
-}
-
-function closeExamModal(){
-document.getElementById("examModal").style.display="none";
-editingExamId=null;
-}
+function closeTeacherModal(){document.getElementById("teacherModal").style.display="none";editingTeacherId=null}
 
 /* HOMEWORK */
-
-let editingHomeworkId=null;
-
-function openHomeworkClasses(){
-
-let html=`
-
-<div class="card">
-<div class="card-header">
-<h3>Homework</h3>
-<button class="small-btn" onclick="openHomeworkModal()">+ Add Homework</button>
-</div>
-</div>
-`;
-
-for(let c=1;c<=12;c++){
-
-let students=getClassStudents(c);
-let sections=[...new Set(students.map(s=>s.section).filter(Boolean))];
-
-let homework=getHomework().filter(x=>Number(x.classNo)===c);
-
-html+=`
-<div class="class-section">
-
-<div class="class-heading">Class ${c}</div>
-
-<div class="class-summary">
-<span class="summary-item summary-total">👨‍🎓 Students: ${students.length}</span>
-<span class="summary-item summary-green">📚 Homework: ${homework.length}</span>
-</div>
-
-<div class="class-card" onclick="openHomeworkSubjects(${c})">
-
-<div class="class-number">Class ${c}</div>
-
-<div class="class-info">
-${sections.length?sections.length+" Sections":"No Sections"}
-</div>
-
-<div class="open-text">Open Subjects →</div>
-
-</div>
-
-</div>
-`;
-}
-
-document.getElementById("otherPage").innerHTML=html;
-}
-
-function openHomeworkSubjects(classNo){
-
-let homework=getHomework().filter(x=>Number(x.classNo)===Number(classNo));
-
-let subjects=[...new Set(homework.map(x=>x.subject).filter(Boolean))];
-
-let html=`
-
-<button class="back-btn" onclick="openHomeworkClasses()">← Back</button>
-
-<div class="card">
-<div class="card-header">
-<h3>Class ${classNo} - Subjects</h3>
-<button class="small-btn" onclick="openHomeworkModal(${classNo})">+ Add Homework</button>
-</div>
-</div>
-`;
-
-if(!subjects.length){
-
-html+=`
-<div class="card">
-<div class="empty">
-<h3>No Homework Added</h3>
-<p style="margin-top:8px">Teacher can add class-wise and subject-wise homework.</p>
-</div>
-</div>
-`;
-
-}else{
-
-subjects.forEach(subject=>{
-
-let records=homework.filter(x=>x.subject===subject);
-
-html+=`
-<div class="class-section">
-
-<div class="class-heading">📚 ${escapeHtml(subject)}</div>
-
-<div class="class-summary">
-<span class="summary-item summary-total">Homework: ${records.length}</span>
-</div>
-
-<div class="class-card" onclick="openHomeworkList(${classNo},'${escapeHtml(subject)}')">
-
-<div class="class-number">📖 ${escapeHtml(subject)}</div>
-
-<div class="class-info">
-${records.length} Assignment(s)
-</div>
-
-<div class="open-text">Open Homework →</div>
-
-</div>
-
-</div>
-`;
-});
-}
-
-document.getElementById("otherPage").innerHTML=html;
-}
-
-function openHomeworkList(classNo,subject){
-
-let records=getHomework().filter(x=>
-Number(x.classNo)===Number(classNo)&&x.subject===subject
-);
-
-let html=`
-
-<button class="back-btn" onclick="openHomeworkSubjects(${classNo})">← Back</button>
-
-<div class="card">
-<div class="card-header">
-<h3>Class ${classNo} - ${escapeHtml(subject)}</h3>
-<button class="small-btn" onclick="openHomeworkModal(${classNo},'${escapeHtml(subject)}')">+ Add Homework</button>
-</div>
-</div>
-`;
-
-if(!records.length){
-
-html+=`<div class="empty">No homework found.</div>`;
-
-}else{
-
-records.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-
-records.forEach(h=>{
-
-let teacher=getTeachers().find(t=>Number(t.id)===Number(h.teacherId));
-
-html+=`
-<div class="homework-card">
-
-<h3>📚 ${escapeHtml(h.subject)}</h3>
-
-<div class="homework-meta">
-
-<span>🏫 Class ${h.classNo}</span>
-
-${h.section?`<span>Section ${escapeHtml(h.section)}</span>`:""}
-
-${h.stream?`<span>Stream: ${escapeHtml(h.stream)}</span>`:""}
-
-<span>👨‍🏫 ${escapeHtml(teacher?.name||h.teacherName||"Teacher")}</span>
-
-<span>📅 ${formatDate(h.date)}</span>
-
-${h.dueDate?`<span>⏰ Due: ${formatDate(h.dueDate)}</span>`:""}
-
-</div>
-
-<div style="background:#f8faff;padding:15px;border-radius:10px;line-height:1.6">
-${escapeHtml(h.text)}
-</div>
-
-<div class="action-buttons" style="margin-top:12px">
-
-<button class="edit-btn" onclick="editHomework(${h.id})">✏️ Edit</button>
-
-<button class="delete-btn" onclick="deleteHomework(${h.id},${classNo},'${escapeHtml(subject)}')">🗑️ Delete</button>
-
-</div>
-
-</div>
-`;
-});
-}
-
-document.getElementById("otherPage").innerHTML=html;
-}
-
-function openHomeworkModal(classNo="",subject=""){
-
-editingHomeworkId=null;
-
-document.getElementById("homeworkModalTitle").innerText="Add Homework";
-
-document.getElementById("homeworkClass").value=classNo||"";
-document.getElementById("homeworkSubject").value=subject||"";
-document.getElementById("homeworkSection").innerHTML=
-`<option value="">All Sections</option>`;
-
-document.getElementById("homeworkStream").value="";
-document.getElementById("homeworkDate").value=today();
-document.getElementById("homeworkDueDate").value="";
-document.getElementById("homeworkText").value="";
-
-updateHomeworkSections();
-updateHomeworkTeachers();
-
-document.getElementById("homeworkModal").style.display="flex";
-}
-
-function updateHomeworkSections(){
-
-let classNo=Number(document.getElementById("homeworkClass").value);
-let select=document.getElementById("homeworkSection");
-
-select.innerHTML=`<option value="">All Sections</option>`;
-
-if(!classNo)return;
-
-let sections=getSections().filter(x=>Number(x.classNo)===classNo);
-
-sections.forEach(x=>{
-select.innerHTML+=
-`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
-});
-}
-
-function updateHomeworkTeachers(selected=""){
-
-let classNo=Number(document.getElementById("homeworkClass").value);
-let subject=document.getElementById("homeworkSubject").value.trim().toLowerCase();
-
-let select=document.getElementById("homeworkTeacher");
-
-select.innerHTML=`<option value="">Select Teacher</option>`;
-
+function renderHomeworkPage(){
 let teachers=getTeachers();
+let classes=[...new Set(teachers.map(t=>Number(t.classNo)).filter(Boolean))].sort((a,b)=>a-b);
 
-if(classNo){
-
-teachers=teachers.filter(t=>
-!t.classNo||
-Number(t.classNo)===classNo
-);
+document.getElementById("otherPage").innerHTML=`
+<div class="card">
+<div class="card-header"><h3>Homework</h3><button class="small-btn" onclick="openHomeworkModal()">+ Add Homework</button></div>
+<div class="homework-filter">
+<select id="hwClass" onchange="loadHomeworkList()"><option value="">Select Class</option>${classes.map(c=>`<option value="${c}">Class ${c}</option>`).join("")}</select>
+<select id="hwSubject" onchange="loadHomeworkList()"><option value="">Select Subject</option></select>
+<select id="hwDate" onchange="loadHomeworkList()"><option value="">All Dates</option></select>
+<button class="small-btn" onclick="openHomeworkModal()">+ Homework</button>
+</div>
+<div id="homeworkList"><div class="empty">Select class and subject to view homework.</div></div>
+</div>`;
 }
 
-if(subject){
-
-let subjectTeachers=teachers.filter(t=>
-String(t.subject||"").toLowerCase()===subject
-);
-
-if(subjectTeachers.length)teachers=subjectTeachers;
+function loadHomeworkSubjects(){
+let c=Number(document.getElementById("hwClass").value);
+let subjects=[...new Set(getTeachers().filter(t=>Number(t.classNo)===c).map(t=>t.subject).filter(Boolean))];
+let select=document.getElementById("hwSubject");
+select.innerHTML=`<option value="">All Subjects</option>`+subjects.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("");
+loadHomeworkList()
 }
+document.addEventListener("change",e=>{
+if(e.target.id==="hwClass")loadHomeworkSubjects()
+})
 
-teachers.forEach(t=>{
+function loadHomeworkList(){
+let c=Number(document.getElementById("hwClass").value);
+let subject=document.getElementById("hwSubject").value;
+let list=getHomework().filter(h=>Number(h.classNo)===c&&(!subject||h.subject===subject));
 
-select.innerHTML+=`
-<option value="${t.id}">
-${escapeHtml(t.name)} - ${escapeHtml(t.subject)}
-</option>
-`;
+let html="";
+if(!c){document.getElementById("homeworkList").innerHTML=`<div class="empty">Select class first.</div>`;return}
+if(!list.length){document.getElementById("homeworkList").innerHTML=`<div class="empty">No homework for this class/subject.</div>`;return}
+
+list.forEach(h=>{
+html+=`<div class="homework-item"><h4>📚 ${escapeHtml(h.subject)} — ${formatDate(h.date)}</h4><p><strong>Teacher:</strong> ${escapeHtml(h.teacherName)}</p><p style="margin-top:6px">${escapeHtml(h.text)}</p><button class="delete-btn" style="margin-top:10px" onclick="deleteHomework(${h.id})">Delete</button></div>`
 });
+document.getElementById("homeworkList").innerHTML=html
+}
 
-select.value=selected||"";
+function openHomeworkModal(){
+let teachers=getTeachers();
+if(!teachers.length){alert("First add a teacher.");return}
+let options=teachers.map(t=>`<option value="${t.id}">${escapeHtml(t.name)} — Class ${t.classNo} — ${escapeHtml(t.subject)}</option>`).join("");
+
+document.getElementById("otherPage").insertAdjacentHTML("beforeend",`
+<div class="modal-bg" id="homeworkTempModal" style="display:flex">
+<div class="modal">
+<div class="modal-header"><h2>Add Homework</h2><button class="close-btn" onclick="document.getElementById('homeworkTempModal').remove()">×</button></div>
+<div class="form-group"><label>Teacher</label><select id="hwTeacher" onchange="setHomeworkTeacherInfo()">${options}</select></div>
+<div class="form-grid">
+<div class="form-group"><label>Class</label><input id="hwSelectedClass" readonly></div>
+<div class="form-group"><label>Subject</label><input id="hwSelectedSubject" readonly></div>
+<div class="form-group"><label>Section</label><input id="hwSelectedSection" readonly></div>
+<div class="form-group"><label>Date</label><input id="hwNewDate" type="date" value="${today()}"></div>
+</div>
+<div class="form-group"><label>Homework</label><textarea id="hwText" style="width:100%;min-height:130px;border:1px solid #dce2eb;border-radius:11px;padding:13px"></textarea></div>
+<button class="btn btn-primary" onclick="saveHomeworkData()">Save Homework</button>
+</div></div>`);
+setHomeworkTeacherInfo()
+}
+
+function setHomeworkTeacherInfo(){
+let id=Number(document.getElementById("hwTeacher").value),t=getTeachers().find(x=>Number(x.id)===id);if(!t)return;
+document.getElementById("hwSelectedClass").value="Class "+t.classNo;
+document.getElementById("hwSelectedSubject").value=t.subject;
+document.getElementById("hwSelectedSection").value=t.section||"All Sections";
 }
 
 function saveHomeworkData(){
-
-let classNo=document.getElementById("homeworkClass").value;
-let section=document.getElementById("homeworkSection").value;
-let stream=document.getElementById("homeworkStream").value;
-let subject=document.getElementById("homeworkSubject").value.trim();
-let teacherId=document.getElementById("homeworkTeacher").value;
-let date=document.getElementById("homeworkDate").value;
-let dueDate=document.getElementById("homeworkDueDate").value;
-let text=document.getElementById("homeworkText").value.trim();
-
-if(!classNo||!subject||!teacherId||!date||!text){
-alert("Please fill Class, Subject, Teacher, Date and Homework");
-return;
+let id=Number(document.getElementById("hwTeacher").value),t=getTeachers().find(x=>Number(x.id)===id);
+let text=document.getElementById("hwText").value.trim(),date=document.getElementById("hwNewDate").value;
+if(!t||!text||!date){alert("Fill homework details");return}
+let d=getHomework();
+d.push({id:Date.now(),teacherId:t.id,teacherName:t.name,classNo:Number(t.classNo),section:t.section||"",subject:t.subject,date,text});
+saveHomework(d);
+document.getElementById("homeworkTempModal").remove();
+renderHomeworkPage();
+document.getElementById("hwClass").value=t.classNo;
+loadHomeworkSubjects();
 }
 
-let teacher=getTeachers().find(t=>Number(t.id)===Number(teacherId));
-
-let data=getHomework();
-
-let record={
-id:editingHomeworkId||Date.now(),
-classNo:Number(classNo),
-section,
-stream,
-subject,
-teacherId:Number(teacherId),
-teacherName:teacher?.name||"Teacher",
-date,
-dueDate,
-text
-};
-
-let i=data.findIndex(x=>Number(x.id)===Number(editingHomeworkId));
-
-if(i>=0)data[i]=record;
-else data.push(record);
-
-saveHomework(data);
-
-closeHomeworkModal();
-
-openHomeworkList(Number(classNo),subject);
-}
-
-function editHomework(id){
-
-let h=getHomework().find(x=>Number(x.id)===Number(id));
-if(!h)return;
-
-editingHomeworkId=id;
-
-document.getElementById("homeworkModalTitle").innerText="Edit Homework";
-
-document.getElementById("homeworkClass").value=h.classNo;
-
-updateHomeworkSections();
-
-document.getElementById("homeworkSection").value=h.section||"";
-document.getElementById("homeworkStream").value=h.stream||"";
-document.getElementById("homeworkSubject").value=h.subject||"";
-
-updateHomeworkTeachers(h.teacherId);
-
-document.getElementById("homeworkDate").value=h.date||today();
-document.getElementById("homeworkDueDate").value=h.dueDate||"";
-document.getElementById("homeworkText").value=h.text||"";
-
-document.getElementById("homeworkModal").style.display="flex";
-}
-
-function deleteHomework(id,classNo,subject){
-
-if(!confirm("Delete this homework?"))return;
-
+function deleteHomework(id){
+if(!confirm("Delete homework?"))return;
 saveHomework(getHomework().filter(x=>Number(x.id)!==Number(id)));
-
-openHomeworkList(classNo,subject);
+loadHomeworkList()
 }
 
-function closeHomeworkModal(){
-document.getElementById("homeworkModal").style.display="none";
-editingHomeworkId=null;
+/* REPORTS */
+function downloadFile(filename,content,type){
+let blob=new Blob([content],{type});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+setTimeout(()=>URL.revokeObjectURL(a.href),500)
 }
 
-/* OTHER */
+function csvCell(x){return`"${String(x??"").replace(/"/g,'""')}"`}
+
+function downloadStudentReport(){
+let rows=[["Roll","Student Name","Father","Mother","Mobile","DOB","Age","Gender","Caste","Religion","Class","Section","Stream","Total Fee","Paid Fee","Due Fee"]];
+getStudents().forEach((s,i)=>rows.push([i+1,s.name,s.father,s.mother,s.mobile,s.dob,s.age,s.gender,s.caste,s.religion,s.classNo,s.section,s.stream,s.fee,getStudentPaid(s.id),Math.max(0,Number(s.fee||0)-getStudentPaid(s.id))]));
+downloadFile("Student_Report.csv",rows.map(r=>r.map(csvCell).join(",")).join("\n"),"text/csv;charset=utf-8")
+}
+
+function downloadFeeReport(){
+let rows=[["Student","Class","Total Fee","Paid","Due","Payment Date","Amount","Mode","Receipt"]];
+getStudents().forEach(s=>{
+let p=getStudentPayments(s.id);
+if(!p.length)rows.push([s.name,s.classNo,s.fee,0,s.fee,"","","",""]);
+p.forEach(x=>rows.push([s.name,s.classNo,s.fee,getStudentPaid(s.id),Math.max(0,Number(s.fee||0)-getStudentPaid(s.id)),x.date,x.amount,x.mode,x.receipt]))
+});
+downloadFile("Fee_Report.csv",rows.map(r=>r.map(csvCell).join(",")).join("\n"),"text/csv;charset=utf-8")
+}
+
+function downloadAttendanceReport(){
+let rows=[["Student","Class","Present","Absent","Leave","Attendance %"]];
+getStudents().forEach(s=>{
+let r=getAttendanceForStudent(s.id),p=r.filter(x=>x.status==="Present").length,a=r.filter(x=>x.status==="Absent").length,l=r.filter(x=>x.status==="Leave").length,total=p+a+l;
+rows.push([s.name,s.classNo,p,a,l,total?(p/total*100).toFixed(1):0])
+});
+downloadFile("Attendance_Report.csv",rows.map(r=>r.map(csvCell).join(",")).join("\n"),"text/csv;charset=utf-8")
+}
+
+function downloadResultReport(){
+let rows=[["Student","Class","Section","Stream","Exam","Date","Total Marks","Obtained","Percentage","Result","Subjects"]];
+getStudents().forEach(s=>{
+let e=getExamForStudent(s.id);
+if(e){
+rows.push([s.name,s.classNo,s.section,s.stream,e.examName,e.examDate,getExamTotal(e),getExamObtained(e),getExamPercentage(e).toFixed(1),getExamPercentage(e)>=33?"PASS":"FAIL",(e.subjects||[]).map(x=>x.name+":"+x.obtained+"/"+x.max).join(" | ")])
+}else rows.push([s.name,s.classNo,s.section,s.stream,"","","","","","Result Not Added",""])
+});
+downloadFile("Exam_Result_Report.csv",rows.map(r=>r.map(csvCell).join(",")).join("\n"),"text/csv;charset=utf-8")
+}
 
 function getOtherPage(page){
-
 if(page==="teachers"){
-
-setTimeout(renderTeacherPage,0);
-return `<div class="card"><div class="empty">Loading Teachers...</div></div>`;
-}
-
-if(page==="timetable"){
-
-return `
-<div class="card">
-<div class="card-header"><h3>Class Timetable</h3></div>
-<div class="table-container">
-<table>
-<tr>
-<th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th>
-</tr>
-<tr>
-<td>08:00</td><td>Maths</td><td>Science</td><td>English</td><td>Maths</td><td>Hindi</td>
-</tr>
-<tr>
-<td>09:00</td><td>English</td><td>Maths</td><td>Hindi</td><td>Science</td><td>Computer</td>
-</tr>
-</table>
-</div>
-</div>
-`;
-}
-
-if(page==="notices"){
-
-return `
-<div class="card">
-<div class="card-header">
-<h3>Notice Board</h3>
-<button class="small-btn">+ New Notice</button>
-</div>
-
-<div class="notice">
-<strong>Independence Day Holiday</strong>
-<span>School holiday notice</span>
-</div>
-
-<div class="notice">
-<strong>Parent Teacher Meeting</strong>
-<span>PTM scheduled Saturday</span>
-</div>
-
-<div class="notice">
-<strong>Annual Sports Day</strong>
-<span>All students can participate</span>
-</div>
-</div>
-`;
+let teachers=getTeachers();
+return`<div class="card">
+<div class="card-header"><h3>Teachers</h3><button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button></div>
+${teachers.length?`<div class="table-container"><table><thead><tr><th>Photo</th><th>Employee ID</th><th>Name</th><th>Subject</th><th>Class</th><th>Section</th><th>Mobile</th><th>Action</th></tr></thead><tbody>
+${teachers.map(t=>`<tr><td>${t.photo?`<img class="student-photo" src="${t.photo}">`:`👨‍🏫`}</td><td>${escapeHtml(t.employeeId)}</td><td><strong>${escapeHtml(t.name)}</strong></td><td>${escapeHtml(t.subject)}</td><td>Class ${t.classNo}</td><td>${escapeHtml(t.section||"All")}</td><td>${escapeHtml(t.mobile)}</td><td><button class="edit-btn" onclick="openTeacherModal(${t.id})">✏️ Edit</button> <button class="delete-btn" onclick="deleteTeacher(${t.id})">🗑️ Delete</button></td></tr>`).join("")}
+</tbody></table></div>`:`<div class="empty">No teachers added.</div>`}
+</div>`
 }
 
 if(page==="reports"){
-
-let students=getStudents();
-let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
-let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
-let results=students.map(s=>getExamForStudent(s.id)).filter(Boolean);
-let pass=results.filter(e=>getExamPercentage(e)>=33).length;
-
-return `
-<div class="stats">
-
-<div class="stat-card">
-<div class="stat-number">${students.length}</div>
-<div class="stat-label">Students</div>
+let students=getStudents(),paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0),total=students.reduce((a,s)=>a+Number(s.fee||0),0),results=students.map(s=>getExamForStudent(s.id)).filter(Boolean),pass=results.filter(e=>getExamPercentage(e)>=33).length;
+return`<div class="stats">
+<div class="stat-card"><div class="stat-number">${students.length}</div><div class="stat-label">Students</div></div>
+<div class="stat-card"><div class="stat-number">${total?Math.round(paid/total*100):0}%</div><div class="stat-label">Fee Collection</div></div>
+<div class="stat-card"><div class="stat-number">${results.length}</div><div class="stat-label">Results Added</div></div>
+<div class="stat-card"><div class="stat-number">${results.length?Math.round(pass/results.length*100):0}%</div><div class="stat-label">Pass Percentage</div></div>
 </div>
-
-<div class="stat-card">
-<div class="stat-number">${total?Math.round(paid/total*100):0}%</div>
-<div class="stat-label">Fee Collection</div>
+<div class="card">
+<div class="card-header"><h3>Download Detailed Reports</h3></div>
+<div class="report-actions">
+<button class="small-btn" onclick="downloadStudentReport()">⬇️ Student Report</button>
+<button class="small-btn" onclick="downloadFeeReport()">⬇️ Fee Report</button>
+<button class="small-btn" onclick="downloadAttendanceReport()">⬇️ Attendance Report</button>
+<button class="small-btn" onclick="downloadResultReport()">⬇️ Exam / Result Report</button>
 </div>
-
-<div class="stat-card">
-<div class="stat-number">${results.length}</div>
-<div class="stat-label">Results Added</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">${results.length?Math.round(pass/results.length*100):0}%</div>
-<div class="stat-label">Pass Percentage</div>
-</div>
-
-</div>
-`;
+<div class="report-section"><div class="report-title">Student Details</div><div class="notice">Name, father, mother, mobile, DOB, age, caste, religion, class, section, stream and fee details included.</div></div>
+<div class="report-section"><div class="report-title">Fee Details</div><div class="notice">Total fee, paid fee, due fee and individual payment history included.</div></div>
+<div class="report-section"><div class="report-title">Attendance Details</div><div class="notice">Present, absent, leave and attendance percentage included.</div></div>
+<div class="report-section"><div class="report-title">Result Details</div><div class="notice">Exam, date, total marks, obtained marks, percentage, PASS/FAIL and subject-wise marks included.</div></div>
+</div>`
 }
+
+if(page==="timetable")return`<div class="card"><div class="card-header"><h3>Class Timetable</h3></div><div class="table-container"><table><tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr><tr><td>08:00</td><td>Maths</td><td>Science</td><td>English</td><td>Maths</td><td>Hindi</td></tr><tr><td>09:00</td><td>English</td><td>Maths</td><td>Hindi</td><td>Science</td><td>Computer</td></tr></table></div></div>`;
+
+if(page==="notices")return`<div class="card"><div class="card-header"><h3>Notice Board</h3><button class="small-btn">+ New Notice</button></div><div class="notice"><strong>Independence Day Holiday</strong><span>School holiday notice</span></div><div class="notice"><strong>Parent Teacher Meeting</strong><span>PTM scheduled Saturday</span></div><div class="notice"><strong>Annual Sports Day</strong><span>All students can participate</span></div></div>`;
 
 if(page==="settings"){
-
-let school=localStorage.getItem("schoolName")||"ABC Public School";
-let email=localStorage.getItem("schoolEmail")||"abcschool@example.com";
-
-return `
-<div class="card">
-
-<div class="card-header">
-<h3>School Settings</h3>
-</div>
-
-<div style="padding:20px">
-
-<div class="form-group">
-<label>School Name</label>
-<input id="settingsSchool" value="${escapeHtml(school)}">
-</div>
-
-<div class="form-group">
-<label>Email</label>
-<input id="settingsEmail" value="${escapeHtml(email)}">
-</div>
-
-<button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
-
-</div>
-</div>
-`;
+return`<div class="card"><div class="card-header"><h3>School Settings</h3></div><div style="padding:20px"><div class="form-group"><label>School Name</label><input id="settingsSchool" value="${escapeHtml(localStorage.getItem("schoolName")||"ABC Public School")}"></div><div class="form-group"><label>Email</label><input id="settingsEmail" value="${escapeHtml(localStorage.getItem("schoolEmail")||"") }"></div><button class="btn btn-primary" onclick="saveSettings()">Save Changes</button></div></div>`
 }
-
-return "";
+return""
 }
-
 function saveSettings(){
-
-let school=document.getElementById("settingsSchool").value.trim();
-let email=document.getElementById("settingsEmail").value.trim();
-
-localStorage.setItem("schoolName",school);
-localStorage.setItem("schoolEmail",email);
-
-document.getElementById("displaySchool").innerText=school;
-
-alert("Settings saved successfully!");
+let s=document.getElementById("settingsSchool").value.trim(),e=document.getElementById("settingsEmail").value.trim();
+localStorage.setItem("schoolName",s);localStorage.setItem("schoolEmail",e);document.getElementById("displaySchool").innerText=s;alert("Settings saved!")
 }
 
 /* DASHBOARD */
-
 function updateDashboard(){
-
-let students=getStudents();
-let teachers=getTeachers();
-
-document.getElementById("dashStudents").innerText=students.length;
-document.getElementById("dashTeachers").innerText=teachers.length;
-
-let r=getAttendance().filter(x=>
-x.date===today()&&
-students.some(s=>Number(s.id)===Number(x.studentId))
-);
-
-let present=r.filter(x=>x.status==="Present").length;
-let absent=r.filter(x=>x.status==="Absent").length;
-let leave=r.filter(x=>x.status==="Leave").length;
-
-let total=present+absent+leave;
-
-document.getElementById("dashPresent").innerText=present+" Students";
-document.getElementById("dashAbsent").innerText=absent+" Students";
-document.getElementById("dashLeave").innerText=leave+" Students";
-
-document.getElementById("dashAttendance").innerText=
-(total?Math.round(present/total*100):0)+"%";
-
-let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
-
-document.getElementById("dashFees").innerText=
-"₹"+paid.toLocaleString("en-IN");
+let s=getStudents(),t=getTeachers();
+document.getElementById("dashStudents").innerText=s.length;
+document.getElementById("dashTeachers").innerText=t.length;
+let r=getAttendance().filter(x=>x.date===today()),p=r.filter(x=>x.status==="Present").length,a=r.filter(x=>x.status==="Absent").length,l=r.filter(x=>x.status==="Leave").length,total=p+a+l;
+document.getElementById("dashPresent").innerText=p+" Students";
+document.getElementById("dashAbsent").innerText=a+" Students";
+document.getElementById("dashLeave").innerText=l+" Students";
+document.getElementById("dashAttendance").innerText=(total?Math.round(p/total*100):0)+"%";
+let paid=s.reduce((a,x)=>a+getStudentPaid(x.id),0);
+document.getElementById("dashFees").innerText="₹"+paid.toLocaleString("en-IN")
 }
 
 /* MOBILE */
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open")}
 
-function toggleSidebar(){
-document.getElementById("sidebar").classList.toggle("open");
-}
-
-/* EVENTS */
-
+/* INIT */
 document.getElementById("studentClass").addEventListener("change",function(){
-
-if(![11,12].includes(Number(this.value))){
-document.getElementById("studentStream").value="";
-}
-
-updateSectionOptions();
+if(![11,12].includes(Number(this.value)))document.getElementById("studentStream").value="";
+updateSectionOptions()
 });
-
-document.getElementById("teacherClass").addEventListener("change",function(){
-updateTeacherSections();
-});
-
-document.getElementById("homeworkClass").addEventListener("change",function(){
-updateHomeworkSections();
-updateHomeworkTeachers();
-});
-
-document.getElementById("homeworkSubject").addEventListener("input",function(){
-updateHomeworkTeachers();
-});
-
-document.getElementById("attendanceDate").addEventListener("change",function(){
-renderAttendanceStudentList();
-});
-
-/* INITIAL */
 
 updateDashboard();
-
 </script>
-
 </body>
 </html>
