@@ -1586,12 +1586,12 @@ $("dashboardNotices").innerHTML=ns.length?
 ns.map(n=>`<div class="notice"><strong>${escapeHtml(n.title)}</strong><span>${formatDate(n.date)}${n.text?" · "+escapeHtml(n.text):""}</span></div>`).join(""):
 `<div class="notice"><strong>No notices</strong><span>Add a notice from Notice Board.</span></div>`;
 
-$("dashStudents")?.innerText=s.length;
-$("dashPresent")?.innerText=p+" Students";
-$("dashAbsent")?.innerText=ab+" Students";
-$("dashLeave")?.innerText=l+" Students";
-$("dashAttendance")?.innerText=(p+ab+l?Math.round(p/(p+ab+l)*100):0)+"%";
-$("dashFees")?.innerText="₹"+paid.toLocaleString("en-IN")
+if($("dashStudents")) $("dashStudents").innerText=s.length;
+if($("dashPresent")) $("dashPresent").innerText=p+" Students";
+if($("dashAbsent")) $("dashAbsent").innerText=ab+" Students";
+if($("dashLeave")) $("dashLeave").innerText=l+" Students";
+if($("dashAttendance")) $("dashAttendance").innerText=(p+ab+l?Math.round(p/(p+ab+l)*100):0)+"%";
+if($("dashFees")) $("dashFees").innerText="₹"+paid.toLocaleString("en-IN")
 }
 
 /* SETTINGS */
