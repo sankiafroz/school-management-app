@@ -735,18 +735,33 @@ function saveFeePayment(){
 let amount=Number($("feeAmount").value),date=$("feeDate").value;
 if(amount<=0||!date){alert("Enter amount and date");return}
 let f=getFees();
-f.push({
-id:Date.now(),
-studentId:Number(window.feeStudentId),
-amount,date,
-mode:$("feeMode").value,
-receipt:$("feeReceipt").value.trim()
-});
+if(window.editingFeeId){
+let x=f.find(v=>Number(v.id)===Number(window.editingFeeId));
+if(x)Object.assign(x,{amount,date,mode:$("feeMode").value,receipt:$("feeReceipt").value.trim()});
+}else{
+f.push({id:Date.now(),studentId:Number(window.feeStudentId),amount,date,mode:$("feeMode").value,receipt:$("feeReceipt").value.trim()});
+}
 saveFees(f);
 closeFeeModal();
 updateDashboard();
 openStudentsData("fees",window.feeClassNo,window.feeStream,window.feeSection)
 }
+function editFeePayment(id){
+let x=getFees().find(v=>Number(v.id)===Number(id));
+if(!x)return;
+window.editingFeeId=id;
+window.feeStudentId=x.studentId;
+window.feeClassNo=Number(getStudents().find(v=>Number(v.id)===Number(x.studentId))?.classNo||window.currentClassNo||1);
+window.feeStream=getStudents().find(v=>Number(v.id)===Number(x.studentId))?.stream||"";
+window.feeSection=getStudents().find(v=>Number(v.id)===Number(x.studentId))?.section||"";
+$("feeStudentName").value=getStudents().find(v=>Number(v.id)===Number(x.studentId))?.name||"";
+$("feeAmount").value=x.amount||0;
+$("feeDate").value=x.date||today();
+$("feeMode").value=x.mode||"Cash";
+$("feeReceipt").value=x.receipt||"";
+$("feeModal").style.display="flex";
+}
+
 function viewFeeHistory(id){
 let s=getStudents().find(x=>Number(x.id)===Number(id));
 let p=getStudentPayments(id);
@@ -755,7 +770,7 @@ let html=`
 <div class="modal">
 <div class="modal-header"><h2>Fee History - ${escapeHtml(s?.name||"Student")}</h2><button class="close-btn" onclick="document.getElementById('feeHistoryModal').remove()">×</button></div>
 <div class="table-container"><table style="min-width:600px"><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Receipt</th><th>Action</th></tr>
-${p.length?p.map(x=>`<tr><td>${formatDate(x.date)}</td><td>₹${Number(x.amount||0).toLocaleString("en-IN")}</td><td>${escapeHtml(x.mode||"-")}</td><td>${escapeHtml(x.receipt||"-")}</td><td><button class="delete-btn" onclick="deleteFee(${x.id},${window.currentClassNo},'${escapeHtml(window.currentStream||"")}','${escapeHtml(window.currentSection||"")}');document.getElementById('feeHistoryModal')?.remove()">Delete</button></td></tr>`).join(""):`<tr><td colspan="5">No payments.</td></tr>`}
+${p.length?p.map(x=>`<tr><td>${formatDate(x.date)}</td><td>₹${Number(x.amount||0).toLocaleString("en-IN")}</td><td>${escapeHtml(x.mode||"-")}</td><td>${escapeHtml(x.receipt||"-")}</td><td><button class="edit-btn" onclick="document.getElementById('feeHistoryModal')?.remove();editFeePayment(${x.id})">✏️ Edit</button> <button class="delete-btn" onclick="deleteFee(${x.id},${window.currentClassNo},'${escapeHtml(window.currentStream||"")}','${escapeHtml(window.currentSection||"")}');document.getElementById('feeHistoryModal')?.remove()">Delete</button></td></tr>`).join(""):`<tr><td colspan="5">No payments.</td></tr>`}
 </table></div>
 </div></div>`;
 document.body.insertAdjacentHTML("beforeend",html)
@@ -766,7 +781,7 @@ saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
 updateDashboard();
 openStudentsData("fees",classNo,stream||"",section||"")
 }
-function closeFeeModal(){$("feeModal").style.display="none"}
+function closeFeeModal(){$("feeModal").style.display="none";window.editingFeeId=null}
 
 /* ATTENDANCE */
 function getAttendanceForStudent(id){
