@@ -1093,6 +1093,11 @@ openHomeworkClasses();
 return;
 }
 
+if(page==="teachers"){
+renderTeacherPage();
+return;
+}
+
 document.getElementById("otherPage").innerHTML=getOtherPage(page);
 }
 
@@ -3145,9 +3150,7 @@ editingHomeworkId=null;
 function getOtherPage(page){
 
 if(page==="teachers"){
-
-setTimeout(renderTeacherPage,0);
-return `<div class="card"><div class="empty">Loading Teachers...</div></div>`;
+return "";
 }
 
 if(page==="timetable"){
