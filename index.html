@@ -111,6 +111,20 @@ th{background:#fafbfd;color:#667085}
 .homework-card{background:#fff;border:1px solid #e5eaf1;border-radius:15px;padding:18px;margin-bottom:12px}
 .homework-card h3{margin-bottom:7px}
 .homework-meta{display:flex;gap:12px;flex-wrap:wrap;color:#667085;font-size:13px;margin-bottom:10px}
+.student-profile-list{padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.student-profile-card{border:1px solid #e5eaf1;border-radius:16px;padding:16px;background:#fff;box-shadow:0 3px 12px #00000008}
+.student-profile-top{display:flex;gap:14px;align-items:center;padding-bottom:13px;border-bottom:1px solid #edf0f4;margin-bottom:13px}
+.student-profile-avatar{width:78px;height:78px;border-radius:16px;object-fit:cover;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}
+.student-profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+.student-profile-name{font-size:18px;font-weight:bold}
+.student-profile-meta{color:#667085;font-size:12px;margin-top:5px;line-height:1.5}
+.student-profile-details{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.student-profile-detail{background:#f8faff;padding:9px;border-radius:9px}
+.student-profile-detail small{display:block;color:#777;font-size:11px;margin-bottom:3px}
+.student-profile-detail strong{display:block;font-size:13px;word-break:break-word}
+.fee-paid{color:#15803d!important}.fee-pending{color:#b77900!important}
+@media(max-width:700px){.student-profile-list{grid-template-columns:1fr}.student-profile-details{grid-template-columns:1fr 1fr}}
+
 .profile-box{padding:22px}
 .profile-head{display:flex;gap:20px;align-items:center;padding-bottom:20px;border-bottom:1px solid #edf0f4;margin-bottom:18px}
 .profile-large{width:120px;height:120px;border-radius:20px;object-fit:cover;background:#eef4ff}
@@ -367,6 +381,11 @@ SchoolHub
 <div class="form-group">
 <label>Student Name *</label>
 <input id="studentName">
+</div>
+
+<div class="form-group">
+<label>Roll Number</label>
+<input id="studentRoll" type="number" placeholder="Enter roll number">
 </div>
 
 <div class="form-group">
@@ -909,6 +928,7 @@ for(let i=0;i<names.length;i++){
 
 students.push({
 id:Date.now()+i,
+roll:i+1,
 name:names[i],
 father:fathers[i],
 mother:"Mother Name",
@@ -1142,6 +1162,13 @@ document.getElementById("otherPage").innerHTML=html;
 
 function openClass(type,classNo){
 
+/* Students module opens the selected class directly.
+   Sections/streams remain available for Fees, Attendance and Exam. */
+if(type==="students"){
+openStudentsData("students",classNo,"","");
+return;
+}
+
 if(classNo===11||classNo===12){
 openStreams(type,classNo);
 return;
@@ -1284,21 +1311,47 @@ stream?
 `openStreams('${type}',${classNo})`:
 `openClasses('${type}')`;
 
+if(type==="students"){
+
+let html=`
+<button class="back-btn" onclick="${back}">← Back to Classes</button>
+
+<div class="card">
+<div class="card-header">
+<div>
+<h3>${title}</h3>
+<p style="color:#777;font-size:12px;margin-top:4px">All Students Profiles</p>
+</div>
+<button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>
+</div>
+
+<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
+👨‍🎓 <strong>Students:</strong> ${students.length}
+</div>
+
+<div class="search-box">
+<input id="studentSearch" placeholder="🔍 Search student, father name or mobile..." oninput="filterStudentCards(${classNo},'${stream||""}','${section||""}')">
+</div>
+
+<div id="studentTableArea">
+${buildStudentProfileCards(classNo,stream,section,students)}
+</div>
+</div>
+`;
+
+document.getElementById("otherPage").innerHTML=html;
+return;
+}
+
 let html=`
 <button class="back-btn" onclick="${back}">← Back</button>
 
 <div class="card">
-
 <div class="card-header">
-
 <div>
 <h3>${title}</h3>
 <p style="color:#777;font-size:12px;margin-top:4px">${getTypeTitle(type)} Details</p>
 </div>
-
-${type==="students"?
-`<button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>`:""}
-
 </div>
 
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
@@ -1312,18 +1365,91 @@ ${type==="students"?
 <div id="studentTableArea">
 ${buildStudentTable(type,classNo,stream,section,students)}
 </div>
-
 </div>
 `;
 
 document.getElementById("otherPage").innerHTML=html;
 }
 
+function buildStudentProfileCards(classNo,stream,section,students){
+
+if(!students.length){
+return `<div class="empty"><h3>No Students Found</h3><p style="margin-top:7px">Click + Add Student to add the first student.</p></div>`;
+}
+
+return `<div class="student-profile-list">`+students.map((s,index)=>{
+
+let paid=getStudentPaid(s.id);
+let pending=Math.max(0,Number(s.fee||0)-paid);
+
+let photo=s.photo?
+`<div class="student-profile-avatar"><img src="${s.photo}" alt=""></div>`:
+`<div class="student-profile-avatar">👨‍🎓</div>`;
+
+return `
+<div class="student-profile-card">
+<div class="student-profile-top">
+${photo}
+<div>
+<div class="student-profile-name">${escapeHtml(s.name)}</div>
+<div class="student-profile-meta">
+Roll No. ${escapeHtml(s.roll||index+1)} • Class ${s.classNo}
+${s.section?" • Section "+escapeHtml(s.section):""}
+${s.stream?" • "+escapeHtml(s.stream):""}
+</div>
+</div>
+</div>
+
+<div class="student-profile-details">
+
+<div class="student-profile-detail"><small>Student Name</small><strong>${escapeHtml(s.name)}</strong></div>
+<div class="student-profile-detail"><small>Roll Number</small><strong>${escapeHtml(s.roll||index+1)}</strong></div>
+<div class="student-profile-detail"><small>Father Name</small><strong>${escapeHtml(s.father||"-")}</strong></div>
+<div class="student-profile-detail"><small>Mother Name</small><strong>${escapeHtml(s.mother||"-")}</strong></div>
+<div class="student-profile-detail"><small>Date of Birth</small><strong>${formatDate(s.dob)}</strong></div>
+<div class="student-profile-detail"><small>Mobile Number</small><strong>${escapeHtml(s.mobile||"-")}</strong></div>
+<div class="student-profile-detail"><small>Caste</small><strong>${escapeHtml(s.caste||"-")}</strong></div>
+<div class="student-profile-detail"><small>Religion</small><strong>${escapeHtml(s.religion||"-")}</strong></div>
+<div class="student-profile-detail"><small>Total Fee</small><strong>₹${Number(s.fee||0).toLocaleString("en-IN")}</strong></div>
+<div class="student-profile-detail"><small>Paid Fee</small><strong class="fee-paid">₹${paid.toLocaleString("en-IN")}</strong></div>
+<div class="student-profile-detail"><small>Pending Fee</small><strong class="fee-pending">₹${pending.toLocaleString("en-IN")}</strong></div>
+<div class="student-profile-detail"><small>Gender</small><strong>${escapeHtml(s.gender||"-")}</strong></div>
+
+</div>
+
+<div class="action-buttons" style="margin-top:13px">
+<button class="profile-btn" onclick="openStudentProfile(${s.id})">👤 Full Profile</button>
+<button class="edit-btn" onclick="editStudent(${s.id})">✏️ Edit</button>
+<button class="delete-btn" onclick="deleteStudent(${s.id})">🗑️ Delete</button>
+</div>
+</div>`;
+}).join("")+`</div>`;
+}
+
+function filterStudentCards(classNo,stream,section){
+
+let q=(document.getElementById("studentSearch")?.value||"").toLowerCase().trim();
+
+let students=getStudents().filter(s=>
+Number(s.classNo)===Number(classNo)&&
+(!stream||s.stream===stream)&&
+(!section||s.section===section)&&
+(!q||
+String(s.name||"").toLowerCase().includes(q)||
+String(s.father||"").toLowerCase().includes(q)||
+String(s.mother||"").toLowerCase().includes(q)||
+String(s.mobile||"").toLowerCase().includes(q)
+)
+);
+
+document.getElementById("studentTableArea").innerHTML=
+buildStudentProfileCards(classNo,stream,section,students);
+}
+
 /*
 STUDENTS:
-Full profile information is available ONLY in Students module.
-Fees / Attendance / Exam:
-only Name + Father + relevant card data.
+The Students module shows profile cards with photo and complete basic details.
+Fees / Attendance / Exam continue to use their own detailed tables.
 */
 
 function buildStudentTable(type,classNo,stream,section,students){
@@ -1663,6 +1789,7 @@ calculateAgeFromDOB(document.getElementById("studentDOB").value);
 function saveStudent(){
 
 let name=document.getElementById("studentName").value.trim();
+let roll=document.getElementById("studentRoll").value.trim();
 let father=document.getElementById("fatherName").value.trim();
 let mother=document.getElementById("motherName").value.trim();
 let mobile=document.getElementById("studentMobile").value.trim();
@@ -1695,7 +1822,7 @@ let s=students.find(x=>Number(x.id)===Number(editingStudentId));
 if(!s)return;
 
 Object.assign(s,{
-name,father,mother,mobile,gender,dob,age,caste,religion,
+roll,name,father,mother,mobile,gender,dob,age,caste,religion,
 classNo:Number(classNo),section,stream,fee
 });
 
@@ -1705,6 +1832,7 @@ if(studentPhotoData)s.photo=studentPhotoData;
 
 students.push({
 id:Date.now(),
+roll:roll||"",
 name,father,mother,mobile,gender,dob,age,caste,religion,
 classNo:Number(classNo),section,stream,fee,
 photo:studentPhotoData||""
@@ -1735,6 +1863,7 @@ studentPhotoData=s.photo||"";
 document.getElementById("studentModalTitle").innerText="Edit Student";
 
 document.getElementById("studentName").value=s.name||"";
+document.getElementById("studentRoll").value=s.roll||"";
 document.getElementById("fatherName").value=s.father||"";
 document.getElementById("motherName").value=s.mother||"";
 document.getElementById("studentMobile").value=s.mobile||"";
