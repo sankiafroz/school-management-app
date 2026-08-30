@@ -461,7 +461,7 @@ let html=`
 <button class="back-btn" onclick="${back}">← Back</button>
 <div class="card">
 <div class="card-header">
-<h3>${title}</h3>
+<h3>${title} — Editable Data</h3>
 ${type==="students"?`<button class="small-btn" onclick="openAddStudent(${classNo},'${escapeHtml(stream||"")}','${escapeHtml(section||"")}')">+ Add Student</button>`:""}
 </div>
 <div class="search-box">
@@ -501,7 +501,7 @@ html+=`<td>${escapeHtml(s.gender||"-")}</td><td>₹${Number(s.fee||0).toLocaleSt
 }else if(type==="fees"){
 let paid=getStudentPaid(s.id),due=Math.max(0,Number(s.fee||0)-paid);
 let payments=getStudentPayments(s.id);
-html+=`<td>₹${Number(s.fee||0).toLocaleString("en-IN")}</td><td>₹${paid.toLocaleString("en-IN")}</td><td>₹${due.toLocaleString("en-IN")}</td><td>${payments.length} Payments</td><td><button class="small-btn" onclick="openFeeModal(${s.id},${classNo},'${escapeHtml(stream||"")}','${escapeHtml(section||"")}')">+ Payment</button> ${payments.length?`<button class="edit-btn" onclick="viewFeeHistory(${s.id})">History</button>`:""}</td>`
+html+=`<td>₹${Number(s.fee||0).toLocaleString("en-IN")}</td><td>₹${paid.toLocaleString("en-IN")}</td><td>₹${due.toLocaleString("en-IN")}</td><td>${payments.length} Payments</td><td><button class="small-btn" onclick="openFeeModal(${s.id},${classNo},'${escapeHtml(stream||"")}','${escapeHtml(section||"")}')">+ Payment</button> <button class="edit-btn" onclick="editStudent(${s.id},${classNo},'${escapeHtml(stream||"")}','${escapeHtml(section||"")}')">✏️ Edit Fee</button> ${payments.length?`<button class="edit-btn" onclick="viewFeeHistory(${s.id})">💳 Edit Payments</button>`:""}</td>`
 }else if(type==="attendance"){
 let r=getAttendanceForStudent(s.id),p=r.filter(x=>x.status==="Present").length,a=r.filter(x=>x.status==="Absent").length,l=r.filter(x=>x.status==="Leave").length,total=p+a+l;
 html+=`<td>${p}</td><td>${a}</td><td>${l}</td><td><span class="badge ${total&&p/total>=.75?"green":"yellow"}">${total?(p/total*100).toFixed(1):0}%</span></td><td><button class="small-btn" onclick="openAttendanceModal(${s.id},${classNo},'${escapeHtml(stream||"")}','${escapeHtml(section||"")}')">Mark Attendance</button></td>`
@@ -949,7 +949,7 @@ let classes=[...new Set(teachers.map(t=>Number(t.classNo)).filter(Boolean))].sor
 $("otherPage").innerHTML=`
 <div class="card">
 <div class="card-header">
-<h3>📚 Homework</h3>
+<h3>📚 Homework — Editable Data</h3>
 <button class="small-btn" onclick="openHomeworkModal()">+ Add Homework</button>
 </div>
 <div class="homework-filter">
@@ -1122,7 +1122,7 @@ let t=getTeachers();
 return`
 <div class="card">
 <div class="card-header">
-<h3>Teachers</h3>
+<h3>Teachers — Editable Data</h3>
 <button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
 </div>
 ${t.length?
@@ -1251,7 +1251,7 @@ let classes=[...new Set(data.map(x=>Number(x.classNo)).filter(Boolean))].sort((a
 return`
 <div class="card">
 <div class="card-header">
-<h3>🕐 Class Timetable</h3>
+<h3>🕐 Class Timetable — Editable Data</h3>
 <button class="small-btn" onclick="openTimetableModal()">+ Add Period</button>
 </div>
 
