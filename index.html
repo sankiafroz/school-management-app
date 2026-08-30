@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SchoolHub</title>
+<title>SchoolHub - Teacher Profiles</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
@@ -1094,7 +1094,14 @@ return;
 }
 
 if(page==="teachers"){
+// IMPORTANT: Teachers page must render ONLY teacher profiles.
+// Never route Teachers through the Students/Class renderer.
+try{
 renderTeacherPage();
+}catch(e){
+console.error("Teacher page error:",e);
+document.getElementById("otherPage").innerHTML=`<div class="card"><div class="empty"><h3>Unable to load Teachers</h3><p>${escapeHtml(e.message||e)}</p></div></div>`;
+}
 return;
 }
 
@@ -3150,7 +3157,7 @@ editingHomeworkId=null;
 function getOtherPage(page){
 
 if(page==="teachers"){
-return "";
+return `<div class="card"><div class="empty"><h3>Teachers</h3><p>Click Teachers in the menu to view teacher profiles.</p></div></div>`;
 }
 
 if(page==="timetable"){
