@@ -132,6 +132,22 @@ th{background:#fafbfd;color:#667085}
 .detail-item{background:#f8faff;padding:13px;border-radius:10px}
 .detail-item small{display:block;color:#777;margin-bottom:4px}
 .detail-item strong{display:block}
+
+.teacher-profile-list{padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.teacher-profile-card{border:1px solid #e5eaf1;border-radius:16px;padding:16px;background:#fff;box-shadow:0 3px 12px #00000008}
+.teacher-profile-top{display:flex;gap:14px;align-items:center;padding-bottom:13px;border-bottom:1px solid #edf0f4;margin-bottom:13px}
+.teacher-profile-avatar{width:78px;height:78px;border-radius:16px;object-fit:cover;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}
+.teacher-profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+.teacher-profile-name{font-size:18px;font-weight:bold}
+.teacher-profile-meta{color:#667085;font-size:12px;margin-top:5px;line-height:1.5}
+.teacher-profile-details{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.teacher-profile-detail{background:#f8faff;padding:9px;border-radius:9px}
+.teacher-profile-detail small{display:block;color:#777;font-size:11px;margin-bottom:3px}
+.teacher-profile-detail strong{display:block;font-size:13px;word-break:break-word}
+.teacher-subjects{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.teacher-subject-box{background:#eef4ff;color:#1769ff;padding:9px;border-radius:9px;font-size:13px;font-weight:bold}
+@media(max-width:700px){.teacher-profile-list{grid-template-columns:1fr}}
+
 .teacher-card{display:flex;align-items:center;gap:15px}
 @media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){
@@ -512,32 +528,22 @@ SchoolHub
 
 <div class="form-group">
 <label>Teacher Name *</label>
-<input id="teacherName">
+<input id="teacherName" placeholder="Enter teacher name">
 </div>
 
 <div class="form-group">
-<label>Employee ID *</label>
-<input id="teacherEmployeeId">
+<label>Mobile Number *</label>
+<input id="teacherMobile" placeholder="Enter mobile number">
 </div>
 
 <div class="form-group">
-<label>Mobile *</label>
-<input id="teacherMobile">
+<label>Qualification</label>
+<input id="teacherQualification" placeholder="B.Ed / M.Sc / M.A etc.">
 </div>
 
 <div class="form-group">
-<label>Email</label>
-<input id="teacherEmail" type="email">
-</div>
-
-<div class="form-group">
-<label>Subject *</label>
-<input id="teacherSubject" placeholder="Mathematics">
-</div>
-
-<div class="form-group">
-<label>Class</label>
-<select id="teacherClass">
+<label>Teaching Class</label>
+<select id="teacherClass" onchange="updateTeacherSections()">
 <option value="">All / Not Assigned</option>
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
@@ -555,17 +561,32 @@ SchoolHub
 </div>
 
 <div class="form-group">
+<label>Teaching Subject 1</label>
+<input id="teacherSubject1" placeholder="Optional">
+</div>
+
+<div class="form-group">
+<label>Teaching Subject 2</label>
+<input id="teacherSubject2" placeholder="Optional">
+</div>
+
+<div class="form-group">
+<label>Teaching Subject 3</label>
+<input id="teacherSubject3" placeholder="Optional">
+</div>
+
+<div class="form-group">
+<label>Teaching Subject 4</label>
+<input id="teacherSubject4" placeholder="Optional">
+</div>
+
+</div>
+
+<div class="form-group">
 <label>Section</label>
 <select id="teacherSection">
 <option value="">All / Not Assigned</option>
 </select>
-</div>
-
-<div class="form-group">
-<label>Qualification</label>
-<input id="teacherQualification" placeholder="B.Ed / M.Sc etc.">
-</div>
-
 </div>
 
 <br>
@@ -2049,12 +2070,18 @@ let t=id?getTeachers().find(x=>Number(x.id)===Number(id)):null;
 document.getElementById("teacherModalTitle").innerText=t?"Edit Teacher":"Add Teacher";
 
 document.getElementById("teacherName").value=t?.name||"";
-document.getElementById("teacherEmployeeId").value=t?.employeeId||"";
 document.getElementById("teacherMobile").value=t?.mobile||"";
-document.getElementById("teacherEmail").value=t?.email||"";
-document.getElementById("teacherSubject").value=t?.subject||"";
-document.getElementById("teacherClass").value=t?.classNo||"";
 document.getElementById("teacherQualification").value=t?.qualification||"";
+document.getElementById("teacherClass").value=t?.classNo||"";
+
+let subjects=Array.isArray(t?.subjects)?
+t.subjects:
+(t?.subject?[t.subject]:[]);
+
+for(let i=1;i<=4;i++){
+document.getElementById("teacherSubject"+i).value=subjects[i-1]||"";
+}
+
 document.getElementById("teacherPhoto").value="";
 
 teacherPhotoData=t?.photo||"";
@@ -2111,16 +2138,19 @@ select.value=selected||"";
 function saveTeacher(){
 
 let name=document.getElementById("teacherName").value.trim();
-let employeeId=document.getElementById("teacherEmployeeId").value.trim();
 let mobile=document.getElementById("teacherMobile").value.trim();
-let email=document.getElementById("teacherEmail").value.trim();
-let subject=document.getElementById("teacherSubject").value.trim();
+let qualification=document.getElementById("teacherQualification").value.trim();
 let classNo=document.getElementById("teacherClass").value;
 let section=document.getElementById("teacherSection").value;
-let qualification=document.getElementById("teacherQualification").value.trim();
 
-if(!name||!employeeId||!mobile||!subject){
-alert("Please fill Teacher Name, Employee ID, Mobile and Subject");
+let subjects=[];
+for(let i=1;i<=4;i++){
+let value=document.getElementById("teacherSubject"+i).value.trim();
+if(value)subjects.push(value);
+}
+
+if(!name||!mobile){
+alert("Please fill Teacher Name and Mobile Number");
 return;
 }
 
@@ -2133,8 +2163,12 @@ let t=teachers.find(x=>Number(x.id)===Number(editingTeacherId));
 if(t){
 
 Object.assign(t,{
-name,employeeId,mobile,email,subject,
-classNo,section,qualification
+name,
+mobile,
+qualification,
+classNo,
+section,
+subjects
 });
 
 if(teacherPhotoData)t.photo=teacherPhotoData;
@@ -2145,13 +2179,12 @@ if(teacherPhotoData)t.photo=teacherPhotoData;
 teachers.push({
 id:Date.now(),
 name,
-employeeId,
 mobile,
-email,
-subject,
+qualification,
 classNo,
 section,
-qualification,
+subjects,
+subject:subjects[0]||"",
 photo:teacherPhotoData||"",
 password:"123456"
 });
@@ -2179,6 +2212,7 @@ showPage("teachers");
 }
 
 function closeTeacherModal(){
+
 document.getElementById("teacherModal").style.display="none";
 editingTeacherId=null;
 teacherPhotoData="";
@@ -2235,16 +2269,23 @@ let html=`
 <div class="card">
 
 <div class="card-header">
+<div>
 <h3>Teachers</h3>
+<p style="color:#777;font-size:12px;margin-top:4px">All Teacher Profiles</p>
+</div>
 <button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
 </div>
 
+<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
+👨‍🏫 <strong>Teachers:</strong> ${teachers.length}
+</div>
+
 <div class="search-box">
-<input id="teacherSearch" placeholder="🔍 Search teacher, employee ID, subject..." oninput="filterTeachers()">
+<input id="teacherSearch" placeholder="🔍 Search teacher, mobile, qualification or subject..." oninput="filterTeachers()">
 </div>
 
 <div id="teacherTableArea">
-${buildTeacherTable(teachers)}
+${buildTeacherProfileCards(teachers)}
 </div>
 
 </div>
@@ -2297,110 +2338,112 @@ ${buildSectionsList()}
 document.getElementById("otherPage").innerHTML=html;
 }
 
-function buildTeacherTable(teachers){
+function buildTeacherProfileCards(teachers){
 
 if(!teachers.length){
 return `<div class="empty"><h3>No Teachers Added</h3><p style="margin-top:8px">Click + Add Teacher to create teacher profile.</p></div>`;
 }
 
-let html=`
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>Photo</th>
-<th>Employee ID</th>
-<th>Name</th>
-<th>Father/Basic</th>
-<th>Subject</th>
-<th>Class</th>
-<th>Section</th>
-<th>Mobile</th>
-<th>Qualification</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-`;
+return `<div class="teacher-profile-list">`+teachers.map(t=>{
 
-teachers.forEach(t=>{
+let subjects=Array.isArray(t.subjects)?
+t.subjects.filter(Boolean):
+(t.subject?[t.subject]:[]);
 
 let photo=t.photo?
-`<img class="teacher-photo" src="${t.photo}">`:
-`<div class="teacher-photo" style="display:flex;align-items:center;justify-content:center">👨‍🏫</div>`;
+`<div class="teacher-profile-avatar"><img src="${t.photo}" alt=""></div>`:
+`<div class="teacher-profile-avatar">👨‍🏫</div>`;
 
-html+=`
-<tr>
-<td>${photo}</td>
-<td>${escapeHtml(t.employeeId)}</td>
-<td><strong>${escapeHtml(t.name)}</strong></td>
-<td>-</td>
-<td>${escapeHtml(t.subject)}</td>
-<td>${t.classNo?"Class "+t.classNo:"All"}</td>
-<td>${escapeHtml(t.section||"All")}</td>
-<td>${escapeHtml(t.mobile)}</td>
-<td>${escapeHtml(t.qualification||"-")}</td>
-<td>
-<div class="action-buttons">
+let subjectBoxes="";
+for(let i=0;i<4;i++){
+subjectBoxes+=`
+<div class="teacher-subject-box">
+Subject ${i+1}: ${escapeHtml(subjects[i]||"-")}
+</div>`;
+}
+
+return `
+<div class="teacher-profile-card">
+
+<div class="teacher-profile-top">
+${photo}
+<div>
+<div class="teacher-profile-name">${escapeHtml(t.name||"-")}</div>
+<div class="teacher-profile-meta">
+${t.classNo?"Teaching Class: Class "+escapeHtml(t.classNo):"Teaching Class: All / Not Assigned"}
+</div>
+</div>
+</div>
+
+<div class="teacher-profile-details">
+
+<div class="teacher-profile-detail">
+<small>Teacher Name</small>
+<strong>${escapeHtml(t.name||"-")}</strong>
+</div>
+
+<div class="teacher-profile-detail">
+<small>Mobile Number</small>
+<strong>${escapeHtml(t.mobile||"-")}</strong>
+</div>
+
+<div class="teacher-profile-detail">
+<small>Qualification</small>
+<strong>${escapeHtml(t.qualification||"-")}</strong>
+</div>
+
+<div class="teacher-profile-detail">
+<small>Teaching Class</small>
+<strong>${t.classNo?"Class "+escapeHtml(t.classNo):"All / Not Assigned"}</strong>
+</div>
+
+<div class="teacher-profile-detail">
+<small>Section</small>
+<strong>${escapeHtml(t.section||"-")}</strong>
+</div>
+
+</div>
+
+<div style="margin-top:13px">
+<strong style="font-size:13px">Teaching Subjects</strong>
+<div class="teacher-subjects">
+${subjectBoxes}
+</div>
+</div>
+
+<div class="action-buttons" style="margin-top:13px">
 <button class="edit-btn" onclick="openTeacherModal(${t.id})">✏️ Edit</button>
 <button class="delete-btn" onclick="deleteTeacher(${t.id})">🗑️ Delete</button>
 </div>
-</td>
-</tr>
-`;
-});
 
-html+=`</tbody></table></div>`;
+</div>`;
 
-return html;
+}).join("")+`</div>`;
+}
+
+function buildTeacherTable(teachers){
+return buildTeacherProfileCards(teachers);
 }
 
 function filterTeachers(){
 
-let q=document.getElementById("teacherSearch").value.toLowerCase();
+let q=(document.getElementById("teacherSearch")?.value||"").toLowerCase().trim();
 
-let teachers=getTeachers().filter(t=>
-t.name.toLowerCase().includes(q)||
-t.employeeId.toLowerCase().includes(q)||
-t.subject.toLowerCase().includes(q)||
-t.mobile.includes(q)
-);
+let teachers=getTeachers().filter(t=>{
+
+let subjects=Array.isArray(t.subjects)?
+t.subjects:
+(t.subject?[t.subject]:[]);
+
+return String(t.name||"").toLowerCase().includes(q)||
+String(t.mobile||"").toLowerCase().includes(q)||
+String(t.qualification||"").toLowerCase().includes(q)||
+String(t.classNo||"").toLowerCase().includes(q)||
+subjects.some(s=>String(s||"").toLowerCase().includes(q));
+});
 
 document.getElementById("teacherTableArea").innerHTML=
-buildTeacherTable(teachers);
-}
-
-function buildSectionsList(){
-
-let sections=getSections();
-
-if(!sections.length){
-return `<div class="empty">No sections created.</div>`;
-}
-
-return sections.map(x=>`
-
-<div style="display:flex;justify-content:space-between;align-items:center;background:#f8faff;padding:12px;border-radius:10px;margin-bottom:8px">
-
-<div>
-<strong>Class ${x.classNo} - Section ${escapeHtml(x.name)}</strong>
-${x.stream?`<span style="color:#777"> • ${escapeHtml(x.stream)}</span>`:""}
-</div>
-
-<button class="delete-btn" onclick="deleteSection(${x.id})">Delete</button>
-
-</div>
-
-`).join("");
-}
-
-function deleteSection(id){
-
-if(!confirm("Delete this section?"))return;
-
-saveSections(getSections().filter(x=>Number(x.id)!==Number(id)));
-
-renderTeacherPage();
+buildTeacherProfileCards(teachers);
 }
 
 /* FEES */
@@ -2991,7 +3034,10 @@ Number(t.classNo)===classNo
 if(subject){
 
 let subjectTeachers=teachers.filter(t=>
-String(t.subject||"").toLowerCase()===subject
+(
+String(t.subject||"").toLowerCase()===subject ||
+(Array.isArray(t.subjects)&&t.subjects.some(s=>String(s||"").toLowerCase()===subject))
+)
 );
 
 if(subjectTeachers.length)teachers=subjectTeachers;
@@ -3001,7 +3047,7 @@ teachers.forEach(t=>{
 
 select.innerHTML+=`
 <option value="${t.id}">
-${escapeHtml(t.name)} - ${escapeHtml(t.subject)}
+${escapeHtml(t.name)} - ${escapeHtml((Array.isArray(t.subjects)&&t.subjects.length?t.subjects[0]:t.subject)||"-")}
 </option>
 `;
 });
