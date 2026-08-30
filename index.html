@@ -2270,192 +2270,85 @@ document.getElementById("sectionName").value="";
 renderTeacherPage();
 }
 
-/* TEACHER PAGE */
-
+/* TEACHER PAGE - FINAL FIX */
 function renderTeacherPage(){
+  const teachers = Array.isArray(getTeachers()) ? getTeachers() : [];
+  const area = document.getElementById("otherPage");
+  if(!area) return;
 
-let teachers=getTeachers();
-
-let html=`
-
-<div class="card">
-
-<div class="card-header">
-<div>
-<h3>Teachers</h3>
-<p style="color:#777;font-size:12px;margin-top:4px">All Teacher Profiles</p>
-</div>
-<button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
-</div>
-
-<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
-👨‍🏫 <strong>Teachers:</strong> ${teachers.length}
-</div>
-
-<div class="search-box">
-<input id="teacherSearch" placeholder="🔍 Search teacher, mobile, qualification or subject..." oninput="filterTeachers()">
-</div>
-
-<div id="teacherTableArea">
-${buildTeacherProfileCards(teachers)}
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-header">
-<h3>Class / Section Management</h3>
-</div>
-
-<div style="padding:20px">
-
-<div class="form-grid">
-
-<div class="form-group">
-<label>Class</label>
-<select id="sectionClass">
-<option value="">Select Class</option>
-${Array.from({length:12},(_,i)=>`<option value="${i+1}">Class ${i+1}</option>`).join("")}
-</select>
-</div>
-
-<div class="form-group">
-<label>Section Name</label>
-<input id="sectionName" placeholder="A / B / C">
-</div>
-
-<div class="form-group">
-<label>Stream</label>
-<select id="sectionStream">
-<option value="">General</option>
-<option value="Science">Science</option>
-<option value="Commerce">Commerce</option>
-<option value="Arts">Arts</option>
-</select>
-</div>
-
-</div>
-
-<button class="small-btn" onclick="addTeacherSection()">+ Add Section</button>
-
-<div style="margin-top:20px">
-${buildSectionsList()}
-</div>
-
-</div>
-</div>
-`;
-
-document.getElementById("otherPage").innerHTML=html;
+  area.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>👨‍🏫 Teacher Profiles</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">${teachers.length} Teacher${teachers.length===1?'':'s'}</p>
+        </div>
+        <button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
+      </div>
+      <div class="search-box">
+        <input id="teacherSearch" placeholder="🔍 Search teacher, mobile, qualification or subject..." oninput="filterTeachers()">
+      </div>
+      <div id="teacherTableArea">${buildTeacherProfileCards(teachers)}</div>
+    </div>`;
 }
 
 function buildTeacherProfileCards(teachers){
+  if(!Array.isArray(teachers) || teachers.length===0){
+    return `<div class="empty"><h3>No Teachers Added</h3><p style="margin-top:8px">Click <b>+ Add Teacher</b> to create a teacher profile.</p></div>`;
+  }
 
-if(!teachers.length){
-return `<div class="empty"><h3>No Teachers Added</h3><p style="margin-top:8px">Click + Add Teacher to create teacher profile.</p></div>`;
+  return `<div class="teacher-profile-list">${teachers.map((t,index)=>{
+    t=t||{};
+    let subjects=Array.isArray(t.subjects)?t.subjects.filter(Boolean):[];
+    if(!subjects.length && t.subject) subjects=[t.subject];
+    while(subjects.length<4) subjects.push("");
+
+    const photo=t.photo ? `<img src="${t.photo}" alt="Teacher Photo">` : `👨‍🏫`;
+    const cls=t.classNo ? `Class ${escapeHtml(t.classNo)}` : `Not Assigned`;
+    const sec=t.section || "-";
+
+    return `<div class="teacher-profile-card">
+      <div class="teacher-profile-top">
+        <div class="teacher-profile-avatar">${photo}</div>
+        <div>
+          <div class="teacher-profile-name">${escapeHtml(t.name||"Teacher")}</div>
+          <div class="teacher-profile-meta">Teaching Class: ${cls}</div>
+        </div>
+      </div>
+
+      <div class="teacher-profile-details">
+        <div class="teacher-profile-detail"><small>Name</small><strong>${escapeHtml(t.name||"-")}</strong></div>
+        <div class="teacher-profile-detail"><small>Mobile Number</small><strong>${escapeHtml(t.mobile||"-")}</strong></div>
+        <div class="teacher-profile-detail"><small>Qualification</small><strong>${escapeHtml(t.qualification||"-")}</strong></div>
+        <div class="teacher-profile-detail"><small>Teaching Class</small><strong>${cls}</strong></div>
+        <div class="teacher-profile-detail"><small>Section</small><strong>${escapeHtml(sec)}</strong></div>
+      </div>
+
+      <div style="margin-top:13px"><strong style="font-size:13px">Teaching Subjects</strong>
+        <div class="teacher-subjects">
+          ${subjects.slice(0,4).map((sub,i)=>`<div class="teacher-subject-box">Subject ${i+1}: ${escapeHtml(sub||"Optional")}</div>`).join("")}
+        </div>
+      </div>
+
+      <div class="action-buttons" style="margin-top:13px">
+        <button class="edit-btn" onclick="openTeacherModal(${Number(t.id)||0})">✏️ Edit</button>
+        <button class="delete-btn" onclick="deleteTeacher(${Number(t.id)||0})">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join("")}</div>`;
 }
 
-return `<div class="teacher-profile-list">`+teachers.map(t=>{
-
-let subjects=Array.isArray(t.subjects)?
-t.subjects.filter(Boolean):
-(t.subject?[t.subject]:[]);
-
-let photo=t.photo?
-`<div class="teacher-profile-avatar"><img src="${t.photo}" alt=""></div>`:
-`<div class="teacher-profile-avatar">👨‍🏫</div>`;
-
-let subjectBoxes="";
-for(let i=0;i<4;i++){
-subjectBoxes+=`
-<div class="teacher-subject-box">
-Subject ${i+1}: ${escapeHtml(subjects[i]||"-")}
-</div>`;
-}
-
-return `
-<div class="teacher-profile-card">
-
-<div class="teacher-profile-top">
-${photo}
-<div>
-<div class="teacher-profile-name">${escapeHtml(t.name||"-")}</div>
-<div class="teacher-profile-meta">
-${t.classNo?"Teaching Class: Class "+escapeHtml(t.classNo):"Teaching Class: All / Not Assigned"}
-</div>
-</div>
-</div>
-
-<div class="teacher-profile-details">
-
-<div class="teacher-profile-detail">
-<small>Teacher Name</small>
-<strong>${escapeHtml(t.name||"-")}</strong>
-</div>
-
-<div class="teacher-profile-detail">
-<small>Mobile Number</small>
-<strong>${escapeHtml(t.mobile||"-")}</strong>
-</div>
-
-<div class="teacher-profile-detail">
-<small>Qualification</small>
-<strong>${escapeHtml(t.qualification||"-")}</strong>
-</div>
-
-<div class="teacher-profile-detail">
-<small>Teaching Class</small>
-<strong>${t.classNo?"Class "+escapeHtml(t.classNo):"All / Not Assigned"}</strong>
-</div>
-
-<div class="teacher-profile-detail">
-<small>Section</small>
-<strong>${escapeHtml(t.section||"-")}</strong>
-</div>
-
-</div>
-
-<div style="margin-top:13px">
-<strong style="font-size:13px">Teaching Subjects</strong>
-<div class="teacher-subjects">
-${subjectBoxes}
-</div>
-</div>
-
-<div class="action-buttons" style="margin-top:13px">
-<button class="edit-btn" onclick="openTeacherModal(${t.id})">✏️ Edit</button>
-<button class="delete-btn" onclick="deleteTeacher(${t.id})">🗑️ Delete</button>
-</div>
-
-</div>`;
-
-}).join("")+`</div>`;
-}
-
-function buildTeacherTable(teachers){
-return buildTeacherProfileCards(teachers);
-}
+function buildTeacherTable(teachers){ return buildTeacherProfileCards(teachers); }
 
 function filterTeachers(){
-
-let q=(document.getElementById("teacherSearch")?.value||"").toLowerCase().trim();
-
-let teachers=getTeachers().filter(t=>{
-
-let subjects=Array.isArray(t.subjects)?
-t.subjects:
-(t.subject?[t.subject]:[]);
-
-return String(t.name||"").toLowerCase().includes(q)||
-String(t.mobile||"").toLowerCase().includes(q)||
-String(t.qualification||"").toLowerCase().includes(q)||
-String(t.classNo||"").toLowerCase().includes(q)||
-subjects.some(s=>String(s||"").toLowerCase().includes(q));
-});
-
-document.getElementById("teacherTableArea").innerHTML=
-buildTeacherProfileCards(teachers);
+  const q=(document.getElementById("teacherSearch")?.value||"").toLowerCase().trim();
+  const teachers=(Array.isArray(getTeachers())?getTeachers():[]).filter(t=>{
+    const subjects=Array.isArray(t.subjects)?t.subjects:(t.subject?[t.subject]:[]);
+    const hay=[t.name,t.mobile,t.qualification,t.classNo,t.section,...subjects].map(x=>String(x||"").toLowerCase());
+    return !q || hay.some(x=>x.includes(q));
+  });
+  const area=document.getElementById("teacherTableArea");
+  if(area) area.innerHTML=buildTeacherProfileCards(teachers);
 }
 
 /* FEES */
