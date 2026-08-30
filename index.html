@@ -1202,12 +1202,283 @@ openStudentsData("students",classNo,"","");
 return;
 }
 
+if(type==="attendance"){
+openAttendanceClass(classNo);
+return;
+}
+
 if(classNo===11||classNo===12){
 openStreams(type,classNo);
 return;
 }
 
 openSections(type,classNo,"");
+}
+
+
+
+/* CLASS ATTENDANCE REGISTER */
+function attendanceRoll(student,index){
+  let r=student.rollNo ?? student.rollNumber ?? student.roll ?? student.admissionNo ?? student.admissionNumber;
+  return (r!==undefined && r!==null && String(r).trim()!=="") ? String(r) : String(index+1);
+}
+
+function getClassAttendanceStudents(classNo){
+  return getClassStudents(classNo).slice().sort((a,b)=>{
+    let ra=Number(attendanceRoll(a,0)), rb=Number(attendanceRoll(b,0));
+    if(Number.isFinite(ra)&&Number.isFinite(rb)) return ra-rb;
+    return attendanceRoll(a,0).localeCompare(attendanceRoll(b,0),undefined,{numeric:true});
+  });
+}
+
+function openAttendanceClass(classNo){
+  window.attendanceRegisterClass=Number(classNo);
+  window.attendanceRegisterDate=today();
+  renderAttendanceRegister();
+}
+
+function renderAttendanceRegister(){
+  let classNo=Number(window.attendanceRegisterClass);
+  let date=window.attendanceRegisterDate||today();
+  let students=getClassAttendanceStudents(classNo);
+
+  let html=`
+  <button class="back-btn" onclick="openClasses('attendance')">← Back to Classes</button>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h3>Class ${classNo} - Attendance</h3>
+        <p style="color:#777;font-size:12px;margin-top:4px">${students.length} Students</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="small-btn" onclick="markAllPresent(${classNo})">🟢 Mark All Present</button>
+<button class="small-btn" style="background:#15803d" onclick="openAttendanceDownload(${classNo})">⬇️ Download Attendance</button>
+</div>
+    </div>
+    <div style="padding:18px;border-bottom:1px solid #edf0f4;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="attendanceRegisterDate" type="date" value="${date}" onchange="window.attendanceRegisterDate=this.value;renderAttendanceRegister()" style="max-width:190px">
+      <input id="attendanceRegisterSearch" placeholder="🔍 Search by Roll No. or Student Name" oninput="filterAttendanceRegister()" style="flex:1;min-width:240px">
+    </div>
+    <div id="attendanceRegisterArea">${buildAttendanceRegisterTable(students,classNo,date)}</div>
+  </div>`;
+  document.getElementById("otherPage").innerHTML=html;
+}
+
+function buildAttendanceRegisterTable(students,classNo,date){
+  if(!students.length) return `<div class="empty">No students found in Class ${classNo}.</div>`;
+  let records=getAttendance();
+  let rows=students.map((s,i)=>{
+    let roll=attendanceRoll(s,i);
+    let rec=records.find(x=>Number(x.studentId)===Number(s.id)&&x.date===date);
+    let status=rec?.status||"";
+    let pct=getAttendanceForStudent(s.id);
+    let present=pct.filter(x=>x.status==="Present").length;
+    let total=pct.filter(x=>["Present","Absent","Leave","Holiday"].includes(x.status)).length;
+    let percent=total?((present/total)*100).toFixed(1):"0.0";
+    let statusBadge=status?`<span class="badge ${status==="Present"?"green":status==="Absent"?"red":status==="Leave"?"yellow":"blue"}">${status}</span>`:`<span class="badge">Not Marked</span>`;
+    return `<tr data-att-search="${escapeHtml((roll+" "+(s.name||"")).toLowerCase())}">
+      <td><strong>${escapeHtml(roll)}</strong></td>
+      <td><strong>${escapeHtml(s.name||"-")}</strong></td>
+      <td>${escapeHtml(s.father||"-")}</td>
+      <td>${statusBadge}</td>
+      <td><div class="action-buttons">
+        <button class="small-btn" onclick="setRegisterAttendance(${s.id},${classNo},'Present')">🟢 Present</button>
+        <button class="delete-btn" onclick="setRegisterAttendance(${s.id},${classNo},'Absent')">🔴 Absent</button>
+        <button style="background:#fff5d9;color:#b77900;border:0;padding:7px 10px;border-radius:7px;font-weight:bold" onclick="setRegisterAttendance(${s.id},${classNo},'Leave')">🟡 Leave</button>
+        <button style="background:#eef4ff;color:#1769ff;border:0;padding:7px 10px;border-radius:7px;font-weight:bold" onclick="setRegisterAttendance(${s.id},${classNo},'Holiday')">🔵 Holiday</button>
+      </div></td>
+      <td><strong>${percent}%</strong></td>
+      <td><div class="action-buttons">${status?`<button class="delete-btn" onclick="deleteRegisterAttendance(${s.id},${classNo})">🗑️ Delete ${status}</button>`:""}${status?`<button class="edit-btn" onclick="editRegisterAttendance(${s.id},${classNo})">✏️ Edit</button>`:""}</div></td>
+    </tr>`;
+  }).join("");
+  return `<div class="table-container"><table style="min-width:1100px"><thead><tr><th>Roll No.</th><th>Student Name</th><th>Father Name</th><th>Today's Status</th><th>Mark Attendance</th><th>Attendance %</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function filterAttendanceRegister(){
+  let q=(document.getElementById("attendanceRegisterSearch")?.value||"").toLowerCase().trim();
+  document.querySelectorAll("#attendanceRegisterArea tbody tr").forEach(row=>{
+    row.style.display=!q || row.dataset.attSearch.includes(q)?"":"none";
+  });
+}
+
+function setRegisterAttendance(studentId,classNo,status){
+  let date=window.attendanceRegisterDate||today();
+  let data=getAttendance();
+  let i=data.findIndex(x=>Number(x.studentId)===Number(studentId)&&x.date===date);
+  let rec={id:i>=0?data[i].id:Date.now()+Math.floor(Math.random()*1000),studentId:Number(studentId),date,status};
+  if(i>=0)data[i]=rec; else data.push(rec);
+  saveAttendance(data);
+  updateDashboard();
+  renderAttendanceRegister();
+}
+
+
+function openAttendanceDownload(classNo){
+  let todayDate=today();
+  let d=new Date(todayDate+"T00:00:00");
+  let first=new Date(d.getFullYear(),d.getMonth(),1);
+  let last=new Date(d.getFullYear(),d.getMonth()+1,0);
+  let fmt=x=>x.toISOString().slice(0,10);
+
+  let html=`
+  <div class="modal-bg" id="attendanceDownloadModal" style="display:flex">
+    <div class="modal" style="max-width:620px">
+      <div class="modal-header">
+        <h2>Download Attendance - Class ${classNo}</h2>
+        <button class="close-btn" onclick="document.getElementById('attendanceDownloadModal').remove()">×</button>
+      </div>
+
+      <div class="form-group">
+        <label>Download Type</label>
+        <select id="attendanceDownloadType" onchange="toggleAttendanceDownloadDates()">
+          <option value="day">One Day</option>
+          <option value="range">Date Range / Multiple Days</option>
+          <option value="month">Full Month</option>
+        </select>
+      </div>
+
+      <div id="attendanceDownloadDayBox" class="form-group">
+        <label>Date</label>
+        <input id="attendanceDownloadDay" type="date" value="${todayDate}">
+      </div>
+
+      <div id="attendanceDownloadRangeBox" class="form-grid" style="display:none">
+        <div class="form-group">
+          <label>From Date</label>
+          <input id="attendanceDownloadFrom" type="date" value="${fmt(first)}">
+        </div>
+        <div class="form-group">
+          <label>To Date</label>
+          <input id="attendanceDownloadTo" type="date" value="${todayDate}">
+        </div>
+      </div>
+
+      <div id="attendanceDownloadMonthBox" class="form-grid" style="display:none">
+        <div class="form-group">
+          <label>Month</label>
+          <select id="attendanceDownloadMonth">
+            ${Array.from({length:12},(_,i)=>{
+              let dt=new Date(d.getFullYear(),i,1);
+              return `<option value="${i}" ${i===d.getMonth()?"selected":""}>${dt.toLocaleString("en-IN",{month:"long"})}</option>`;
+            }).join("")}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input id="attendanceDownloadYear" type="number" min="2000" max="2100" value="${d.getFullYear()}">
+        </div>
+      </div>
+
+      <div style="background:#f8faff;padding:14px;border-radius:10px;margin:10px 0 18px;color:#667085;font-size:13px">
+        Download will include Roll No., Student Name, Father Name and daily attendance status.
+      </div>
+
+      <button class="btn btn-primary" onclick="downloadAttendanceReportForClass(${classNo})">⬇️ Download CSV</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+
+function toggleAttendanceDownloadDates(){
+  let type=document.getElementById("attendanceDownloadType").value;
+  document.getElementById("attendanceDownloadDayBox").style.display=type==="day"?"block":"none";
+  document.getElementById("attendanceDownloadRangeBox").style.display=type==="range"?"grid":"none";
+  document.getElementById("attendanceDownloadMonthBox").style.display=type==="month"?"grid":"none";
+}
+
+function downloadAttendanceReportForClass(classNo){
+  let type=document.getElementById("attendanceDownloadType").value;
+  let from,to;
+
+  if(type==="day"){
+    from=to=document.getElementById("attendanceDownloadDay").value;
+  }else if(type==="range"){
+    from=document.getElementById("attendanceDownloadFrom").value;
+    to=document.getElementById("attendanceDownloadTo").value;
+    if(!from||!to){alert("Select From Date and To Date.");return;}
+    if(from>to){alert("From Date cannot be after To Date.");return;}
+  }else{
+    let month=Number(document.getElementById("attendanceDownloadMonth").value);
+    let year=Number(document.getElementById("attendanceDownloadYear").value);
+    if(!year){alert("Enter year.");return;}
+    from=new Date(year,month,1).toISOString().slice(0,10);
+    to=new Date(year,month+1,0).toISOString().slice(0,10);
+  }
+
+  let students=getClassAttendanceStudents(classNo);
+  if(!students.length){alert("No students found in this class.");return;}
+
+  let dates=[];
+  let cur=new Date(from+"T00:00:00");
+  let end=new Date(to+"T00:00:00");
+  while(cur<=end){dates.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
+
+  let records=getAttendance();
+  let rows=[];
+  let header=["Roll No.","Student Name","Father Name"];
+  dates.forEach(dt=>header.push(formatDate(dt)));
+  header.push("Present","Absent","Leave","Holiday","Attendance %");
+  rows.push(header);
+
+  students.forEach((s,i)=>{
+    let roll=attendanceRoll(s,i);
+    let statuses=[];
+    let counts={Present:0,Absent:0,Leave:0,Holiday:0};
+    dates.forEach(dt=>{
+      let rec=records.find(x=>Number(x.studentId)===Number(s.id)&&x.date===dt);
+      let status=rec?.status||"Not Marked";
+      statuses.push(status);
+      if(counts[status]!==undefined)counts[status]++;
+    });
+    let total=counts.Present+counts.Absent+counts.Leave+counts.Holiday;
+    let percent=total?(counts.Present/total*100).toFixed(1):"0.0";
+    rows.push([roll,s.name||"",s.father||"",...statuses,counts.Present,counts.Absent,counts.Leave,counts.Holiday,percent+"%"]);
+  });
+
+  let csv="\\uFEFF"+rows.map(r=>r.map(csvCell).join(",")).join("\\n");
+  let suffix=type==="day"?from:(from+"_to_"+to);
+  downloadFile(`Attendance_Class_${classNo}_${suffix}.csv`,csv,"text/csv;charset=utf-8");
+  document.getElementById("attendanceDownloadModal")?.remove();
+}
+
+function markAllPresent(classNo){
+  let date=window.attendanceRegisterDate||today();
+  let students=getClassAttendanceStudents(classNo);
+  if(!students.length){alert("No students in this class.");return;}
+  if(!confirm(`Mark all ${students.length} students Present for ${formatDate(date)}?`))return;
+  let data=getAttendance();
+  students.forEach(s=>{
+    let i=data.findIndex(x=>Number(x.studentId)===Number(s.id)&&x.date===date);
+    let rec={id:i>=0?data[i].id:Date.now()+Math.floor(Math.random()*100000),studentId:Number(s.id),date,status:"Present"};
+    if(i>=0)data[i]=rec; else data.push(rec);
+  });
+  saveAttendance(data);
+  updateDashboard();
+  renderAttendanceRegister();
+}
+
+function deleteRegisterAttendance(studentId,classNo){
+  let date=window.attendanceRegisterDate||today();
+  if(!confirm("Delete today's attendance record?"))return;
+  saveAttendance(getAttendance().filter(x=>!(Number(x.studentId)===Number(studentId)&&x.date===date)));
+  updateDashboard();
+  renderAttendanceRegister();
+}
+
+function editRegisterAttendance(studentId,classNo){
+  let date=window.attendanceRegisterDate||today();
+  let rec=getAttendance().find(x=>Number(x.studentId)===Number(studentId)&&x.date===date);
+  if(!rec)return;
+  let next=prompt("Enter status: Present, Absent, Leave or Holiday",rec.status);
+  if(next===null)return;
+  next=next.trim();
+  let allowed=["Present","Absent","Leave","Holiday"];
+  let match=allowed.find(x=>x.toLowerCase()===next.toLowerCase());
+  if(!match){alert("Please enter Present, Absent, Leave or Holiday.");return;}
+  rec.status=match;
+  saveAttendance(getAttendance());
+  updateDashboard();
+  renderAttendanceRegister();
 }
 
 /* SECTION */
@@ -1338,6 +1609,10 @@ Number(s.classNo)===Number(classNo)&&
 
 let title=`Class ${classNo}${stream?" - "+stream:""}${section?" - Section "+section:""}`;
 
+if(type==="attendance"){
+window.attendanceSelectedDate=today();
+}
+
 let back=section?
 `openSections('${type}',${classNo},'${stream||""}')`:
 stream?
@@ -1368,6 +1643,45 @@ let html=`
 
 <div id="studentTableArea">
 ${buildStudentProfileCards(classNo,stream,section,students)}
+</div>
+</div>
+`;
+
+document.getElementById("otherPage").innerHTML=html;
+return;
+}
+
+if(type==="attendance"){
+students=[...students].sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+let html=`
+<button class="back-btn" onclick="${back}">← Back to Classes</button>
+
+<div class="card">
+<div class="card-header">
+<div>
+<h3>${title} - Attendance</h3>
+<p style="color:#777;font-size:12px;margin-top:4px">Mark and manage daily student attendance</p>
+</div>
+</div>
+
+<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
+<div class="form-grid">
+<div class="form-group" style="margin-bottom:0">
+<label>Date</label>
+<input id="attendancePageDate" type="date" value="${today()}" onchange="changeAttendanceDate(${classNo},'${stream||""}','${section||""}')">
+</div>
+<div class="form-group" style="margin-bottom:0;display:flex;align-items:end">
+<button class="small-btn" style="height:47px;width:100%" onclick="markAllPresent(${classNo},'${stream||""}','${section||""}')">🟢 Mark All Present</button>
+</div>
+</div>
+</div>
+
+<div class="search-box">
+<input id="studentSearch" placeholder="🔍 Search by Roll No. or Student Name..." oninput="filterStudentTable('${type}',${classNo},'${stream||""}','${section||""}')">
+</div>
+
+<div id="studentTableArea">
+${buildStudentTable(type,classNo,stream,section,students)}
 </div>
 </div>
 `;
@@ -1529,14 +1843,46 @@ html+=`
 
 if(type==="attendance"){
 
+let records=getAttendanceForStudent(s.id);
+let present=records.filter(x=>x.status==="Present").length;
+let absent=records.filter(x=>x.status==="Absent").length;
+let leave=records.filter(x=>x.status==="Leave").length;
+let holiday=records.filter(x=>x.status==="Holiday").length;
+let total=present+absent+leave;
+let percentage=total?(present/total*100).toFixed(1):0;
+let todayRecord=records.find(x=>x.date===window.attendanceSelectedDate);
+let status=todayRecord?.status||"Not Marked";
+
+let statusButtons=["Present","Absent","Leave","Holiday"].map(st=>`
+<button class="${st==="Present"?"edit-btn":st==="Absent"?"delete-btn":"small-btn"}"
+style="${st==="Leave"?"background:#fff5d9;color:#b77900":st==="Holiday"?"background:#eef4ff;color:#1769ff":""}"
+onclick="setStudentAttendance(${s.id},'${st}',${classNo},'${stream||""}','${section||""}')">
+${st==="Present"?"🟢":st==="Absent"?"🔴":st==="Leave"?"🟡":"🔵"} ${st}
+</button>`).join("");
+
 html+=`
-<th>Student Name</th>
-<th>Father Name</th>
-<th>Present</th>
-<th>Absent</th>
-<th>Leave</th>
-<th>Attendance %</th>
-<th>Action</th>
+<tr>
+<td><strong>${escapeHtml(s.roll||index+1)}</strong></td>
+<td><strong>${escapeHtml(s.name)}</strong></td>
+<td>${escapeHtml(s.father||"-")}</td>
+<td>
+<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+${statusButtons}
+<span class="badge ${status==="Present"?"green":status==="Absent"?"red":status==="Leave"?"yellow":status==="Holiday"?"blue":""}">${status}</span>
+</div>
+</td>
+<td class="summary-green">${present}</td>
+<td class="summary-red">${absent}</td>
+<td class="summary-yellow">${leave}</td>
+<td>${holiday}</td>
+<td><strong>${percentage}%</strong></td>
+<td>
+<div class="action-buttons">
+${todayRecord?`<button class="delete-btn" onclick="deleteStudentAttendance(${todayRecord.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete Present</button>`:""}
+${todayRecord?`<button class="edit-btn" onclick="editStudentAttendance(${s.id},${classNo},'${stream||""}','${section||""}')">✏️ Edit Present</button>`:""}
+</div>
+</td>
+</tr>
 `;
 }
 
@@ -1708,19 +2054,23 @@ return html;
 
 function filterStudentTable(type,classNo,stream,section){
 
-let q=document.getElementById("studentSearch").value.toLowerCase();
+let q=(document.getElementById("studentSearch")?.value||"").toLowerCase().trim();
 
 let students=getStudents().filter(s=>
 Number(s.classNo)===Number(classNo)&&
 (!stream||s.stream===stream)&&
 (!section||s.section===section)&&
 (
-s.name.toLowerCase().includes(q)||
-s.father.toLowerCase().includes(q)||
-String(s.mobile).includes(q)
+String(s.roll||"").toLowerCase().includes(q)||
+String(s.name||"").toLowerCase().includes(q)||
+String(s.father||"").toLowerCase().includes(q)||
+String(s.mobile||"").includes(q)
 )
 );
 
+if(type==="attendance"){
+students.sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+}
 document.getElementById("studentTableArea").innerHTML=
 buildStudentTable(type,classNo,stream,section,students);
 }
@@ -2527,6 +2877,70 @@ attendanceSection
 
 function closeAttendanceModal(){
 document.getElementById("attendanceModal").style.display="none";
+}
+
+function getAttendancePageDate(){
+return document.getElementById("attendancePageDate")?.value||today();
+}
+
+function changeAttendanceDate(classNo,stream,section){
+window.attendanceSelectedDate=getAttendancePageDate();
+filterStudentTable("attendance",classNo,stream,section);
+}
+
+function saveStudentAttendanceRecord(studentId,status,date){
+let data=getAttendance();
+let i=data.findIndex(x=>Number(x.studentId)===Number(studentId)&&x.date===date);
+let record={id:i>=0?data[i].id:Date.now()+Math.floor(Math.random()*100000),studentId:Number(studentId),date,status};
+if(i>=0)data[i]=record;
+else data.push(record);
+saveAttendance(data);
+}
+
+function setStudentAttendance(studentId,status,classNo,stream,section){
+let date=getAttendancePageDate();
+saveStudentAttendanceRecord(studentId,status,date);
+window.attendanceSelectedDate=date;
+filterStudentTable("attendance",classNo,stream,section);
+updateDashboard();
+}
+
+function editStudentAttendance(studentId,classNo,stream,section){
+let date=getAttendancePageDate();
+let r=getAttendance().find(x=>Number(x.studentId)===Number(studentId)&&x.date===date);
+if(!r){alert("No attendance marked for this date.");return;}
+let next=prompt("Edit attendance: Present / Absent / Leave / Holiday",r.status);
+if(next===null)return;
+next=next.trim();
+let allowed=["Present","Absent","Leave","Holiday"];
+let match=allowed.find(x=>x.toLowerCase()===next.toLowerCase());
+if(!match){alert("Please enter Present, Absent, Leave or Holiday.");return;}
+saveStudentAttendanceRecord(studentId,match,date);
+filterStudentTable("attendance",classNo,stream,section);
+updateDashboard();
+}
+
+function deleteStudentAttendance(id,classNo,stream,section){
+if(!confirm("Delete today's attendance record?"))return;
+saveAttendance(getAttendance().filter(x=>Number(x.id)!==Number(id)));
+filterStudentTable("attendance",classNo,stream,section);
+updateDashboard();
+}
+
+function markAllPresent(classNo,stream,section){
+let date=getAttendancePageDate();
+let students=getStudents().filter(s=>
+Number(s.classNo)===Number(classNo)&&
+(!stream||s.stream===stream)&&
+(!section||s.section===section)
+);
+if(!students.length){alert("No students found.");return;}
+if(!confirm("Mark all "+students.length+" students Present for "+formatDate(date)+"?"))return;
+students.forEach(s=>saveStudentAttendanceRecord(s.id,"Present",date));
+window.attendanceSelectedDate=date;
+filterStudentTable("attendance",classNo,stream,section);
+updateDashboard();
+alert("All students marked Present.");
 }
 
 /* EXAMS */
