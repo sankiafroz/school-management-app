@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -169,7 +168,6 @@ th{background:#fafbfd;color:#667085}
 .profile-head{align-items:flex-start;flex-direction:column}
 }
 </style>
-
 </head>
 
 <body>
@@ -200,7 +198,8 @@ th{background:#fafbfd;color:#667085}
 <input id="loginPassword" type="password" placeholder="Enter password">
 </div>
 
-<button class="btn btn-primary" onclick="loginUser()">Login</button> <button class="btn btn-outline" onclick="openRegister()">+ Register New School</button>
+<button class="btn btn-primary" onclick="loginUser()">Login</button>
+<button class="btn btn-outline" onclick="openRegister()">+ Register New School</button>
 
 <div class="demo">
 <strong>Demo Login</strong><br>
@@ -339,7 +338,6 @@ SchoolHub
 </div>
 
 <!-- REGISTER -->
-
 <div class="modal-bg" id="registerModal">
 <div class="modal">
 <div class="modal-header">
@@ -373,12 +371,10 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="registerSchool()">Register School</button>
-
 </div>
 </div>
 
 <!-- STUDENT MODAL -->
-
 <div class="modal-bg" id="studentModal">
 <div class="modal">
 
@@ -501,7 +497,6 @@ SchoolHub
 </div>
 
 <!-- STUDENT PROFILE -->
-
 <div class="modal-bg" id="studentProfileModal">
 <div class="modal">
 <div class="modal-header">
@@ -513,7 +508,6 @@ SchoolHub
 </div>
 
 <!-- TEACHER MODAL -->
-
 <div class="modal-bg" id="teacherModal">
 <div class="modal">
 <div class="modal-header">
@@ -601,7 +595,6 @@ SchoolHub
 </div>
 
 <!-- FEE MODAL -->
-
 <div class="modal-bg" id="feeModal">
 <div class="modal">
 <div class="modal-header">
@@ -642,12 +635,10 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="saveFeePayment()">Save Payment</button>
-
 </div>
 </div>
 
 <!-- ATTENDANCE MODAL -->
-
 <div class="modal-bg" id="attendanceModal">
 <div class="modal">
 <div class="modal-header">
@@ -668,12 +659,10 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="saveAttendanceData()">Save Attendance</button>
-
 </div>
 </div>
 
 <!-- EXAM MODAL -->
-
 <div class="modal-bg" id="examModal">
 <div class="modal">
 <div class="modal-header">
@@ -709,12 +698,10 @@ SchoolHub
 <div id="examSummary" style="background:#f8faff;padding:15px;border-radius:12px;margin-bottom:15px"></div>
 
 <button class="btn btn-primary" onclick="saveExam()">Save Result</button>
-
 </div>
 </div>
 
 <!-- HOMEWORK MODAL -->
-
 <div class="modal-bg" id="homeworkModal">
 <div class="modal">
 <div class="modal-header">
@@ -790,7 +777,6 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="saveHomeworkData()">Save Homework</button>
-
 </div>
 </div>
 
@@ -1209,8 +1195,9 @@ document.getElementById("otherPage").innerHTML=html;
 
 function openClass(type,classNo){
 
-/* Students module opens the selected class directly.
-   Sections/streams remain available for Fees, Attendance and Exam. */
+/* Students, Fees and Result must always open the actual students
+   of the selected class. Section is optional and must never block
+   access to student data. Attendance keeps its dedicated register. */
 if(type==="students"){
 openStudentsData("students",classNo,"","");
 return;
@@ -1221,96 +1208,25 @@ openAttendanceClass(classNo);
 return;
 }
 
-if(type==="fees"){
-openFeeSections(classNo);
-return;
-}
-
-if(classNo===11||classNo===12){
+/* For Fees / Result:
+   Class 11/12 may still use Stream selection when stream data exists.
+   For Classes 1-10, open the student list directly.
+   If no section has been created, openStudentsData() still shows
+   all students because section is optional. */
+if((type==="fees" || type==="exams") && (classNo===11 || classNo===12)){
 openStreams(type,classNo);
 return;
 }
 
-openSections(type,classNo,"");
+if(type==="fees" || type==="exams"){
+openStudentsData(type,classNo,"","");
+return;
 }
 
-
-
-/* FEES - SECTION SELECTOR */
-function openFeeSections(classNo){
-
-let students=getClassStudents(classNo);
-
-let sections=getSections().filter(x=>
-Number(x.classNo)===Number(classNo)
-);
-
-let used=[...new Set(
-students
-.map(s=>String(s.section||"").trim())
-.filter(Boolean)
-)];
-
-sections.forEach(x=>{
-let name=String(x.name||"").trim();
-if(name&&!used.includes(name))used.push(name);
-});
-
-let html=`
-<button class="back-btn" onclick="openClasses('fees')">← Back</button>
-
-<div class="card">
-<div class="card-header">
-<h3>Class ${classNo} - Select Section</h3>
-</div>
-</div>
-`;
-
-if(!used.length){
-
-html+=`
-<div class="card">
-<div class="empty">
-<h3>No Section Added</h3>
-<p style="margin-top:8px">Add sections from Teacher management.</p>
-</div>
-</div>
-`;
-
-}else{
-
-used.forEach(sec=>{
-
-let count=students.filter(s=>
-String(s.section||"").trim()===sec
-).length;
-
-html+=`
-<div class="class-section">
-
-<div class="class-heading">Section ${escapeHtml(sec)}</div>
-
-<div class="class-summary">
-<span class="summary-item summary-total">👨‍🎓 Students: ${count}</span>
-</div>
-
-<div class="class-card" onclick="openStudentsData('fees',${classNo},'','${escapeHtml(sec)}')">
-
-<div class="class-number">Section ${escapeHtml(sec)}</div>
-
-<div class="class-info">${count} Students</div>
-
-<div class="open-text">Open Section →</div>
-
-</div>
-
-</div>
-`;
-});
+/* Fallback for any other class-based module. */
+openStudentsData(type,classNo,"","");
 }
 
-document.getElementById("otherPage").innerHTML=html;
-}
 
 
 /* CLASS ATTENDANCE REGISTER */
@@ -1482,6 +1398,52 @@ function toggleAttendanceDownloadDates(){
   document.getElementById("attendanceDownloadMonthBox").style.display=type==="month"?"grid":"none";
 }
 
+function csvCell(value){
+  return "\""+String(value??"").replace(/\"/g, "\"\"")+"\"";
+}
+
+function downloadFile(filename,content,mime="text/csv;charset=utf-8"){
+  try{
+    // iPhone/iPad Safari can block programmatic Blob downloads from local HTML files.
+    // Use a real temporary link first, then fall back to a data URL in a new tab.
+    const csvText = String(content).replace(/^\uFEFF/, "");
+    const blob = new Blob(["\uFEFF" + csvText], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.style.position = "fixed";
+    a.style.left = "-9999px";
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function(){
+      try{ URL.revokeObjectURL(url); }catch(e){}
+      try{ a.remove(); }catch(e){}
+    }, 1500);
+
+    // If the browser does not honor the download attribute, show the CSV so it
+    // can be saved/shared from the browser's Share menu.
+    setTimeout(function(){
+      if(document.visibilityState === "visible"){
+        const dataUrl = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFF" + csvText);
+        const fallback = document.createElement("a");
+        fallback.href = dataUrl;
+        fallback.target = "_blank";
+        fallback.rel = "noopener";
+        fallback.innerText = "Open Attendance CSV";
+        fallback.style.cssText = "position:fixed;z-index:99999;right:18px;bottom:18px;background:#1769ff;color:#fff;padding:13px 16px;border-radius:10px;text-decoration:none;font-weight:bold";
+        document.body.appendChild(fallback);
+        setTimeout(()=>fallback.remove(),10000);
+      }
+    }, 700);
+  }catch(e){
+    alert("Download failed: " + (e && e.message ? e.message : e));
+  }
+}
+
 function downloadAttendanceReportForClass(classNo){
   let type=document.getElementById("attendanceDownloadType").value;
   let from,to;
@@ -1608,14 +1570,10 @@ let html=`
 
 if(!used.length){
 
-html+=`
-<div class="card">
-<div class="empty">
-<h3>No Section Added</h3>
-<p style="margin-top:8px">Add sections from Teacher management.</p>
-</div>
-</div>
-`;
+/* Section is optional. If no section exists, do NOT block the
+   Fees / Result module. Open all students in the selected class. */
+openStudentsData(type,classNo,stream||"","");
+return;
 
 }else{
 
@@ -1700,7 +1658,9 @@ window.currentSection=section||"";
 let students=getStudents().filter(s=>
 Number(s.classNo)===Number(classNo)&&
 (!stream||s.stream===stream)&&
-(!section||s.section===section)
+(!section ||
+ String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase()
+)
 );
 
 let title=`Class ${classNo}${stream?" - "+stream:""}${section?" - Section "+section:""}`;
@@ -3028,7 +2988,9 @@ let date=getAttendancePageDate();
 let students=getStudents().filter(s=>
 Number(s.classNo)===Number(classNo)&&
 (!stream||s.stream===stream)&&
-(!section||s.section===section)
+(!section ||
+ String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase()
+)
 );
 if(!students.length){alert("No students found.");return;}
 if(!confirm("Mark all "+students.length+" students Present for "+formatDate(date)+"?"))return;
@@ -3220,7 +3182,8 @@ let html=`
 for(let c=1;c<=12;c++){
 
 let students=getClassStudents(c);
-let sections=[...new Set(students.map(s=>s.section).filter(Boolean))];
+/* Section is optional for Homework. Student data is class-based. */
+let sections=[...new Set(students.map(s=>String(s.section||"").trim()).filter(Boolean))];
 
 let homework=getHomework().filter(x=>Number(x.classNo)===c);
 
