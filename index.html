@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -168,6 +169,7 @@ th{background:#fafbfd;color:#667085}
 .profile-head{align-items:flex-start;flex-direction:column}
 }
 </style>
+
 </head>
 
 <body>
@@ -198,8 +200,7 @@ th{background:#fafbfd;color:#667085}
 <input id="loginPassword" type="password" placeholder="Enter password">
 </div>
 
-<button class="btn btn-primary" onclick="loginUser()">Login</button>
-<button class="btn btn-outline" onclick="openRegister()">+ Register New School</button>
+<button class="btn btn-primary" onclick="loginUser()">Login</button> <button class="btn btn-outline" onclick="openRegister()">+ Register New School</button>
 
 <div class="demo">
 <strong>Demo Login</strong><br>
@@ -338,6 +339,7 @@ SchoolHub
 </div>
 
 <!-- REGISTER -->
+
 <div class="modal-bg" id="registerModal">
 <div class="modal">
 <div class="modal-header">
@@ -371,10 +373,12 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="registerSchool()">Register School</button>
+
 </div>
 </div>
 
 <!-- STUDENT MODAL -->
+
 <div class="modal-bg" id="studentModal">
 <div class="modal">
 
@@ -497,6 +501,7 @@ SchoolHub
 </div>
 
 <!-- STUDENT PROFILE -->
+
 <div class="modal-bg" id="studentProfileModal">
 <div class="modal">
 <div class="modal-header">
@@ -508,6 +513,7 @@ SchoolHub
 </div>
 
 <!-- TEACHER MODAL -->
+
 <div class="modal-bg" id="teacherModal">
 <div class="modal">
 <div class="modal-header">
@@ -595,6 +601,7 @@ SchoolHub
 </div>
 
 <!-- FEE MODAL -->
+
 <div class="modal-bg" id="feeModal">
 <div class="modal">
 <div class="modal-header">
@@ -635,10 +642,12 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="saveFeePayment()">Save Payment</button>
+
 </div>
 </div>
 
 <!-- ATTENDANCE MODAL -->
+
 <div class="modal-bg" id="attendanceModal">
 <div class="modal">
 <div class="modal-header">
@@ -659,10 +668,12 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="saveAttendanceData()">Save Attendance</button>
+
 </div>
 </div>
 
 <!-- EXAM MODAL -->
+
 <div class="modal-bg" id="examModal">
 <div class="modal">
 <div class="modal-header">
@@ -698,10 +709,12 @@ SchoolHub
 <div id="examSummary" style="background:#f8faff;padding:15px;border-radius:12px;margin-bottom:15px"></div>
 
 <button class="btn btn-primary" onclick="saveExam()">Save Result</button>
+
 </div>
 </div>
 
 <!-- HOMEWORK MODAL -->
+
 <div class="modal-bg" id="homeworkModal">
 <div class="modal">
 <div class="modal-header">
@@ -777,6 +790,7 @@ SchoolHub
 </div>
 
 <button class="btn btn-primary" onclick="saveHomeworkData()">Save Homework</button>
+
 </div>
 </div>
 
@@ -1207,6 +1221,11 @@ openAttendanceClass(classNo);
 return;
 }
 
+if(type==="fees"){
+openFeeSections(classNo);
+return;
+}
+
 if(classNo===11||classNo===12){
 openStreams(type,classNo);
 return;
@@ -1215,6 +1234,83 @@ return;
 openSections(type,classNo,"");
 }
 
+
+
+/* FEES - SECTION SELECTOR */
+function openFeeSections(classNo){
+
+let students=getClassStudents(classNo);
+
+let sections=getSections().filter(x=>
+Number(x.classNo)===Number(classNo)
+);
+
+let used=[...new Set(
+students
+.map(s=>String(s.section||"").trim())
+.filter(Boolean)
+)];
+
+sections.forEach(x=>{
+let name=String(x.name||"").trim();
+if(name&&!used.includes(name))used.push(name);
+});
+
+let html=`
+<button class="back-btn" onclick="openClasses('fees')">← Back</button>
+
+<div class="card">
+<div class="card-header">
+<h3>Class ${classNo} - Select Section</h3>
+</div>
+</div>
+`;
+
+if(!used.length){
+
+html+=`
+<div class="card">
+<div class="empty">
+<h3>No Section Added</h3>
+<p style="margin-top:8px">Add sections from Teacher management.</p>
+</div>
+</div>
+`;
+
+}else{
+
+used.forEach(sec=>{
+
+let count=students.filter(s=>
+String(s.section||"").trim()===sec
+).length;
+
+html+=`
+<div class="class-section">
+
+<div class="class-heading">Section ${escapeHtml(sec)}</div>
+
+<div class="class-summary">
+<span class="summary-item summary-total">👨‍🎓 Students: ${count}</span>
+</div>
+
+<div class="class-card" onclick="openStudentsData('fees',${classNo},'','${escapeHtml(sec)}')">
+
+<div class="class-number">Section ${escapeHtml(sec)}</div>
+
+<div class="class-info">${count} Students</div>
+
+<div class="open-text">Open Section →</div>
+
+</div>
+
+</div>
+`;
+});
+}
+
+document.getElementById("otherPage").innerHTML=html;
+}
 
 
 /* CLASS ATTENDANCE REGISTER */
