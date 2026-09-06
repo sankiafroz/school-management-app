@@ -689,7 +689,7 @@ SchoolHub
 
 <div class="subject-list">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-<strong>Subjects</strong>
+<div><strong>Subjects</strong><div style="font-size:12px;color:#667085;margin-top:4px">Har subject ke Practical aur Theory marks alag add karein.</div></div>
 <button class="small-btn" onclick="addSubjectRow()">+ Add Subject</button>
 </div>
 <div id="subjectRows"></div>
@@ -1019,23 +1019,32 @@ function getAttendanceForStudent(id){
 return getAttendance().filter(x=>Number(x.studentId)===Number(id));
 }
 
+function getExamResultsForStudent(id){
+return getExams().filter(x=>Number(x.studentId)===Number(id)).sort((a,b)=>String(a.examDate||"").localeCompare(String(b.examDate||""))||Number(a.id)-Number(b.id));
+}
+
 function getExamForStudent(id){
-let a=getExams().filter(x=>Number(x.studentId)===Number(id));
+let a=getExamResultsForStudent(id);
 return a.length?a[a.length-1]:null;
 }
 
-function getExamTotal(e){
-return (e.subjects||[]).reduce((a,x)=>a+Number(x.max||0),0);
+function normalizeExamSubject(x){
+let practical=Number(x?.practical);
+let theory=Number(x?.theory);
+let practicalMax=Number(x?.practicalMax);
+let theoryMax=Number(x?.theoryMax);
+if(!Number.isFinite(practical)) practical=0;
+if(!Number.isFinite(theory)) theory=Number(x?.obtained)||0;
+if(!Number.isFinite(practicalMax)||practicalMax<0) practicalMax=0;
+if(!Number.isFinite(theoryMax)||theoryMax<=0) theoryMax=Number(x?.max)||100;
+return {name:String(x?.name||"").trim(),practical,theory,practicalMax,theoryMax};
 }
 
-function getExamObtained(e){
-return (e.subjects||[]).reduce((a,x)=>a+Number(x.obtained||0),0);
-}
-
-function getExamPercentage(e){
-let t=getExamTotal(e);
-return t?getExamObtained(e)/t*100:0;
-}
+function getSubjectObtained(x){let n=normalizeExamSubject(x);return n.practical+n.theory;}
+function getSubjectMax(x){let n=normalizeExamSubject(x);return n.practicalMax+n.theoryMax;}
+function getExamTotal(e){return (e.subjects||[]).reduce((a,x)=>a+getSubjectMax(x),0);}
+function getExamObtained(e){return (e.subjects||[]).reduce((a,x)=>a+getSubjectObtained(x),0);}
+function getExamPercentage(e){let t=getExamTotal(e);return t?getExamObtained(e)/t*100:0;}
 
 function getTypeTitle(type){
 return {
@@ -1943,17 +1952,10 @@ ${todayRecord?`<button class="edit-btn" onclick="editStudentAttendance(${s.id},$
 }
 
 if(type==="exams"){
-
 html+=`
 <th>Student Name</th>
 <th>Father Name</th>
-<th>Exam</th>
-<th>Date</th>
-<th>Total</th>
-<th>Obtained</th>
-<th>%</th>
-<th>Result</th>
-<th>Subjects</th>
+<th>All Saved Results</th>
 <th>Action</th>
 `;
 }
@@ -2054,51 +2056,16 @@ html+=`
 }
 
 if(type==="exams"){
-
-let e=getExamForStudent(s.id);
-
-if(e){
-
-let total=getExamTotal(e);
-let obtained=getExamObtained(e);
-let percentage=getExamPercentage(e);
-let pass=percentage>=33;
-
-html+=`
-<tr>
-<td><strong>${escapeHtml(s.name)}</strong></td>
-<td>${escapeHtml(s.father)}</td>
-<td>${escapeHtml(e.examName)}</td>
-<td>${formatDate(e.examDate)}</td>
-<td>${total}</td>
-<td>${obtained}</td>
-<td>${percentage.toFixed(1)}%</td>
-<td><span class="badge ${pass?"green":"red"}">${pass?"PASS":"FAIL"}</span></td>
-<td>
-${e.subjects.map(x=>`
-<div style="font-size:12px;margin-bottom:4px">
-<b>${escapeHtml(x.name)}</b>: ${x.obtained}/${x.max}
-</div>`).join("")}
-</td>
-<td>
-<button class="edit-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">✏️ Edit</button>
-<button class="delete-btn" onclick="deleteExam(${e.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button>
-</td>
-</tr>
-`;
-
+let results=getExamResultsForStudent(s.id);
+if(results.length){
+let historyHtml=results.map(e=>{
+let total=getExamTotal(e), obtained=getExamObtained(e), percentage=getExamPercentage(e), pass=percentage>=33;
+let subjects=(e.subjects||[]).map(x=>{let n=normalizeExamSubject(x);return `<div style="display:grid;grid-template-columns:minmax(120px,1.5fr) 90px 90px;gap:6px;padding:5px 0;border-bottom:1px solid #edf0f5"><div><b>${escapeHtml(n.name)}</b></div><div style="text-align:center">${n.practical}/${n.practicalMax}</div><div style="text-align:center">${n.theory}/${n.theoryMax}</div></div>`;}).join("");
+return `<div style="border:1px solid #e4e7ec;border-radius:10px;padding:10px;margin-bottom:8px;background:#fff"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><strong>${escapeHtml(e.examName)}</strong> <span style="color:#667085;font-size:12px">${formatDate(e.examDate)}</span></div><div><b>${obtained}/${total}</b> · ${percentage.toFixed(1)}% <span class="badge ${pass?"green":"red"}">${pass?"PASS":"FAIL"}</span></div></div><div style="margin-top:8px;display:grid;grid-template-columns:minmax(120px,1.5fr) 90px 90px;gap:6px;font-size:12px;color:#667085;padding-bottom:4px;border-bottom:1px solid #dfe3ea"><b>Subject</b><b style="text-align:center">Practical</b><b style="text-align:center">Theory</b></div>${subjects}<div style="margin-top:8px;display:flex;gap:6px"><button class="edit-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}',${e.id})">✏️ Edit</button><button class="delete-btn" onclick="deleteExam(${e.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button></div></div>`;
+}).join("");
+html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td style="min-width:560px">${historyHtml}</td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add New Result</button></td></tr>`;
 }else{
-
-html+=`
-<tr>
-<td><strong>${escapeHtml(s.name)}</strong></td>
-<td>${escapeHtml(s.father)}</td>
-<td colspan="7"><span class="badge yellow">Result Not Added</span></td>
-<td>
-<button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button>
-</td>
-</tr>
-`;
+html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td><span class="badge yellow">Result Not Added</span></td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button></td></tr>`;
 }
 }
 });
@@ -3002,166 +2969,118 @@ alert("All students marked Present.");
 }
 
 /* EXAMS */
-
 let examSubjects=[];
 let editingExamId=null;
 
-function openExamModal(studentId,classNo,stream,section){
-
-let s=getStudents().find(x=>Number(x.id)===Number(studentId));
-if(!s)return;
-
-let e=getExamForStudent(studentId);
-
-window.examStudentId=studentId;
-window.examClassNo=classNo;
-window.examStream=stream||"";
-window.examSection=section||"";
-editingExamId=e?e.id:null;
-
-examSubjects=e?.subjects?
-JSON.parse(JSON.stringify(e.subjects)):
-[
-{name:"Maths",max:100,obtained:0},
-{name:"Science",max:100,obtained:0},
-{name:"English",max:100,obtained:0},
-{name:"Hindi",max:100,obtained:0},
-{name:"Social Science",max:100,obtained:0}
-];
-
-document.getElementById("examModalTitle").innerText=
-e?"Edit Exam Result":"Add Exam Result";
-
-document.getElementById("examStudentName").value=s.name;
-document.getElementById("examName").value=e?.examName||"Annual Examination";
+function openExamModal(studentId,classNo,stream,section,examId){
+let st=getStudents().find(x=>Number(x.id)===Number(studentId));
+if(!st)return;
+let all=getExamResultsForStudent(studentId);
+let e=examId?all.find(x=>Number(x.id)===Number(examId)):null;
+window.examStudentId=studentId;window.examClassNo=classNo;window.examStream=stream||"";window.examSection=section||"";editingExamId=e?e.id:null;
+let old=e?.subjects||[];
+let names=[...new Set(old.map(x=>String(x.name||"").trim()).filter(Boolean))];
+if(!names.length) names=["Maths","Science","English","Hindi","Social Science"];
+examSubjects=names.map(name=>{let x=old.find(y=>String(y.name||"").trim().toLowerCase()===name.toLowerCase());if(x)return normalizeExamSubject(x);return {name,practical:0,theory:0,practicalMax:20,theoryMax:80};});
+document.getElementById("examModalTitle").innerText=e?"Edit Exam Result":"Add New Exam Result";
+document.getElementById("examStudentName").value=st.name;
+document.getElementById("examName").value=e?.examName||"";
 document.getElementById("examDate").value=e?.examDate||today();
-
-renderSubjectRows();
-
+renderSubjectRows(all.filter(x=>!e||Number(x.id)!==Number(e.id)));
 document.getElementById("examModal").style.display="flex";
 }
 
-function addSubjectRow(){
-examSubjects.push({name:"",max:100,obtained:0});
-renderSubjectRows();
+function addSubjectRow(){examSubjects.push({name:"",practical:0,theory:0,practicalMax:20,theoryMax:80});renderSubjectRows();}
+function removeSubjectRow(i){examSubjects.splice(i,1);renderSubjectRows();}
+
+function renderSubjectRows(previousResults=[]){
+let html=`<div style="display:grid;grid-template-columns:minmax(120px,1.5fr) 80px 80px 80px 80px 32px;gap:6px;align-items:center;font-size:11px;color:#667085;margin-bottom:6px"><b>Subject</b><b>Practical Max</b><b>Practical</b><b>Theory Max</b><b>Theory</b><b></b></div>`;
+examSubjects.forEach((x,i)=>{let n=normalizeExamSubject(x);html+=`<div class="subject-row" style="display:grid;grid-template-columns:minmax(120px,1.5fr) 80px 80px 80px 80px 32px;gap:6px;align-items:center"><input placeholder="Subject Name" value="${escapeHtml(n.name)}" oninput="examSubjects[${i}].name=this.value;updateExamSummary()"><input type="number" min="0" value="${n.practicalMax}" oninput="examSubjects[${i}].practicalMax=Number(this.value)||0;updateExamSummary()"><input type="number" min="0" value="${n.practical}" oninput="examSubjects[${i}].practical=Number(this.value)||0;updateExamSummary()"><input type="number" min="0" value="${n.theoryMax}" oninput="examSubjects[${i}].theoryMax=Number(this.value)||0;updateExamSummary()"><input type="number" min="0" value="${n.theory}" oninput="examSubjects[${i}].theory=Number(this.value)||0;updateExamSummary()"><button class="delete-btn" onclick="removeSubjectRow(${i})">×</button></div>`;});
+if(previousResults.length){
+let names=[...new Set(previousResults.flatMap(e=>(e.subjects||[]).map(x=>String(x.name||"").trim()).filter(Boolean)))];
+html+=`<div style="margin-top:16px;border-top:1px solid #e4e7ec;padding-top:12px"><strong>Previous Results</strong><div style="overflow:auto;margin-top:8px"><table style="width:100%;min-width:650px;border-collapse:collapse;font-size:12px"><thead><tr><th style="text-align:left;padding:6px">Subject</th>${previousResults.map(e=>`<th colspan="2" style="padding:6px">${escapeHtml(e.examName)}<br><span style="font-weight:normal">${formatDate(e.examDate)}</span></th>`).join("")}</tr><tr><th></th>${previousResults.map(e=>`<th>Practical</th><th>Theory</th>`).join("")}</tr></thead><tbody>${names.map(name=>`<tr><td style="padding:6px"><b>${escapeHtml(name)}</b></td>${previousResults.map(e=>{let x=(e.subjects||[]).find(y=>String(y.name||"").trim().toLowerCase()===name.toLowerCase());let n=normalizeExamSubject(x||{});return `<td style="padding:6px;text-align:center">${x?`${n.practical}/${n.practicalMax}`:"-"}</td><td style="padding:6px;text-align:center">${x?`${n.theory}/${n.theoryMax}`:"-"}</td>`}).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+}
+document.getElementById("subjectRows").innerHTML=html;updateExamSummary();
 }
 
-function removeSubjectRow(i){
-examSubjects.splice(i,1);
-renderSubjectRows();
+function updateExamSummary(){let total=getExamTotal({subjects:examSubjects}),obtained=getExamObtained({subjects:examSubjects}),percentage=total?obtained/total*100:0;document.getElementById("examSummary").innerHTML=`<strong>Current Exam Total:</strong> ${total} &nbsp; | &nbsp; <strong>Obtained:</strong> ${obtained} &nbsp; | &nbsp; <strong>Percentage:</strong> ${percentage.toFixed(1)}%`; }
+
+
+function handleExamNameChange(){
+    const sel=document.getElementById("examName");
+    const wrap=document.getElementById("examCustomNameWrap");
+    if(!sel) return;
+    if(sel.value==="__ADD_MORE__"){
+        if(wrap) wrap.style.display="";
+        const input=document.getElementById("examCustomName");
+        if(input) input.focus();
+    }else{
+        if(wrap) wrap.style.display="none";
+    }
 }
 
-function renderSubjectRows(){
-
-let html="";
-
-examSubjects.forEach((x,i)=>{
-
-html+=`
-<div class="subject-row">
-
-<input placeholder="Subject Name"
-value="${escapeHtml(x.name)}"
-oninput="examSubjects[${i}].name=this.value;updateExamSummary()">
-
-<input type="number" value="${x.max}"
-oninput="examSubjects[${i}].max=Number(this.value)||0;updateExamSummary()">
-
-<input type="number" value="${x.obtained}"
-oninput="examSubjects[${i}].obtained=Number(this.value)||0;updateExamSummary()">
-
-<button class="delete-btn" onclick="removeSubjectRow(${i})">×</button>
-
-</div>
-`;
-});
-
-document.getElementById("subjectRows").innerHTML=html;
-updateExamSummary();
+function getSelectedExamName(){
+    const sel=document.getElementById("examName");
+    if(!sel) return "";
+    if(sel.value==="__ADD_MORE__"){
+        return (document.getElementById("examCustomName")?.value||"").trim();
+    }
+    return (sel.value||"").trim();
 }
 
-function updateExamSummary(){
+function handleExamMarksTypeChange(){
+    const withPractical=document.getElementById("examMarksType")?.value==="with_practical";
+    document.querySelectorAll(".exam-practical-field").forEach(el=>{
+        el.style.display=withPractical ? "" : "none";
+    });
+}
 
-let total=getExamTotal({subjects:examSubjects});
-let obtained=getExamObtained({subjects:examSubjects});
-let percentage=total?obtained/total*100:0;
+function setResultDeclareUI(declared){
+    const btn=document.getElementById("declareResultBtn");
+    const status=document.getElementById("resultDeclareStatus");
+    if(btn){
+        btn.textContent=declared ? "Result Declared ✓" : "Declare Result";
+        btn.className=declared ? "btn btn-success" : "btn btn-primary";
+    }
+    if(status){
+        status.textContent=declared
+            ? "Declared — Students can see this result"
+            : "Not Declared — Students cannot see this result";
+    }
+}
 
-document.getElementById("examSummary").innerHTML=`
-<strong>Total Marks:</strong> ${total}
-&nbsp; | &nbsp;
-<strong>Obtained:</strong> ${obtained}
-&nbsp; | &nbsp;
-<strong>Percentage:</strong> ${percentage.toFixed(1)}%
-`;
+function toggleResultDeclared(){
+    const studentId=Number(window.examStudentId||0);
+    const examName=getSelectedExamName();
+    if(!studentId || !examName){
+        alert("Please select the Result / Exam Name first.");
+        return;
+    }
+    const results=JSON.parse(localStorage.getItem("schoolhub_exams")||"[]");
+    const matches=results.filter(r=>Number(r.studentId)===studentId && String(r.examName||"").trim()===examName);
+    if(!matches.length){
+        alert("Please save the result first, then declare it.");
+        return;
+    }
+    const next=!matches.every(r=>r.declared===true);
+    results.forEach(r=>{
+        if(Number(r.studentId)===studentId && String(r.examName||"").trim()===examName){
+            r.declared=next;
+        }
+    });
+    localStorage.setItem("schoolhub_exams",JSON.stringify(results));
+    setResultDeclareUI(next);
+    if(typeof renderAll==="function") renderAll();
 }
 
 function saveExam(){
-
-let examName=document.getElementById("examName").value.trim();
-let examDate=document.getElementById("examDate").value;
-
-if(!examName||!examDate){
-alert("Enter exam name and date");
-return;
+let examName=document.getElementById("examName").value.trim(),examDate=document.getElementById("examDate").value;
+if(!examName||!examDate){alert("Enter exam name and date");return;}if(!examSubjects.length){alert("Add at least one subject");return;}
+let clean=[];for(let x of examSubjects){let n=normalizeExamSubject(x);n.name=n.name.trim();n.practical=Number(n.practical)||0;n.theory=Number(n.theory)||0;n.practicalMax=Number(n.practicalMax)||0;n.theoryMax=Number(n.theoryMax)||0;if(!n.name||n.theoryMax<=0||n.practicalMax<0||n.practical<0||n.theory<0||n.practical>n.practicalMax||n.theory>n.theoryMax){alert("Please check Practical/Theory marks for all subjects");return;}clean.push(n);}
+let data=getExams();let result={id:editingExamId||Date.now(),studentId:Number(window.examStudentId),examName,examDate,subjects:clean};let i=editingExamId?data.findIndex(x=>Number(x.id)===Number(editingExamId)):-1;if(i>=0)data[i]=result;else data.push(result);saveExams(data);closeExamModal();openStudentsData("exams",window.examClassNo,window.examStream,window.examSection);
 }
 
-if(!examSubjects.length){
-alert("Add at least one subject");
-return;
-}
-
-for(let s of examSubjects){
-
-s.name=s.name.trim();
-s.max=Number(s.max)||0;
-s.obtained=Number(s.obtained)||0;
-
-if(!s.name||s.max<=0||s.obtained<0||s.obtained>s.max){
-alert("Please check subject marks");
-return;
-}
-}
-
-let data=getExams();
-
-let result={
-id:editingExamId||Date.now(),
-studentId:Number(window.examStudentId),
-examName,
-examDate,
-subjects:examSubjects
-};
-
-let i=data.findIndex(x=>Number(x.id)===Number(editingExamId));
-
-if(i>=0)data[i]=result;
-else data.push(result);
-
-saveExams(data);
-
-closeExamModal();
-
-openStudentsData(
-"exams",
-window.examClassNo,
-window.examStream,
-window.examSection
-);
-}
-
-function deleteExam(id,classNo,stream,section){
-
-if(!confirm("Delete this result?"))return;
-
-saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
-
-openStudentsData("exams",classNo,stream,section);
-}
-
-function closeExamModal(){
-document.getElementById("examModal").style.display="none";
-editingExamId=null;
-}
+function deleteExam(id,classNo,stream,section){if(!confirm("Delete this result?"))return;saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));openStudentsData("exams",classNo,stream,section);}
 
 /* HOMEWORK */
 
@@ -3376,61 +3295,120 @@ document.getElementById("homeworkModal").style.display="flex";
 function updateHomeworkSections(){
 
 let classNo=Number(document.getElementById("homeworkClass").value);
+let stream=(document.getElementById("homeworkStream")?.value||"").trim();
 let select=document.getElementById("homeworkSection");
 
 select.innerHTML=`<option value="">All Sections</option>`;
 
 if(!classNo)return;
 
-let sections=getSections().filter(x=>Number(x.classNo)===classNo);
+/* Sections come automatically from Section Management + student records */
+let names=[];
 
-sections.forEach(x=>{
+getSections().forEach(x=>{
+if(Number(x.classNo)!==classNo)return;
+if(stream && x.stream && String(x.stream).toLowerCase()!==stream.toLowerCase())return;
+
+let name=String(x.name||"").trim();
+if(name && !names.some(n=>n.toLowerCase()===name.toLowerCase())){
+names.push(name);
+}
+});
+
+getClassStudents(classNo).forEach(st=>{
+if(stream && st.stream && String(st.stream).toLowerCase()!==stream.toLowerCase())return;
+
+let name=String(st.section||"").trim();
+if(name && !names.some(n=>n.toLowerCase()===name.toLowerCase())){
+names.push(name);
+}
+});
+
+names.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}));
+
+names.forEach(name=>{
 select.innerHTML+=
-`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
+`<option value="${escapeHtml(name)}">Section ${escapeHtml(name)}</option>`;
 });
 }
 
 function updateHomeworkTeachers(selected=""){
 
 let classNo=Number(document.getElementById("homeworkClass").value);
-let subject=document.getElementById("homeworkSubject").value.trim().toLowerCase();
+let section=(document.getElementById("homeworkSection")?.value||"").trim().toLowerCase();
+let stream=(document.getElementById("homeworkStream")?.value||"").trim().toLowerCase();
+let subject=(document.getElementById("homeworkSubject").value||"").trim().toLowerCase();
 
 let select=document.getElementById("homeworkTeacher");
-
 select.innerHTML=`<option value="">Select Teacher</option>`;
 
-let teachers=getTeachers();
+let allTeachers=Array.isArray(getTeachers())?getTeachers():[];
 
-if(classNo){
+/* Class teachers + teachers marked All/Not Assigned */
+let teachers=classNo
+?allTeachers.filter(t=>!t.classNo||Number(t.classNo)===classNo)
+:allTeachers.slice();
 
-teachers=teachers.filter(t=>
-!t.classNo||
-Number(t.classNo)===classNo
-);
+/* Section is a preference, never a hard block */
+if(section){
+let matching=teachers.filter(t=>{
+let ts=String(t.section||"").trim().toLowerCase();
+return !ts || ts===section;
+});
+if(matching.length)teachers=matching;
 }
 
-if(subject){
+/* Stream is also a preference */
+if(stream){
+let matching=teachers.filter(t=>{
+let ts=String(t.stream||t.teachingStream||"").trim().toLowerCase();
+return !ts || ts===stream;
+});
+if(matching.length)teachers=matching;
+}
 
-let subjectTeachers=teachers.filter(t=>
-(
-String(t.subject||"").toLowerCase()===subject ||
-(Array.isArray(t.subjects)&&t.subjects.some(s=>String(s||"").toLowerCase()===subject))
+/* Subject is a preference so teacher names never disappear */
+if(subject){
+let matching=teachers.filter(t=>{
+let subs=Array.isArray(t.subjects)
+? t.subjects.map(x=>String(x||"").trim().toLowerCase())
+:[];
+
+if(t.subject)subs.push(String(t.subject).trim().toLowerCase());
+
+return subs.includes(subject);
+});
+
+if(matching.length)teachers=matching;
+}
+
+teachers.sort((a,b)=>
+String(a.name||"").localeCompare(
+String(b.name||""),
+undefined,
+{sensitivity:"base"}
 )
 );
 
-if(subjectTeachers.length)teachers=subjectTeachers;
-}
-
 teachers.forEach(t=>{
 
-select.innerHTML+=`
-<option value="${t.id}">
-${escapeHtml(t.name)} - ${escapeHtml((Array.isArray(t.subjects)&&t.subjects.length?t.subjects[0]:t.subject)||"-")}
-</option>
-`;
+let subs=Array.isArray(t.subjects)
+?t.subjects.filter(Boolean)
+:[];
+
+if(!subs.length&&t.subject)subs=[t.subject];
+
+let label=String(t.name||"Teacher");
+
+if(subs.length)label+=" - "+subs.join(", ");
+
+if(t.section)label+=" (Section "+t.section+")";
+
+select.innerHTML+=
+`<option value="${escapeHtml(t.id)}">${escapeHtml(label)}</option>`;
 });
 
-select.value=selected||"";
+if(selected!=="")select.value=String(selected);
 }
 
 function saveHomeworkData(){
@@ -3713,6 +3691,15 @@ updateTeacherSections();
 });
 
 document.getElementById("homeworkClass").addEventListener("change",function(){
+updateHomeworkSections();
+updateHomeworkTeachers();
+});
+
+document.getElementById("homeworkSection").addEventListener("change",function(){
+updateHomeworkTeachers();
+});
+
+document.getElementById("homeworkStream").addEventListener("change",function(){
 updateHomeworkSections();
 updateHomeworkTeachers();
 });
