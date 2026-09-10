@@ -460,10 +460,8 @@ SchoolHub
 </div>
 
 <div class="form-group" id="studentSectionGroup">
-<label>Section</label>
-<select id="studentSection">
-<option value="">No Section</option>
-</select>
+<label>Add Section</label>
+<input id="studentSection" type="text" placeholder="Enter section e.g. A, B, ABC">
 </div>
 
 <div class="form-group">
@@ -2067,14 +2065,40 @@ html+=`
 }
 
 if(type==="exams"){
+/* Result card shows only one result per student: the latest saved result.
+   Older results remain stored and can still be edited/deleted through the
+   existing result records, but the class result screen is kept clean. */
 let results=getExamResultsForStudent(s.id);
-if(results.length){
-let historyHtml=results.map(e=>{
+let e=results.length?results[results.length-1]:null;
+
+if(e){
 let total=getExamTotal(e), obtained=getExamObtained(e), percentage=getExamPercentage(e), pass=percentage>=33;
-let subjects=(e.subjects||[]).map(x=>{let n=normalizeExamSubject(x);return `<div style="display:grid;grid-template-columns:minmax(120px,1.5fr) 90px 90px;gap:6px;padding:5px 0;border-bottom:1px solid #edf0f5"><div><b>${escapeHtml(n.name)}</b></div><div style="text-align:center">${n.practical}/${n.practicalMax}</div><div style="text-align:center">${n.theory}/${n.theoryMax}</div></div>`;}).join("");
-return `<div style="border:1px solid #e4e7ec;border-radius:10px;padding:10px;margin-bottom:8px;background:#fff"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><strong>${escapeHtml(e.examName)}</strong> <span style="color:#667085;font-size:12px">${formatDate(e.examDate)}</span></div><div><b>${obtained}/${total}</b> · ${percentage.toFixed(1)}% <span class="badge ${pass?"green":"red"}">${pass?"PASS":"FAIL"}</span></div></div><div style="margin-top:8px;display:grid;grid-template-columns:minmax(120px,1.5fr) 90px 90px;gap:6px;font-size:12px;color:#667085;padding-bottom:4px;border-bottom:1px solid #dfe3ea"><b>Subject</b><b style="text-align:center">Practical</b><b style="text-align:center">Theory</b></div>${subjects}<div style="margin-top:8px;display:flex;gap:6px"><button class="edit-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}',${e.id})">✏️ Edit</button><button class="delete-btn" onclick="deleteExam(${e.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button></div></div>`;
+
+let subjects=(e.subjects||[]).map(x=>{
+let n=normalizeExamSubject(x);
+return `<div style="display:grid;grid-template-columns:minmax(120px,1.5fr) 90px 90px;gap:6px;padding:5px 0;border-bottom:1px solid #edf0f5">
+<div><b>${escapeHtml(n.name)}</b></div>
+<div style="text-align:center">${n.practical}/${n.practicalMax}</div>
+<div style="text-align:center">${n.theory}/${n.theoryMax}</div>
+</div>`;
 }).join("");
-html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td style="min-width:560px">${historyHtml}</td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add New Result</button></td></tr>`;
+
+let resultHtml=`<div style="border:1px solid #e4e7ec;border-radius:10px;padding:10px;background:#fff">
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+<div><strong>${escapeHtml(e.examName)}</strong> <span style="color:#667085;font-size:12px">${formatDate(e.examDate)}</span></div>
+<div><b>${obtained}/${total}</b> · ${percentage.toFixed(1)}% <span class="badge ${pass?"green":"red"}">${pass?"PASS":"FAIL"}</span></div>
+</div>
+<div style="margin-top:8px;display:grid;grid-template-columns:minmax(120px,1.5fr) 90px 90px;gap:6px;font-size:12px;color:#667085;padding-bottom:4px;border-bottom:1px solid #dfe3ea">
+<b>Subject</b><b style="text-align:center">Practical</b><b style="text-align:center">Theory</b>
+</div>
+${subjects}
+<div style="margin-top:8px;display:flex;gap:6px">
+<button class="edit-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}',${e.id})">✏️ Edit</button>
+<button class="delete-btn" onclick="deleteExam(${e.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button>
+</div>
+</div>`;
+
+html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td style="min-width:560px">${resultHtml}</td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add / Update Result</button></td></tr>`;
 }else{
 html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td><span class="badge yellow">Result Not Added</span></td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button></td></tr>`;
 }
@@ -2116,24 +2140,12 @@ let studentPhotoData="";
 
 function updateSectionOptions(selected=""){
 
-let classNo=Number(document.getElementById("studentClass").value);
-let sections=getSections().filter(x=>Number(x.classNo)===classNo);
+/* Section is entered directly during admission.
+   Existing student section is preserved when editing. */
+let input=document.getElementById("studentSection");
+if(!input)return;
 
-let select=document.getElementById("studentSection");
-let group=document.getElementById("studentSectionGroup");
-
-group.classList.remove("section-hidden");
-select.innerHTML=`<option value="">Select Section</option>`;
-
-sections.forEach(x=>{
-select.innerHTML+=`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
-});
-
-if(selected && !sections.some(x=>String(x.name).toLowerCase()===String(selected).toLowerCase())){
-select.innerHTML+=`<option value="${escapeHtml(selected)}">${escapeHtml(selected)}</option>`;
-}
-
-select.value=selected||"";
+input.value=selected||"";
 }
 
 function openAddStudent(classNo,stream,section){
@@ -3431,44 +3443,51 @@ reader.readAsDataURL(file);
 });
 }
 
-function updateHomeworkSections(){
+function updateHomeworkSections(selected=""){
 
 let classNo=Number(document.getElementById("homeworkClass").value);
 let stream=(document.getElementById("homeworkStream")?.value||"").trim();
 let select=document.getElementById("homeworkSection");
 
+if(!select)return;
+
 select.innerHTML=`<option value="">All Sections</option>`;
 
 if(!classNo)return;
 
-/* Sections come automatically from Section Management + student records */
 let names=[];
 
+function addSectionName(name){
+name=String(name||"").trim();
+if(name && !names.some(n=>n.toLowerCase()===name.toLowerCase())){
+names.push(name);
+}
+}
+
+/* Sections from Section Management */
 getSections().forEach(x=>{
 if(Number(x.classNo)!==classNo)return;
 if(stream && x.stream && String(x.stream).toLowerCase()!==stream.toLowerCase())return;
-
-let name=String(x.name||"").trim();
-if(name && !names.some(n=>n.toLowerCase()===name.toLowerCase())){
-names.push(name);
-}
+addSectionName(x.name);
 });
 
+/* Sections already assigned to admitted students */
 getClassStudents(classNo).forEach(st=>{
 if(stream && st.stream && String(st.stream).toLowerCase()!==stream.toLowerCase())return;
-
-let name=String(st.section||"").trim();
-if(name && !names.some(n=>n.toLowerCase()===name.toLowerCase())){
-names.push(name);
-}
+addSectionName(st.section);
 });
 
 names.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}));
 
 names.forEach(name=>{
-select.innerHTML+=
-`<option value="${escapeHtml(name)}">Section ${escapeHtml(name)}</option>`;
+select.innerHTML+=`<option value="${escapeHtml(name)}">Section ${escapeHtml(name)}</option>`;
 });
+
+if(selected && !names.some(n=>n.toLowerCase()===String(selected).toLowerCase())){
+select.innerHTML+=`<option value="${escapeHtml(selected)}">Section ${escapeHtml(selected)}</option>`;
+}
+
+select.value=selected||"";
 }
 
 function updateHomeworkTeachers(selected=""){
@@ -3608,7 +3627,7 @@ homeworkImageData=Array.isArray(h.images)?h.images.slice():[];
 document.getElementById("homeworkModalTitle").innerText="Edit Homework";
 document.getElementById("homeworkClass").value=h.classNo;
 
-updateHomeworkSections();
+updateHomeworkSections(h.section||"");
 
 document.getElementById("homeworkSection").value=h.section||"";
 document.getElementById("homeworkStream").value=h.stream||"";
