@@ -109,6 +109,8 @@ th{background:#fafbfd;color:#667085}
 .subject-list{background:#f8faff;padding:14px;border-radius:12px;margin:10px 0 18px}
 .section-hidden{display:none!important}
 .homework-card{background:#fff;border:1px solid #e5eaf1;border-radius:15px;padding:18px;margin-bottom:12px}
+.homework-images{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.homework-images img{width:180px;height:130px;object-fit:cover;border:1px solid #dce2eb;border-radius:10px}
 .homework-card h3{margin-bottom:7px}
 .homework-meta{display:flex;gap:12px;flex-wrap:wrap;color:#667085;font-size:13px;margin-bottom:10px}
 .student-profile-list{padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
@@ -713,7 +715,7 @@ SchoolHub
 
 <div class="form-group">
 <label>Class *</label>
-<select id="homeworkClass" onchange="updateHomeworkSections()">
+<select id="homeworkClass" onchange="updateHomeworkSections();updateHomeworkTeachers()">
 <option value="">Select Class</option>
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
@@ -732,9 +734,21 @@ SchoolHub
 
 <div class="form-group">
 <label>Section</label>
-<select id="homeworkSection">
+<select id="homeworkSection" onchange="updateHomeworkTeachers()">
 <option value="">All Sections</option>
 </select>
+</div>
+
+<div class="form-group">
+<label>Teacher *</label>
+<select id="homeworkTeacher">
+<option value="">Select Teacher</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Subject *</label>
+<input id="homeworkSubject" placeholder="Enter subject">
 </div>
 
 <div class="form-group">
@@ -744,18 +758,6 @@ SchoolHub
 <option value="Science">Science</option>
 <option value="Commerce">Commerce</option>
 <option value="Arts">Arts</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>Subject *</label>
-<input id="homeworkSubject" placeholder="Mathematics">
-</div>
-
-<div class="form-group">
-<label>Teacher *</label>
-<select id="homeworkTeacher">
-<option value="">Select Teacher</option>
 </select>
 </div>
 
@@ -773,7 +775,13 @@ SchoolHub
 
 <div class="form-group">
 <label>Homework / Assignment *</label>
-<textarea id="homeworkText" placeholder="Enter homework details..."></textarea>
+<textarea id="homeworkText" placeholder="Teacher can write homework / assignment details here..."></textarea>
+</div>
+
+<div class="form-group">
+<label>Homework Images</label>
+<input id="homeworkImages" type="file" accept="image/*" multiple onchange="previewHomeworkImages(event)">
+<div id="homeworkImagePreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
 </div>
 
 <button class="btn btn-primary" onclick="saveHomeworkData()">Save Homework</button>
@@ -2020,7 +2028,10 @@ payments.map(p=>`
 <br>${escapeHtml(p.mode||"")}
 ${p.receipt?`<br>Receipt: ${escapeHtml(p.receipt)}`:""}
 <br>
+<div class="action-buttons">
+<button class="small-btn" onclick="printFeeSlip(${p.id})">🧾 Slip</button>
 <button class="delete-btn" onclick="deleteFee(${p.id},${classNo},'${stream||""}','${section||""}')">Delete</button>
+</div>
 </div>
 `).join(""):"No Payment"}
 </td>
@@ -2111,18 +2122,16 @@ let sections=getSections().filter(x=>Number(x.classNo)===classNo);
 let select=document.getElementById("studentSection");
 let group=document.getElementById("studentSectionGroup");
 
-if(!sections.length){
-group.classList.add("section-hidden");
-select.innerHTML=`<option value="">No Section</option>`;
-return;
-}
-
 group.classList.remove("section-hidden");
 select.innerHTML=`<option value="">Select Section</option>`;
 
 sections.forEach(x=>{
 select.innerHTML+=`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
 });
+
+if(selected && !sections.some(x=>String(x.name).toLowerCase()===String(selected).toLowerCase())){
+select.innerHTML+=`<option value="${escapeHtml(selected)}">${escapeHtml(selected)}</option>`;
+}
 
 select.value=selected||"";
 }
@@ -2757,21 +2766,110 @@ return;
 
 let fees=getFees();
 
-fees.push({
+let savedPayment={
 id:Date.now(),
 studentId:Number(window.feeStudentId),
 amount,
 date,
 mode:document.getElementById("feeMode").value,
 receipt:document.getElementById("feeReceipt").value.trim()
-});
+};
 
+fees.push(savedPayment);
 saveFees(fees);
 
 closeFeeModal();
 updateDashboard();
 
 openStudentsData("fees",window.feeClassNo,window.feeStream,window.feeSection);
+
+/* Automatically create the printable fee slip immediately after payment. */
+printFeeSlip(savedPayment.id);
+}
+
+
+function printFeeSlip(paymentId){
+
+let payment=getFees().find(x=>Number(x.id)===Number(paymentId));
+if(!payment)return;
+
+let student=getStudents().find(x=>Number(x.id)===Number(payment.studentId));
+if(!student)return;
+
+let totalFee=Number(student.fee||0);
+let paid=getStudentPaid(student.id);
+let due=Math.max(0,totalFee-paid);
+let school=localStorage.getItem("schoolName")||document.getElementById("displaySchool")?.innerText||"ABC Public School";
+
+let receiptNo=payment.receipt||("REC-"+payment.id);
+
+let win=window.open("","_blank","width=760,height=850");
+if(!win){
+alert("Please allow pop-ups to print the fee slip.");
+return;
+}
+
+win.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fee Receipt - ${escapeHtml(student.name)}</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:25px;color:#172033}
+.receipt{max-width:700px;margin:auto;background:#fff;border:1px solid #d9dee7;border-radius:14px;padding:30px}
+.school{text-align:center;font-size:26px;font-weight:800;margin-bottom:5px}
+.title{text-align:center;font-size:18px;font-weight:700;color:#1769ff;margin-bottom:22px}
+.line{border-top:2px solid #172033;margin:12px 0 20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.item{background:#f8faff;border:1px solid #e8edf4;border-radius:9px;padding:11px}
+.item small{display:block;color:#667085;font-size:11px;margin-bottom:4px}
+.item strong{font-size:14px}
+.amount{margin-top:18px;border:1px solid #dfe5ee;border-radius:10px;overflow:hidden}
+.row{display:flex;justify-content:space-between;padding:13px 15px;border-bottom:1px solid #edf0f4}
+.row:last-child{border-bottom:0}
+.paid{font-weight:800;color:#15803d}
+.due{font-weight:800;color:#b77900}
+.footer{margin-top:22px;text-align:center;color:#667085;font-size:12px}
+.print{display:block;margin:18px auto 0;border:0;background:#1769ff;color:#fff;padding:11px 20px;border-radius:9px;font-weight:bold;cursor:pointer}
+@media print{body{background:#fff;padding:0}.receipt{border:0;border-radius:0;max-width:none}.print{display:none}}
+</style>
+</head>
+<body>
+<div class="receipt">
+<div class="school">${escapeHtml(school)}</div>
+<div class="title">FEE PAYMENT RECEIPT</div>
+<div class="line"></div>
+
+<div class="grid">
+<div class="item"><small>Student Name</small><strong>${escapeHtml(student.name)}</strong></div>
+<div class="item"><small>Roll Number</small><strong>${escapeHtml(student.roll||"-")}</strong></div>
+<div class="item"><small>Class</small><strong>Class ${escapeHtml(student.classNo||"-")}</strong></div>
+<div class="item"><small>Section</small><strong>${escapeHtml(student.section||"-")}</strong></div>
+<div class="item"><small>Father Name</small><strong>${escapeHtml(student.father||"-")}</strong></div>
+<div class="item"><small>Payment Date</small><strong>${formatDate(payment.date)}</strong></div>
+<div class="item"><small>Receipt Number</small><strong>${escapeHtml(receiptNo)}</strong></div>
+<div class="item"><small>Payment Mode</small><strong>${escapeHtml(payment.mode||"-")}</strong></div>
+</div>
+
+<div class="amount">
+<div class="row"><span>Total Fee</span><strong>₹${totalFee.toLocaleString("en-IN")}</strong></div>
+<div class="row"><span>Amount Paid This Time</span><strong class="paid">₹${Number(payment.amount||0).toLocaleString("en-IN")}</strong></div>
+<div class="row"><span>Total Fee Paid</span><strong class="paid">₹${paid.toLocaleString("en-IN")}</strong></div>
+<div class="row"><span>Fee Remaining / Due</span><strong class="due">₹${due.toLocaleString("en-IN")}</strong></div>
+</div>
+
+<div class="footer">Thank you. This is a computer-generated fee receipt.</div>
+<button class="print" onclick="window.print()">🖨️ Print / Save Slip</button>
+</div>
+<script>
+window.onload=function(){setTimeout(function(){window.print()},300);}
+<\/script>
+</body>
+</html>
+`);
+win.document.close();
 }
 
 function deleteFee(id,classNo,stream,section){
@@ -3085,6 +3183,7 @@ function deleteExam(id,classNo,stream,section){if(!confirm("Delete this result?"
 /* HOMEWORK */
 
 let editingHomeworkId=null;
+let homeworkImageData=[];
 
 function openHomeworkClasses(){
 
@@ -3250,9 +3349,17 @@ ${h.dueDate?`<span>⏰ Due: ${formatDate(h.dueDate)}</span>`:""}
 
 </div>
 
-<div style="background:#f8faff;padding:15px;border-radius:10px;line-height:1.6">
+<div style="background:#f8faff;padding:15px;border-radius:10px;line-height:1.6;white-space:pre-wrap">
 ${escapeHtml(h.text)}
 </div>
+
+${Array.isArray(h.images)&&h.images.length?`
+<div style="margin-top:12px">
+<strong style="font-size:13px">📷 Attached Images</strong>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+${h.images.map(img=>`<img src="${img.data||img}" alt="Homework Image" style="width:180px;max-width:100%;height:130px;object-fit:cover;border:1px solid #dce2eb;border-radius:10px">`).join("")}
+</div>
+</div>`:""}
 
 <div class="action-buttons" style="margin-top:12px">
 
@@ -3273,9 +3380,9 @@ document.getElementById("otherPage").innerHTML=html;
 function openHomeworkModal(classNo="",subject=""){
 
 editingHomeworkId=null;
+homeworkImageData=[];
 
 document.getElementById("homeworkModalTitle").innerText="Add Homework";
-
 document.getElementById("homeworkClass").value=classNo||"";
 document.getElementById("homeworkSubject").value=subject||"";
 document.getElementById("homeworkSection").innerHTML=
@@ -3285,11 +3392,43 @@ document.getElementById("homeworkStream").value="";
 document.getElementById("homeworkDate").value=today();
 document.getElementById("homeworkDueDate").value="";
 document.getElementById("homeworkText").value="";
+document.getElementById("homeworkImages").value="";
+document.getElementById("homeworkImagePreview").innerHTML="";
 
 updateHomeworkSections();
 updateHomeworkTeachers();
 
 document.getElementById("homeworkModal").style.display="flex";
+}
+
+function previewHomeworkImages(event){
+
+let files=Array.from(event.target.files||[]);
+if(!files.length)return;
+
+homeworkImageData=[];
+
+let pending=files.length;
+files.forEach(file=>{
+let reader=new FileReader();
+reader.onload=function(e){
+homeworkImageData.push({
+name:file.name,
+data:e.target.result
+});
+pending--;
+if(pending===0){
+let area=document.getElementById("homeworkImagePreview");
+area.innerHTML=homeworkImageData.map((img,i)=>
+`<div style="position:relative">
+<img src="${img.data}" style="width:100px;height:75px;object-fit:cover;border:1px solid #dce2eb;border-radius:8px">
+<div style="font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(img.name)}</div>
+</div>`
+).join("");
+}
+};
+reader.readAsDataURL(file);
+});
 }
 
 function updateHomeworkSections(){
@@ -3420,16 +3559,17 @@ let subject=document.getElementById("homeworkSubject").value.trim();
 let teacherId=document.getElementById("homeworkTeacher").value;
 let date=document.getElementById("homeworkDate").value;
 let dueDate=document.getElementById("homeworkDueDate").value;
-let text=document.getElementById("homeworkText").value.trim();
+let textValue=document.getElementById("homeworkText").value.trim();
 
-if(!classNo||!subject||!teacherId||!date||!text){
-alert("Please fill Class, Subject, Teacher, Date and Homework");
+if(!classNo||!subject||!teacherId||!date||!textValue){
+alert("Please fill Class, Section (if needed), Teacher, Subject, Date and Homework");
 return;
 }
 
 let teacher=getTeachers().find(t=>Number(t.id)===Number(teacherId));
 
 let data=getHomework();
+let existing=editingHomeworkId?data.find(x=>Number(x.id)===Number(editingHomeworkId)):null;
 
 let record={
 id:editingHomeworkId||Date.now(),
@@ -3441,7 +3581,8 @@ teacherId:Number(teacherId),
 teacherName:teacher?.name||"Teacher",
 date,
 dueDate,
-text
+text:textValue,
+images:homeworkImageData.length?homeworkImageData:(existing?.images||[])
 };
 
 let i=data.findIndex(x=>Number(x.id)===Number(editingHomeworkId));
@@ -3462,9 +3603,9 @@ let h=getHomework().find(x=>Number(x.id)===Number(id));
 if(!h)return;
 
 editingHomeworkId=id;
+homeworkImageData=Array.isArray(h.images)?h.images.slice():[];
 
 document.getElementById("homeworkModalTitle").innerText="Edit Homework";
-
 document.getElementById("homeworkClass").value=h.classNo;
 
 updateHomeworkSections();
@@ -3478,6 +3619,17 @@ updateHomeworkTeachers(h.teacherId);
 document.getElementById("homeworkDate").value=h.date||today();
 document.getElementById("homeworkDueDate").value=h.dueDate||"";
 document.getElementById("homeworkText").value=h.text||"";
+document.getElementById("homeworkImages").value="";
+
+let area=document.getElementById("homeworkImagePreview");
+area.innerHTML=homeworkImageData.map(img=>{
+let data=img.data||img;
+let name=img.name||"Existing image";
+return `<div style="position:relative">
+<img src="${data}" style="width:100px;height:75px;object-fit:cover;border:1px solid #dce2eb;border-radius:8px">
+<div style="font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(name)}</div>
+</div>`;
+}).join("");
 
 document.getElementById("homeworkModal").style.display="flex";
 }
@@ -3494,6 +3646,7 @@ openHomeworkList(classNo,subject);
 function closeHomeworkModal(){
 document.getElementById("homeworkModal").style.display="none";
 editingHomeworkId=null;
+homeworkImageData=[];
 }
 
 /* OTHER */
@@ -3706,6 +3859,10 @@ updateHomeworkTeachers();
 
 document.getElementById("homeworkSubject").addEventListener("input",function(){
 updateHomeworkTeachers();
+});
+
+document.getElementById("homeworkImages").addEventListener("change",function(e){
+previewHomeworkImages(e);
 });
 
 document.getElementById("attendanceDate").addEventListener("change",function(){
