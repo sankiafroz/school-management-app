@@ -125,6 +125,30 @@ th{background:#fafbfd;color:#667085}
 .student-profile-detail small{display:block;color:#777;font-size:11px;margin-bottom:3px}
 .student-profile-detail strong{display:block;font-size:13px;word-break:break-word}
 .fee-paid{color:#15803d!important}.fee-pending{color:#b77900!important}
+
+.dashboard-class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;padding:18px}
+.dashboard-class-card{background:#fff;border:1px solid #e5eaf1;border-radius:17px;padding:18px;box-shadow:0 3px 12px #00000008}
+.dashboard-class-card h3{font-size:19px;margin-bottom:4px}
+.dashboard-class-meta{font-size:12px;color:#667085;margin-bottom:14px}
+.dashboard-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.dashboard-metric{border:1px solid #edf0f4;background:#fafbfd;border-radius:11px;padding:11px;text-align:left;cursor:pointer;transition:.15s}
+.dashboard-metric:hover{transform:translateY(-2px);box-shadow:0 5px 15px #0001}
+.dashboard-metric strong{display:block;font-size:17px;margin-top:4px}
+.dashboard-metric small{display:block;color:#667085;font-size:11px}
+.dashboard-metric.green strong{color:#15803d}.dashboard-metric.red strong{color:#dc2626}
+.dashboard-metric.yellow strong{color:#b77900}.dashboard-metric.blue strong{color:#1769ff}
+.dashboard-teacher-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;padding:18px}
+.dashboard-teacher-card{background:#fff;border:1px solid #e5eaf1;border-radius:15px;padding:15px;display:flex;gap:12px;align-items:center;cursor:pointer}
+.dashboard-teacher-card:hover{box-shadow:0 6px 18px #0001;transform:translateY(-2px)}
+.dashboard-teacher-card img,.dashboard-teacher-avatar{width:58px;height:58px;border-radius:14px;object-fit:cover;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-size:25px;flex:none}
+.dashboard-teacher-card .tname{font-weight:bold;font-size:16px}.dashboard-teacher-card .tmeta{font-size:12px;color:#667085;margin-top:4px;line-height:1.5}
+.dashboard-link-btn{border:0;background:#eef4ff;color:#1769ff;padding:8px 11px;border-radius:9px;font-weight:bold;cursor:pointer}
+.dashboard-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:18px}
+.dashboard-detail-item{background:#f8faff;padding:11px;border-radius:10px}
+.dashboard-detail-item small{display:block;color:#777;font-size:11px;margin-bottom:4px}
+.dashboard-detail-item strong{display:block;font-size:13px;word-break:break-word}
+@media(max-width:700px){.dashboard-class-grid,.dashboard-teacher-grid{grid-template-columns:1fr}.dashboard-detail-grid{grid-template-columns:1fr}}
+
 @media(max-width:700px){.student-profile-list{grid-template-columns:1fr}.student-profile-details{grid-template-columns:1fr 1fr}}
 
 .profile-box{padding:22px}
@@ -259,78 +283,19 @@ SchoolHub
 
 <div class="welcome">
 <h2>Welcome 👋</h2>
-<p>Manage your school from one place.</p>
-</div>
-
-<div class="stats">
-<div class="stat-card">
-<div class="stat-number" id="dashStudents">0</div>
-<div class="stat-label">Total Students</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number" id="dashTeachers">0</div>
-<div class="stat-label">Total Teachers</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number" id="dashAttendance">0%</div>
-<div class="stat-label">Today's Attendance</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number" id="dashFees">₹0</div>
-<div class="stat-label">Fee Collection</div>
-</div>
-</div>
-
-<div class="two-column">
-
-<div class="card">
-<div class="card-header">
-<h3>Recent Notices</h3>
-<button class="small-btn" onclick="showPage('notices')">View</button>
-</div>
-
-<div class="notice">
-<strong>Independence Day Holiday</strong>
-<span>School holiday notice</span>
-</div>
-
-<div class="notice">
-<strong>Parent Teacher Meeting</strong>
-<span>PTM scheduled Saturday</span>
-</div>
-
-<div class="notice">
-<strong>Annual Examination</strong>
-<span>Exam schedule published</span>
-</div>
+<p>Dashboard par kisi bhi class ko select karein.</p>
 </div>
 
 <div class="card">
-<div class="card-header">
-<h3>Today's Attendance</h3>
-<button class="small-btn" onclick="showPage('attendance')">View</button>
+  <div class="card-header">
+    <div>
+      <h3>📚 Classes</h3>
+      <p style="color:#777;font-size:12px;margin-top:4px">Sirf class cards dikh rahe hain. Data dekhne ke liye class par click karein.</p>
+    </div>
+  </div>
+  <div id="dashboardClassCards" class="dashboard-class-grid"></div>
 </div>
 
-<div class="notice">
-<strong>Present</strong>
-<span id="dashPresent">0 Students</span>
-</div>
-
-<div class="notice">
-<strong>Absent</strong>
-<span id="dashAbsent">0 Students</span>
-</div>
-
-<div class="notice">
-<strong>Leave</strong>
-<span id="dashLeave">0 Students</span>
-</div>
-</div>
-
-</div>
 </div>
 
 <div id="otherPage" style="display:none"></div>
@@ -3810,89 +3775,145 @@ alert("Settings saved successfully!");
 /* DASHBOARD */
 
 function updateDashboard(){
-
-let students=getStudents();
-let teachers=getTeachers();
-
-document.getElementById("dashStudents").innerText=students.length;
-document.getElementById("dashTeachers").innerText=teachers.length;
-
-let r=getAttendance().filter(x=>
-x.date===today()&&
-students.some(s=>Number(s.id)===Number(x.studentId))
-);
-
-let present=r.filter(x=>x.status==="Present").length;
-let absent=r.filter(x=>x.status==="Absent").length;
-let leave=r.filter(x=>x.status==="Leave").length;
-
-let total=present+absent+leave;
-
-document.getElementById("dashPresent").innerText=present+" Students";
-document.getElementById("dashAbsent").innerText=absent+" Students";
-document.getElementById("dashLeave").innerText=leave+" Students";
-
-document.getElementById("dashAttendance").innerText=
-(total?Math.round(present/total*100):0)+"%";
-
-let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
-
-document.getElementById("dashFees").innerText=
-"₹"+paid.toLocaleString("en-IN");
+  renderDashboardClassCards();
 }
 
-/* MOBILE */
-
-function toggleSidebar(){
-document.getElementById("sidebar").classList.toggle("open");
+function dashboardClassAttendance(classNo){
+  let ids=getClassStudents(classNo).map(s=>Number(s.id));
+  let records=getAttendance().filter(x=>x.date===today()&&ids.includes(Number(x.studentId)));
+  return {
+    present:records.filter(x=>x.status==="Present").length,
+    absent:records.filter(x=>x.status==="Absent").length,
+    leave:records.filter(x=>x.status==="Leave").length
+  };
 }
 
-/* EVENTS */
+/* DASHBOARD: ONLY CLASS CARDS */
+function renderDashboardClassCards(){
+  let box=document.getElementById("dashboardClassCards");
+  if(!box)return;
 
-document.getElementById("studentClass").addEventListener("change",function(){
-
-if(![11,12].includes(Number(this.value))){
-document.getElementById("studentStream").value="";
+  let html="";
+  for(let classNo=1;classNo<=12;classNo++){
+    let students=getClassStudents(classNo);
+    html+=`
+      <div class="dashboard-class-card dashboard-only-class-card" onclick="openDashboardClass(${classNo})">
+        <div style="font-size:42px;margin-bottom:8px">📚</div>
+        <h3>Class ${classNo}</h3>
+        <div class="dashboard-class-meta">${students.length} Students</div>
+        <div class="open-text">View Class Data →</div>
+      </div>`;
+  }
+  box.innerHTML=html;
 }
 
-updateSectionOptions();
-});
+/* AFTER CLICKING CLASS: SHOW ALL CLASS DATA */
+function openDashboardClass(classNo){
+  classNo=Number(classNo);
+  let students=getClassStudents(classNo);
+  let att=dashboardClassAttendance(classNo);
 
-document.getElementById("teacherClass").addEventListener("change",function(){
-updateTeacherSections();
-});
+  let totalFee=students.reduce((a,s)=>a+Number(s.fee||0),0);
+  let paidFee=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
+  let pendingFee=Math.max(0,totalFee-paidFee);
 
-document.getElementById("homeworkClass").addEventListener("change",function(){
-updateHomeworkSections();
-updateHomeworkTeachers();
-});
+  let marked=att.present+att.absent+att.leave;
+  let attendancePct=marked?Math.round(att.present/marked*100):0;
 
-document.getElementById("homeworkSection").addEventListener("change",function(){
-updateHomeworkTeachers();
-});
+  let teachers=getTeachers().filter(t=>
+    Number(t.classNo??t.teachingClass??t.class)===classNo
+  );
 
-document.getElementById("homeworkStream").addEventListener("change",function(){
-updateHomeworkSections();
-updateHomeworkTeachers();
-});
+  let teacherHtml=teachers.length?teachers.map(t=>{
+    let subjects=Array.isArray(t.subject)?t.subject:[];
+    if(!subjects.length && Array.isArray(t.subjects))subjects=t.subjects;
+    if(!subjects.length){
+      subjects=[t.subject1,t.subject2,t.subject3,t.subject4,
+        t.teachingSubject1,t.teachingSubject2,t.teachingSubject3,t.teachingSubject4].filter(Boolean);
+    }
+    let photo=t.photo
+      ? `<img src="${t.photo}" alt="">`
+      : `<div class="dashboard-teacher-avatar">👨‍🏫</div>`;
 
-document.getElementById("homeworkSubject").addEventListener("input",function(){
-updateHomeworkTeachers();
-});
+    return `
+      <div class="dashboard-teacher-card" onclick="openDashboardTeacher(${t.id})">
+        ${photo}
+        <div>
+          <div class="tname">${escapeHtml(t.name||"-")}</div>
+          <div class="tmeta">
+            Class ${classNo}${t.section?" • Section "+escapeHtml(t.section):""}<br>
+            ${subjects.length?escapeHtml(subjects.join(", ")):"Subject not assigned"}
+          </div>
+        </div>
+      </div>`;
+  }).join("") : `<div class="empty" style="grid-column:1/-1">Class ${classNo} ke liye koi teacher assigned nahi hai.</div>`;
 
-document.getElementById("homeworkImages").addEventListener("change",function(e){
-previewHomeworkImages(e);
-});
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText=`Class ${classNo}`;
 
-document.getElementById("attendanceDate").addEventListener("change",function(){
-renderAttendanceStudentList();
-});
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="backToDashboard()">← Back to Classes</button>
 
-/* INITIAL */
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>📚 Class ${classNo} Dashboard</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">${students.length} Students</p>
+        </div>
+      </div>
 
-updateDashboard();
+      <div class="dashboard-metrics" style="padding:18px">
+        <button class="dashboard-metric blue" onclick="openDashboardStudentList(${classNo},'all')">
+          <small>Total Students</small><strong>${students.length}</strong>
+        </button>
 
-</script>
+        <button class="dashboard-metric green" onclick="openDashboardStudentList(${classNo},'present')">
+          <small>Present</small><strong>${att.present}</strong>
+        </button>
 
-</body>
-</html>
+        <button class="dashboard-metric red" onclick="openDashboardStudentList(${classNo},'absent')">
+          <small>Absent</small><strong>${att.absent}</strong>
+        </button>
+
+        <button class="dashboard-metric yellow" onclick="openDashboardStudentList(${classNo},'leave')">
+          <small>Leave</small><strong>${att.leave}</strong>
+        </button>
+
+        <button class="dashboard-metric blue" onclick="openDashboardStudentList(${classNo},'feeAll')">
+          <small>Total Fee</small><strong>₹${totalFee.toLocaleString("en-IN")}</strong>
+        </button>
+
+        <button class="dashboard-metric green" onclick="openDashboardStudentList(${classNo},'paid')">
+          <small>Fee Paid</small><strong>₹${paidFee.toLocaleString("en-IN")}</strong>
+        </button>
+
+        <button class="dashboard-metric yellow" onclick="openDashboardStudentList(${classNo},'pending')">
+          <small>Fee Pending</small><strong>₹${pendingFee.toLocaleString("en-IN")}</strong>
+        </button>
+
+        <button class="dashboard-metric blue" onclick="openDashboardStudentList(${classNo},'all')">
+          <small>Attendance %</small><strong>${attendancePct}%</strong>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>👨‍🏫 Class ${classNo} Teachers</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">Teacher par click karke complete profile dekhein.</p>
+        </div>
+      </div>
+      <div class="dashboard-teacher-grid">${teacherHtml}</div>
+    </div>`;
+}
+
+function backToDashboard(){
+  document.getElementById("pageTitle").innerText="Dashboard";
+  document.getElementById("dashboardPage").style.display="block";
+  document.getElementById("otherPage").style.display="none";
+  updateDashboard();
+}
+
+>
