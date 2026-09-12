@@ -806,51 +806,56 @@ return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:date;
 /* LOGIN */
 
 function loginUser(){
+  try {
+    const email=(document.getElementById("loginEmail")?.value||"").trim().toLowerCase();
+    const password=document.getElementById("loginPassword")?.value||"";
+    if(!email||!password){ alert("Please enter login details"); return false; }
 
-let email=document.getElementById("loginEmail").value.trim();
-let password=document.getElementById("loginPassword").value;
+    if(email==="admin@school.com" && password==="123456"){
+      openApplication("ABC Public School","School Administrator");
+      return false;
+    }
 
-if(!email||!password){
-alert("Please enter login details");
-return;
-}
+    const savedEmail=(localStorage.getItem("schoolEmail")||"").trim().toLowerCase();
+    const savedPassword=localStorage.getItem("schoolPassword")||"";
+    if(savedEmail && email===savedEmail && password===savedPassword){
+      openApplication(localStorage.getItem("schoolName")||"ABC Public School","School Administrator");
+      return false;
+    }
 
-if(email==="admin@school.com"&&password==="123456"){
-openApplication("ABC Public School","School Administrator");
-return;
-}
+    const teacher=getTeachers().find(t=>
+      (String(t.email||"").trim().toLowerCase()===email ||
+       String(t.mobile||"").trim()===email) &&
+      String(t.password||"")===password
+    );
+    if(teacher){
+      openApplication(localStorage.getItem("schoolName")||"ABC Public School",
+        "Teacher - "+(teacher.name||"Teacher"));
+      return false;
+    }
 
-if(email===localStorage.getItem("schoolEmail")&&
-password===localStorage.getItem("schoolPassword")){
-openApplication(localStorage.getItem("schoolName"),"School Administrator");
-return;
-}
-
-let teacher=getTeachers().find(t=>
-(t.email===email||t.mobile===email)&&t.password===password
-);
-
-if(teacher){
-openApplication(
-localStorage.getItem("schoolName")||"ABC Public School",
-"Teacher - "+teacher.name
-);
-return;
-}
-
-alert("Invalid Login Details.");
+    alert("Invalid Login Details.");
+  } catch(err) {
+    console.error("Login error:",err);
+    alert("Login error: "+(err.message||"Please refresh the page."));
+  }
+  return false;
 }
 
 function openApplication(school,role){
+  const login=document.getElementById("loginPage");
+  const app=document.getElementById("app");
+  if(login) login.style.display="none";
+  if(app) app.style.display="block";
 
-document.getElementById("loginPage").style.display="none";
-document.getElementById("app").style.display="block";
+  const ds=document.getElementById("displaySchool");
+  const dr=document.getElementById("displayRole");
+  const tu=document.getElementById("topUser");
+  if(ds) ds.innerText=school||"ABC Public School";
+  if(dr) dr.innerText=role||"School Administrator";
+  if(tu) tu.innerText=role||"School Administrator";
 
-document.getElementById("displaySchool").innerText=school||"ABC Public School";
-document.getElementById("displayRole").innerText=role;
-document.getElementById("topUser").innerText=role;
-
-updateDashboard();
+  try { updateDashboard(); } catch(err) { console.error("Dashboard error:",err); }
 }
 
 function logoutUser(){
@@ -3909,11 +3914,96 @@ function openDashboardClass(classNo){
     </div>`;
 }
 
+function openDashboardStudentList(classNo,type){
+  classNo=Number(classNo);
+  const students=getClassStudents(classNo);
+  const attendance=getAttendance();
+  const todayDate=today();
+
+  let filtered=students.slice();
+  let title="Class "+classNo+" Students";
+
+  if(type==="present"){
+    filtered=students.filter(s=>attendance.some(a=>Number(a.studentId)===Number(s.id)&&a.date===todayDate&&a.status==="Present"));
+    title="Class "+classNo+" — Present Students";
+  }else if(type==="absent"){
+    filtered=students.filter(s=>attendance.some(a=>Number(a.studentId)===Number(s.id)&&a.date===todayDate&&a.status==="Absent"));
+    title="Class "+classNo+" — Absent Students";
+  }else if(type==="leave"){
+    filtered=students.filter(s=>attendance.some(a=>Number(a.studentId)===Number(s.id)&&a.date===todayDate&&a.status==="Leave"));
+    title="Class "+classNo+" — Leave Students";
+  }else if(type==="paid"){
+    filtered=students.filter(s=>getStudentPaid(s.id)>0);
+    title="Class "+classNo+" — Fee Paid";
+  }else if(type==="pending"){
+    filtered=students.filter(s=>Math.max(0,Number(s.fee||0)-getStudentPaid(s.id))>0);
+    title="Class "+classNo+" — Fee Pending";
+  }else if(type==="feeAll"){
+    title="Class "+classNo+" — Fee Details";
+  }
+
+  const totalFee=filtered.reduce((a,s)=>a+Number(s.fee||0),0);
+  const paidFee=filtered.reduce((a,s)=>a+getStudentPaid(s.id),0);
+  const pendingFee=filtered.reduce((a,s)=>a+Math.max(0,Number(s.fee||0)-getStudentPaid(s.id)),0);
+
+  let rows=filtered.map((s,i)=>{
+    const total=Number(s.fee||0);
+    const paid=getStudentPaid(s.id);
+    const pending=Math.max(0,total-paid);
+    const rec=attendance.find(a=>Number(a.studentId)===Number(s.id)&&a.date===todayDate);
+    const status=rec?.status||"Not Marked";
+    const statusClass=status==="Present"?"green":status==="Absent"?"red":status==="Leave"?"yellow":"blue";
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${escapeHtml(s.name||"-")}</strong></td>
+      <td>${escapeHtml(s.father||s.fatherName||"-")}</td>
+      <td>${escapeHtml(s.section||"-")}</td>
+      <td>₹${total.toLocaleString("en-IN")}</td>
+      <td class="fee-paid">₹${paid.toLocaleString("en-IN")}</td>
+      <td class="fee-pending">₹${pending.toLocaleString("en-IN")}</td>
+      <td><span class="badge ${statusClass}">${escapeHtml(status)}</span></td>
+      <td><button class="profile-btn" onclick="openStudentProfile(${Number(s.id)})">Profile</button></td>
+    </tr>`;
+  }).join("");
+
+  if(!rows) rows=`<tr><td colspan="9" class="empty">Is category mein koi student nahi mila.</td></tr>`;
+
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText=title;
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="openDashboardClass(${classNo})">← Back to Class Dashboard</button>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">Today: ${formatDate(todayDate)} • ${filtered.length} Students</p>
+        </div>
+      </div>
+      <div class="dashboard-detail-grid">
+        <div class="dashboard-detail-item"><small>Total Fee</small><strong>₹${totalFee.toLocaleString("en-IN")}</strong></div>
+        <div class="dashboard-detail-item"><small>Fee Paid</small><strong class="fee-paid">₹${paidFee.toLocaleString("en-IN")}</strong></div>
+        <div class="dashboard-detail-item"><small>Fee Pending</small><strong class="fee-pending">₹${pendingFee.toLocaleString("en-IN")}</strong></div>
+        <div class="dashboard-detail-item"><small>Students Shown</small><strong>${filtered.length}</strong></div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Student Name</th><th>Father Name</th><th>Section</th>
+            <th>Total Fee</th><th>Paid</th><th>Pending</th><th>Today Attendance</th><th>Action</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
 function backToDashboard(){
   document.getElementById("pageTitle").innerText="Dashboard";
   document.getElementById("dashboardPage").style.display="block";
   document.getElementById("otherPage").style.display="none";
   updateDashboard();
 }
-
->
+</script>
+</body>
+</html>
