@@ -193,6 +193,13 @@ th{background:#fafbfd;color:#667085}
 .profile-details{grid-template-columns:1fr}
 .profile-head{align-items:flex-start;flex-direction:column}
 }
+
+.dashboard-school-title{text-align:center;font-size:28px;font-weight:800;margin:0 0 10px;color:#172033}
+.dashboard-notice-ticker{background:#fff3cd;border:1px solid #ffe08a;color:#9a6700;border-radius:12px;padding:11px 15px;margin:0 0 18px;display:flex;align-items:center;gap:10px;white-space:nowrap;overflow:hidden}
+.dashboard-notice-ticker span:last-child{font-weight:bold;overflow:hidden;text-overflow:ellipsis;animation:noticeBlink 1.2s infinite}
+.dashboard-notice-label{font-weight:800;flex:none}
+@keyframes noticeBlink{0%,45%{opacity:1}55%,100%{opacity:.25}}
+@media(max-width:700px){.dashboard-school-title{font-size:22px}.dashboard-notice-ticker{font-size:13px}}
 </style>
 </head>
 
@@ -267,7 +274,7 @@ SchoolHub
 <main class="main">
 <header class="topbar">
 <div style="display:flex;align-items:center;gap:15px">
-<button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+<button class="mobile-menu" onclick="toggleSidebar()" aria-label="Menu">⋮</button>
 <div class="page-title" id="pageTitle">Dashboard</div>
 </div>
 
@@ -281,6 +288,11 @@ SchoolHub
 
 <div id="dashboardPage">
 
+<div class="dashboard-school-title" id="dashboardSchoolName"></div>
+<div class="dashboard-notice-ticker" id="dashboardNoticeTicker">
+  <span class="dashboard-notice-label">📢 NOTICE</span>
+  <span id="dashboardNoticeText">School Notice</span>
+</div>
 <div class="welcome">
 <h2>Welcome 👋</h2>
 <p>Dashboard par kisi bhi class ko select karein.</p>
@@ -1099,6 +1111,11 @@ homework:"Homework"
 
 /* PAGE */
 
+function toggleSidebar(){
+  const sidebar=document.getElementById("sidebar");
+  if(sidebar)sidebar.classList.toggle("open");
+}
+
 function showPage(page,element){
 
 document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
@@ -1501,11 +1518,12 @@ function downloadFile(filename,content,mime="text/csv;charset=utf-8"){
 }
 
 function attendanceStatusCode(status){
-  const s=String(status||"").toLowerCase();
-  if(s==="present")return "P";
-  if(s==="absent")return "A";
-  if(s==="leave")return "L";
-  if(s==="holiday"||s==="sunday")return "H";
+  const s=String(status||"").trim().toLowerCase();
+  if(s==="p"||s==="present")return "P";
+  if(s==="a"||s==="absent")return "A";
+  if(s==="l"||s==="leave")return "L";
+  if(s==="h"||s==="holiday")return "H";
+  if(s==="s"||s==="sunday")return "S";
   return "";
 }
 
@@ -1625,7 +1643,7 @@ function printAttendanceReport(classNo,students,dates,records){
   </style></head><body>
   <div class="school">${escapeHtml(school)}</div><h2>${escapeHtml(title)}</h2>
   <table><thead><tr><th>Roll No.</th><th>Student Name</th>${head}</tr></thead><tbody>${body}</tbody></table>
-  <div class="note">P = Present &nbsp; A = Absent &nbsp; L = Leave &nbsp; H = Holiday / Sunday</div>
+  <div class="note">P = Present &nbsp; A = Absent &nbsp; L = Leave &nbsp; H = Holiday &nbsp; S = Sunday</div>
   <button class="print" onclick="window.print()">🖨️ Print / Save as PDF</button>
   <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
   </body></html>`);
@@ -4022,51 +4040,124 @@ return `<div class="card"><div class="empty"><h3>Teachers</h3><p>Click Teachers 
 
 if(page==="timetable"){
 
+let tt=getData("schoolTimetable");
+if(!Array.isArray(tt)||!tt.length){
+  tt=[
+    {time:"08:00",days:["Maths","Science","English","Maths","Hindi"]},
+    {time:"09:00",days:["English","Maths","Hindi","Science","Computer"]}
+  ];
+}
+
 return `
 <div class="card">
-<div class="card-header"><h3>Class Timetable</h3></div>
+<div class="card-header">
+  <h3>Class Timetable</h3>
+  <button class="small-btn" onclick="editTimetable()">✏️ Edit Timetable</button>
+</div>
 <div class="table-container">
 <table>
-<tr>
-<th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th>
-</tr>
-<tr>
-<td>08:00</td><td>Maths</td><td>Science</td><td>English</td><td>Maths</td><td>Hindi</td>
-</tr>
-<tr>
-<td>09:00</td><td>English</td><td>Maths</td><td>Hindi</td><td>Science</td><td>Computer</td>
-</tr>
+<tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
+${tt.map(r=>`<tr><td>${escapeHtml(r.time)}</td>${r.days.map(d=>`<td>${escapeHtml(d||"")}</td>`).join("")}</tr>`).join("")}
 </table>
 </div>
-</div>
-`;
+</div>`;
+}
+
+function editTimetable(){
+  let tt=getData("schoolTimetable");
+  if(!Array.isArray(tt)||!tt.length){
+    tt=[
+      {time:"08:00",days:["Maths","Science","English","Maths","Hindi"]},
+      {time:"09:00",days:["English","Maths","Hindi","Science","Computer"]}
+    ];
+  }
+  let html=`<div class="modal-bg" id="timetableEditModal" style="display:flex">
+    <div class="modal">
+      <div class="modal-header"><h2>Edit Timetable</h2><button class="close-btn" onclick="closeTimetableEdit()">×</button></div>
+      <div id="timetableEditRows">
+      ${tt.map((r,i)=>`<div class="subject-list" style="margin-bottom:10px">
+        <div class="form-group"><label>Time</label><input class="tt-time" value="${escapeHtml(r.time||"")}"></div>
+        <div class="form-grid">
+          ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<div class="form-group"><label>${d}</label><input class="tt-day" data-row="${i}" value="${escapeHtml((r.days||[])[j]||"")}"></div>`).join("")}
+        </div>
+      </div>`).join("")}
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="saveTimetable()">Save Timetable</button>
+        <button class="btn btn-outline" style="margin-top:0" onclick="closeTimetableEdit()">Cancel</button>
+      </div>
+    </div></div>`;
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+function closeTimetableEdit(){document.getElementById("timetableEditModal")?.remove();}
+function saveTimetable(){
+  const rows=[...document.querySelectorAll("#timetableEditRows .subject-list")];
+  const data=rows.map(row=>({time:row.querySelector(".tt-time")?.value.trim()||"",days:[...row.querySelectorAll(".tt-day")].map(x=>x.value.trim())}));
+  setData("schoolTimetable",data);
+  closeTimetableEdit();
+  document.getElementById("otherPage").innerHTML=getOtherPage("timetable");
+  alert("Timetable saved successfully!");
 }
 
 if(page==="notices"){
+
+let notices=getData("schoolNotices");
+if(!Array.isArray(notices)||!notices.length){
+  notices=[
+    {title:"Independence Day Holiday",text:"School holiday notice"},
+    {title:"Parent Teacher Meeting",text:"PTM scheduled Saturday"},
+    {title:"Annual Sports Day",text:"All students can participate"}
+  ];
+}
 
 return `
 <div class="card">
 <div class="card-header">
 <h3>Notice Board</h3>
-<button class="small-btn">+ New Notice</button>
+<button class="small-btn" onclick="openNoticeModal()">+ New Notice</button>
 </div>
+${notices.map((n,i)=>`<div class="notice">
+<strong>${escapeHtml(n.title||"")}</strong>
+<span>${escapeHtml(n.text||"")}</span>
+<div style="margin-top:8px"><button class="edit-btn" onclick="editNotice(${i})">Edit</button> <button class="delete-btn" onclick="deleteNotice(${i})">Delete</button></div>
+</div>`).join("")}
+</div>`;
+}
 
-<div class="notice">
-<strong>Independence Day Holiday</strong>
-<span>School holiday notice</span>
-</div>
-
-<div class="notice">
-<strong>Parent Teacher Meeting</strong>
-<span>PTM scheduled Saturday</span>
-</div>
-
-<div class="notice">
-<strong>Annual Sports Day</strong>
-<span>All students can participate</span>
-</div>
-</div>
-`;
+function openNoticeModal(index=null){
+  const notices=getData("schoolNotices");
+  const n=index!==null&&notices[index]?notices[index]:{title:"",text:""};
+  document.getElementById("noticeEditModal")?.remove();
+  document.body.insertAdjacentHTML("beforeend",`<div class="modal-bg" id="noticeEditModal" style="display:flex">
+    <div class="modal">
+      <div class="modal-header"><h2>${index===null?"Add New Notice":"Edit Notice"}</h2><button class="close-btn" onclick="closeNoticeModal()">×</button></div>
+      <div class="form-group"><label>Notice Title *</label><input id="noticeTitleInput" value="${escapeHtml(n.title||"")}"></div>
+      <div class="form-group"><label>Notice Details *</label><textarea id="noticeTextInput">${escapeHtml(n.text||"")}</textarea></div>
+      <button class="btn btn-primary" onclick="saveNotice(${index===null?"null":index})">Save Notice</button>
+    </div></div>`);
+}
+function closeNoticeModal(){document.getElementById("noticeEditModal")?.remove();}
+function saveNotice(index){
+  let title=document.getElementById("noticeTitleInput")?.value.trim();
+  let text=document.getElementById("noticeTextInput")?.value.trim();
+  if(!title||!text){alert("Please enter notice title and details.");return;}
+  let notices=getData("schoolNotices");
+  if(!Array.isArray(notices))notices=[];
+  if(index===null)notices.unshift({title,text,date:today()});
+  else notices[index]={...(notices[index]||{}),title,text};
+  setData("schoolNotices",notices);
+  closeNoticeModal();
+  document.getElementById("otherPage").innerHTML=getOtherPage("notices");
+  updateDashboardNotice();
+}
+function editNotice(index){openNoticeModal(index);}
+function deleteNotice(index){
+  if(!confirm("Delete this notice?"))return;
+  let notices=getData("schoolNotices");
+  notices.splice(index,1);
+  setData("schoolNotices",notices);
+  document.getElementById("otherPage").innerHTML=getOtherPage("notices");
+  updateDashboardNotice();
 }
 
 if(page==="reports"){
@@ -4155,6 +4246,25 @@ alert("Settings saved successfully!");
 
 function updateDashboard(){
   renderDashboardClassCards();
+  updateDashboardNotice();
+}
+function updateDashboardNotice(){
+  const school=localStorage.getItem("schoolName")||document.getElementById("displaySchool")?.innerText||"ABC Public School";
+  const name=document.getElementById("dashboardSchoolName");
+  if(name)name.innerText=school;
+  let notices=getData("schoolNotices");
+  if(!Array.isArray(notices)||!notices.length){
+    notices=[
+      {title:"Independence Day Holiday",text:"School holiday notice"},
+      {title:"Parent Teacher Meeting",text:"PTM scheduled Saturday"},
+      {title:"Annual Sports Day",text:"All students can participate"}
+    ];
+  }
+  const ticker=document.getElementById("dashboardNoticeText");
+  if(ticker){
+    const n=notices[0];
+    ticker.innerText=(n.title||"School Notice")+(n.text?" — "+n.text:"");
+  }
 }
 
 function dashboardClassAttendance(classNo){
