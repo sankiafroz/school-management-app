@@ -41,7 +41,7 @@ input[type=file]{padding:10px;height:auto}
 .user{display:flex;align-items:center;gap:10px}
 .avatar{width:40px;height:40px;background:#1769ff;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;overflow:hidden}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.mobile-menu{display:none;background:none;border:0;font-size:25px}
+.mobile-menu{display:block;background:none;border:0;font-size:25px;line-height:1;padding:4px 8px}
 .content{padding:25px}
 .welcome{background:linear-gradient(110deg,#1769ff,#6046e8);color:#fff;padding:25px;border-radius:20px;margin-bottom:22px}
 .welcome h2{margin-bottom:7px}
@@ -200,6 +200,11 @@ th{background:#fafbfd;color:#667085}
 .dashboard-notice-label{font-weight:800;flex:none}
 @keyframes noticeBlink{0%,45%{opacity:1}55%,100%{opacity:.25}}
 @media(max-width:700px){.dashboard-school-title{font-size:22px}.dashboard-notice-ticker{font-size:13px}}
+.sidebar.desktop-hidden{transform:translateX(-100%)}
+.main.sidebar-hidden{margin-left:0}
+@media(max-width:700px){
+  .sidebar.desktop-hidden{transform:none}
+}
 </style>
 </head>
 
@@ -1113,7 +1118,14 @@ homework:"Homework"
 
 function toggleSidebar(){
   const sidebar=document.getElementById("sidebar");
-  if(sidebar)sidebar.classList.toggle("open");
+  if(!sidebar)return;
+  if(window.innerWidth<=700){
+    sidebar.classList.toggle("open");
+  }else{
+    const main=document.querySelector(".main");
+    sidebar.classList.toggle("desktop-hidden");
+    if(main)main.classList.toggle("sidebar-hidden");
+  }
 }
 
 function showPage(page,element){
@@ -1452,7 +1464,7 @@ function openAttendanceDownload(classNo){
       </div>
 
       <div style="background:#f8faff;padding:14px;border-radius:10px;margin:10px 0 18px;color:#667085;font-size:13px">
-        Excel/CSV & PDF me sirf Roll No., Student Name aur har date ka P / A / L / H status aayega.
+        Excel/CSV & PDF me sirf Roll No., Student Name aur har date ka P / A / L / H / S status aayega.
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -4073,29 +4085,41 @@ function editTimetable(){
   }
   let html=`<div class="modal-bg" id="timetableEditModal" style="display:flex">
     <div class="modal">
-      <div class="modal-header"><h2>Edit Timetable</h2><button class="close-btn" onclick="closeTimetableEdit()">×</button></div>
-      <div id="timetableEditRows">
-      ${tt.map((r,i)=>`<div class="subject-list" style="margin-bottom:10px">
-        <div class="form-group"><label>Time</label><input class="tt-time" value="${escapeHtml(r.time||"")}"></div>
-        <div class="form-grid">
-          ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<div class="form-group"><label>${d}</label><input class="tt-day" data-row="${i}" value="${escapeHtml((r.days||[])[j]||"")}"></div>`).join("")}
-        </div>
-      </div>`).join("")}
+      <div class="modal-header">
+        <h2>Edit Timetable</h2>
+        <button class="close-btn" onclick="closeTimetableEdit()">×</button>
       </div>
+      <div class="table-container">
+        <table style="min-width:700px">
+          <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
+          ${tt.map((r,i)=>`<tr>
+            <td><input class="tt-time" value="${escapeHtml(r.time||"")}"></td>
+            ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="${escapeHtml((r.days||[])[j]||"")}"></td>`).join("")}
+          </tr>`).join("")}
+        </table>
+      </div>
+      <br>
       <div style="display:flex;gap:10px">
         <button class="btn btn-primary" onclick="saveTimetable()">Save Timetable</button>
         <button class="btn btn-outline" style="margin-top:0" onclick="closeTimetableEdit()">Cancel</button>
       </div>
-    </div></div>`;
+    </div>
+  </div>`;
   document.body.insertAdjacentHTML("beforeend",html);
 }
-function closeTimetableEdit(){document.getElementById("timetableEditModal")?.remove();}
+function closeTimetableEdit(){
+  document.getElementById("timetableEditModal")?.remove();
+}
 function saveTimetable(){
-  const rows=[...document.querySelectorAll("#timetableEditRows .subject-list")];
-  const data=rows.map(row=>({time:row.querySelector(".tt-time")?.value.trim()||"",days:[...row.querySelectorAll(".tt-day")].map(x=>x.value.trim())}));
+  const rows=[...document.querySelectorAll("#timetableEditModal table tr")].slice(1);
+  const data=rows.map(row=>({
+    time:row.querySelector(".tt-time")?.value.trim()||"",
+    days:[...row.querySelectorAll(".tt-day")].map(x=>x.value.trim())
+  }));
   setData("schoolTimetable",data);
   closeTimetableEdit();
-  document.getElementById("otherPage").innerHTML=getOtherPage("timetable");
+  const other=document.getElementById("otherPage");
+  if(other)other.innerHTML=getOtherPage("timetable");
   alert("Timetable saved successfully!");
 }
 
@@ -4144,7 +4168,7 @@ function saveNotice(index){
   let notices=getData("schoolNotices");
   if(!Array.isArray(notices))notices=[];
   if(index===null)notices.unshift({title,text,date:today()});
-  else notices[index]={...(notices[index]||{}),title,text};
+  else notices[index]={...(notices[index]||{}),title,text,date:(notices[index]&&notices[index].date)||today()};
   setData("schoolNotices",notices);
   closeNoticeModal();
   document.getElementById("otherPage").innerHTML=getOtherPage("notices");
@@ -4154,6 +4178,7 @@ function editNotice(index){openNoticeModal(index);}
 function deleteNotice(index){
   if(!confirm("Delete this notice?"))return;
   let notices=getData("schoolNotices");
+  if(!Array.isArray(notices))notices=[];
   notices.splice(index,1);
   setData("schoolNotices",notices);
   document.getElementById("otherPage").innerHTML=getOtherPage("notices");
