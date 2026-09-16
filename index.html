@@ -279,6 +279,7 @@ th{background:#fafbfd;color:#667085}
 <label>Login As</label>
 <select id="loginRole" onchange="updateLoginRoleFields()">
 <option value="school_admin">School Admin</option>
+<option value="owner">SchoolHub Owner</option>
 <option value="teacher">Teacher</option>
 <option value="parent">Parent</option>
 <option value="student">Student</option>
@@ -312,12 +313,11 @@ th{background:#fafbfd;color:#667085}
 </div>
 
 <button class="btn btn-primary" onclick="loginUser()">Login</button>
-<button class="btn btn-outline" onclick="openRegister()">+ Register New School</button>
+<button class="btn btn-outline" id="registerSchoolBtn" style="display:none" onclick="openRegister()">+ Register New School</button>
 
-<div class="demo">
-<strong>Demo Login</strong><br>
-Email: <b>admin@school.com</b><br>
-Password: <b>123456</b>
+<div class="demo" id="loginHelp">
+<strong>School Login</strong><br>
+School ki Login ID aur Password sirf SchoolHub Owner register karke dega.
 </div>
 </div>
 </div>
@@ -418,13 +418,18 @@ SchoolHub
 </div>
 
 <div class="form-group">
-<label>School Email</label>
-<input id="regSchoolEmail" type="email" placeholder="school@example.com">
+<label>Principal Name</label>
+<input id="regPrincipalName" placeholder="Enter principal name">
 </div>
 
 <div class="form-group">
-<label>Mobile Number</label>
-<input id="regSchoolMobile" placeholder="Enter mobile number">
+<label>Contact Number</label>
+<input id="regSchoolMobile" placeholder="Enter contact number" inputmode="numeric">
+</div>
+
+<div class="form-group">
+<label>Gmail ID</label>
+<input id="regSchoolEmail" type="email" placeholder="school@gmail.com">
 </div>
 
 <div class="form-group">
@@ -433,11 +438,33 @@ SchoolHub
 </div>
 
 <div class="form-group">
+<label>Create ID</label>
+<input id="regSchoolId" placeholder="Create school login ID" autocomplete="off">
+</div>
+
+<div class="form-group">
 <label>Create Password</label>
-<input id="regSchoolPassword" type="password" placeholder="Minimum 6 characters">
+<input id="regSchoolPassword" type="password" placeholder="Minimum 6 characters" autocomplete="new-password">
 </div>
 
 <button class="btn btn-primary" onclick="registerSchool()">Register School</button>
+</div>
+</div>
+
+<!-- SCHOOLHUB OWNER PANEL -->
+<div class="modal-bg" id="ownerPanelModal">
+<div class="modal" style="max-width:520px">
+  <div class="modal-header">
+    <h2>SchoolHub Owner</h2>
+    <button class="close-btn" onclick="logoutOwner()">×</button>
+  </div>
+  <div style="background:#f8faff;border:1px solid #e5eaf1;border-radius:14px;padding:18px;text-align:center">
+    <div style="font-size:42px">🔐</div>
+    <h3 style="margin:8px 0">School Registration</h3>
+    <p style="color:#667085;font-size:13px;margin-bottom:16px">Yahan se aap school ki Login ID aur Password khud create karke de sakte hain.</p>
+    <button class="btn btn-primary" onclick="openRegister()">＋ Register New School</button>
+    <button class="btn btn-outline" onclick="logoutOwner()">🚪 Logout</button>
+  </div>
 </div>
 </div>
 
@@ -947,13 +974,13 @@ return new Date().toISOString().split("T")[0];
 }
 
 function getData(key){
-let data=localStorage.getItem(key);
+let data=localStorage.getItem(schoolScopedKey(key));
 if(!data)return [];
 try{return JSON.parse(data)}catch(e){return []}
 }
 
 function setData(key,data){
-localStorage.setItem(key,JSON.stringify(data));
+localStorage.setItem(schoolScopedKey(key),JSON.stringify(data));
 }
 
 function getStudents(){return getData("schoolStudents")}
@@ -997,26 +1024,34 @@ return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:date;
 function updateLoginRoleFields(){
   const role=document.getElementById("loginRole")?.value||"school_admin";
   const studentMode=role==="student"||role==="parent";
+  const ownerMode=role==="owner";
   const p=document.getElementById("loginPasswordGroup");
   const c=document.getElementById("studentLoginClassGroup");
   const r=document.getElementById("studentLoginRollGroup");
   const e=document.getElementById("loginEmail");
+  const reg=document.getElementById("registerSchoolBtn");
   if(p)p.style.display=studentMode?"none":"block";
   if(c)c.style.display=studentMode?"block":"none";
   if(r)r.style.display=studentMode?"block":"none";
+  if(reg)reg.style.display=ownerMode?"block":"none";
   const label=e?.previousElementSibling;
-  if(label)label.innerText=studentMode?"Registered Mobile / Aadhaar":"Email / Mobile";
-  if(e)e.placeholder=studentMode?"Enter registered mobile or Aadhaar number":"Enter email or mobile";
+  if(label)label.innerText=studentMode?"Registered Mobile / Aadhaar":(ownerMode?"Owner Login ID":"School Login ID / Email / Mobile");
+  if(e)e.placeholder=studentMode?"Enter registered mobile or Aadhaar":(ownerMode?"Enter owner login ID":"Enter school login ID / email / mobile");
+  const help=document.getElementById("loginHelp");
+  if(help){
+    help.innerHTML=ownerMode
+      ? "<strong>SchoolHub Owner Login</strong><br>ID: <b>owner@schoolhub.com</b><br>Password: <b>SH2026@Owner</b><br><span style=\"color:#667085\">Owner hi school register karega.</span>"
+      : "<strong>School Login</strong><br>School ki Login ID aur Password sirf SchoolHub Owner register karke dega.";
+  }
 }
 
-function findStudentForPortal(identifier,classNo,roll){
-  const id=String(identifier||"").replace(/\s+/g,"").trim().toLowerCase();
-  return getStudents().find(s=>{
-    const mobile=String(s.mobile||"").replace(/\s+/g,"").trim().toLowerCase();
-    const aadhaar=String(s.aadhaar||s.aadhar||s.aadhaarNumber||"").replace(/\s+/g,"").trim().toLowerCase();
-    return Number(s.classNo)===Number(classNo) &&
-      String(s.roll??"").trim()===String(roll??"").trim() &&
-      (mobile===id || aadhaar===id);
+function findSchoolAccount(identifier,password){
+  const id=String(identifier||"").trim().toLowerCase();
+  const accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");
+  if(!Array.isArray(accounts))return null;
+  return accounts.find(a=>{
+    const ids=[a.loginId,a.email,a.mobile].map(v=>String(v||"").trim().toLowerCase());
+    return ids.includes(id) && String(a.password||"")===String(password||"");
   })||null;
 }
 
@@ -1025,58 +1060,72 @@ function loginUser(){
     const role=document.getElementById("loginRole")?.value||"school_admin";
     const identifier=(document.getElementById("loginEmail")?.value||"").trim();
 
+    if(role==="owner"){
+      const password=(document.getElementById("loginPassword")?.value||"").trim();
+      if(identifier.trim().toLowerCase()==="owner@schoolhub.com" && password==="SH2026@Owner"){
+        openOwnerPanel();
+        return false;
+      }
+      alert("Invalid Owner Login Details.");
+      return false;
+    }
+
     if(role==="student"||role==="parent"){
       const classNo=document.getElementById("studentLoginClass")?.value||"";
       const roll=document.getElementById("studentLoginRoll")?.value||"";
-      if(!identifier||!classNo||!roll){
-        alert("Registered Mobile / Aadhaar, Class aur Roll Number enter karein.");
-        return false;
-      }
+      if(!identifier||!classNo||!roll){ alert("Registered Mobile / Aadhaar, Class aur Roll Number enter karein."); return false; }
       const student=findStudentForPortal(identifier,classNo,roll);
-      if(!student){
-        alert("Student login details match nahi hui. Mobile/Aadhaar, Class aur Roll Number check karein.");
-        return false;
-      }
-      openApplication(localStorage.getItem("schoolName")||"ABC Public School",
-        role==="parent"?"Parent - "+(student.name||"Student"):"Student - "+(student.name||"Student"),
-        null, student.id, role);
+      if(!student){ alert("Student login details match nahi hui. Mobile/Aadhaar, Class aur Roll Number check karein."); return false; }
+      const schoolName=localStorage.getItem("schoolName")||"ABC Public School";
+      openApplication(schoolName,role==="parent"?"Parent - "+(student.name||"Student"):"Student - "+(student.name||"Student"),null,student.id,role);
       return false;
     }
 
-    const email=identifier.toLowerCase();
     const password=document.getElementById("loginPassword")?.value||"";
-    if(!email||!password){ alert("Please enter login details"); return false; }
+    if(!identifier||!password){ alert("Please enter login details"); return false; }
 
-    if(email==="admin@school.com" && password==="123456"){
-      openApplication("ABC Public School","School Administrator");
+    const account=findSchoolAccount(identifier,password);
+    if(account){
+      setActiveSchoolAccount(account);
+      openApplication(account.schoolName,"School Administrator");
       return false;
     }
 
-    const savedEmail=(localStorage.getItem("schoolEmail")||"").trim().toLowerCase();
-    const savedPassword=localStorage.getItem("schoolPassword")||"";
-    if(savedEmail && email===savedEmail && password===savedPassword){
-      openApplication(localStorage.getItem("schoolName")||"ABC Public School","School Administrator");
-      return false;
-    }
-
+    // Teacher login continues to use the currently selected school data.
     const teacher=getTeachers().find(t=>
-       (String(t.teacherId||"").trim().toLowerCase()===email ||
-        String(t.email||"").trim().toLowerCase()===email ||
-        String(t.mobile||"").trim()===email) &&
+       (String(t.teacherId||"").trim().toLowerCase()===identifier.toLowerCase() ||
+        String(t.email||"").trim().toLowerCase()===identifier.toLowerCase() ||
+        String(t.mobile||"").trim()===identifier) &&
        String(t.password||"")===password
     );
     if(teacher){
-      openApplication(localStorage.getItem("schoolName")||"ABC Public School",
-        "Teacher - "+(teacher.name||"Teacher"), teacher.id);
+      openApplication(localStorage.getItem("schoolName")||"ABC Public School","Teacher - "+(teacher.name||"Teacher"),teacher.id);
       return false;
     }
 
     alert("Invalid Login Details.");
-  } catch(err) {
-    console.error("Login error:",err);
-    alert("Login error: "+(err.message||"Please refresh the page."));
-  }
+  } catch(err) { console.error("Login error:",err); alert("Login error: "+(err.message||"Please refresh the page.")); }
   return false;
+}
+
+function setActiveSchoolAccount(account){
+  localStorage.setItem("schoolHubActiveSchoolId",String(account.id));
+  localStorage.setItem("schoolName",account.schoolName||"");
+  localStorage.setItem("schoolEmail",account.email||"");
+  localStorage.setItem("schoolMobile",account.mobile||"");
+  localStorage.setItem("schoolCity",account.city||"");
+  localStorage.setItem("schoolPassword",account.password||"");
+}
+function getActiveSchoolId(){return String(localStorage.getItem("schoolHubActiveSchoolId")||"").trim();}
+function schoolScopedKey(key){const id=getActiveSchoolId();return id?"schoolData_"+id+"_"+key:key;}
+function migrateLegacySchoolData(newId){
+  if(localStorage.getItem("schoolHubLegacyMigrated_"+newId))return;
+  const skip=new Set(["schoolAccounts","schoolHubActiveSchoolId","schoolName","schoolEmail","schoolMobile","schoolCity","schoolPassword"]);
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i); if(!k||skip.has(k)||!k.startsWith("school"))continue;
+    if(!localStorage.getItem("schoolData_"+newId+"_"+k)) localStorage.setItem("schoolData_"+newId+"_"+k,localStorage.getItem(k));
+  }
+  localStorage.setItem("schoolHubLegacyMigrated_"+newId,"1");
 }
 
 function openApplication(school,role,teacherId,studentId,portalRole){
@@ -1086,125 +1135,62 @@ function openApplication(school,role,teacherId,studentId,portalRole){
   window.schoolHubTeacherId=normalizedRole==="teacher" ? Number(teacherId||0) : null;
   window.schoolHubStudentId=(normalizedRole==="student"||normalizedRole==="parent") ? Number(studentId||0) : null;
   updateRoleMenuVisibility();
-
-  const login=document.getElementById("loginPage");
-  const app=document.getElementById("app");
-  if(login)login.style.display="none";
-  if(app)app.style.display="block";
-
-  const ds=document.getElementById("displaySchool");
-  const dr=document.getElementById("displayRole");
-  const tu=document.getElementById("topUser");
-  const student=getCurrentPortalStudent();
+  const login=document.getElementById("loginPage"),app=document.getElementById("app");
+  if(login)login.style.display="none"; if(app)app.style.display="block";
+  const ds=document.getElementById("displaySchool"),dr=document.getElementById("displayRole"),tu=document.getElementById("topUser"),student=getCurrentPortalStudent();
   if(ds)ds.innerText=school||"ABC Public School";
-  if(dr)dr.innerText=(normalizedRole==="student"||normalizedRole==="parent") ?
-    (normalizedRole==="parent"?"Parent Portal":"Student Portal") : (role||"School Administrator");
-  if(tu)tu.innerText=(student?.name && (normalizedRole==="student"||normalizedRole==="parent")) ? student.name : (role||"School Administrator");
-
-  try {
-    if(normalizedRole==="student"||normalizedRole==="parent") showStudentPortalDashboard();
-    else updateDashboard();
-  } catch(err){console.error("Dashboard error:",err);}
+  if(dr)dr.innerText=(normalizedRole==="student"||normalizedRole==="parent")?(normalizedRole==="parent"?"Parent Portal":"Student Portal"):(role||"School Administrator");
+  if(tu)tu.innerText=(student?.name&&(normalizedRole==="student"||normalizedRole==="parent"))?student.name:(role||"School Administrator");
+  try{if(normalizedRole==="student"||normalizedRole==="parent")showStudentPortalDashboard();else updateDashboard();}catch(err){console.error("Dashboard error:",err);}
 }
 
-function getCurrentPortalStudent(){
-  if(window.schoolHubRole!=="student"&&window.schoolHubRole!=="parent")return null;
-  const id=Number(window.schoolHubStudentId||0);
-  return getStudents().find(s=>Number(s.id)===id)||null;
+function openOwnerPanel(){
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("app").style.display="none";
+  document.getElementById("ownerPanelModal").style.display="flex";
 }
-
-function isStudentPortal(){
-  return window.schoolHubRole==="student"||window.schoolHubRole==="parent";
+function logoutOwner(){
+  document.getElementById("ownerPanelModal")?.style.setProperty("display","none");
+  document.getElementById("loginPage").style.display="flex";
+  document.getElementById("loginEmail").value="";document.getElementById("loginPassword").value="";
+  document.getElementById("loginRole").value="school_admin";updateLoginRoleFields();
 }
-
+function getCurrentPortalStudent(){if(window.schoolHubRole!=="student"&&window.schoolHubRole!=="parent")return null;const id=Number(window.schoolHubStudentId||0);return getStudents().find(s=>Number(s.id)===id)||null;}
+function isStudentPortal(){return window.schoolHubRole==="student"||window.schoolHubRole==="parent";}
 function updateRoleMenuVisibility(){
-  const isTeacher=window.schoolHubRole==="teacher";
-  const isPortal=isStudentPortal();
-  document.querySelectorAll(".menu li").forEach(li=>{
-    const action=String(li.getAttribute("onclick")||"");
-    const adminOnly=action.includes("showPage('teachers'") || action.includes("showPage('teacherLogin'");
-    const portalAllowed=action.includes("showPage('dashboard'") ||
-      action.includes("showPage('homework'") ||
-      action.includes("showPage('attendance'") ||
-      action.includes("showPage('exams'") ||
-      action.includes("showPage('timetable'") ||
-      action.includes("showPage('notices'") ||
-      action.includes("logoutUser");
-    if(isPortal) li.style.display=portalAllowed?"":"none";
-    else li.style.display=(isTeacher&&adminOnly)?"none":"";
-  });
+  const isTeacher=window.schoolHubRole==="teacher",isPortal=isStudentPortal();
+  document.querySelectorAll(".menu li").forEach(li=>{const action=String(li.getAttribute("onclick")||""),adminOnly=action.includes("showPage('teachers'")||action.includes("showPage('teacherLogin'");const portalAllowed=action.includes("showPage('dashboard'")||action.includes("showPage('homework'")||action.includes("showPage('attendance'")||action.includes("showPage('exams'")||action.includes("showPage('timetable'")||action.includes("showPage('notices'")||action.includes("logoutUser");if(isPortal)li.style.display=portalAllowed?"":"none";else li.style.display=(isTeacher&&adminOnly)?"none":"";});
 }
-
-function getCurrentTeacher(){
-  if(window.schoolHubRole!=="teacher")return null;
-  const id=Number(window.schoolHubTeacherId||0);
-  return (Array.isArray(getTeachers())?getTeachers():[]).find(t=>Number(t.id)===id)||null;
-}
-function teacherAssignedClass(){
-  const t=getCurrentTeacher(); if(!t)return null;
-  const c=Number(t.classNo??t.teachingClass??t.class);
-  return Number.isFinite(c)&&c>=1&&c<=12?c:null;
-}
-function teacherCanAccessClass(classNo){
-  return window.schoolHubRole!=="teacher" || Number(teacherAssignedClass())===Number(classNo);
-}
-function requireTeacherClassAccess(classNo){
-  if(teacherCanAccessClass(classNo))return true;
-  alert("Aap sirf apni assigned class ki Attendance aur Result manage kar sakte hain.");
-  return false;
-}
-
-function logoutUser(){
-document.getElementById("app").style.display="none";
-document.getElementById("loginPage").style.display="flex";
-window.schoolHubRole="admin";
-window.schoolHubTeacherId=null;
-window.schoolHubStudentId=null;
-updateLoginRoleFields();
-}
-
-function openRegister(){
-document.getElementById("registerModal").style.display="flex";
-}
-
-function closeRegister(){
-document.getElementById("registerModal").style.display="none";
-}
-
+function getCurrentTeacher(){if(window.schoolHubRole!=="teacher")return null;const id=Number(window.schoolHubTeacherId||0);return (Array.isArray(getTeachers())?getTeachers():[]).find(t=>Number(t.id)===id)||null;}
+function teacherAssignedClass(){const t=getCurrentTeacher();if(!t)return null;const c=Number(t.classNo??t.teachingClass??t.class);return Number.isFinite(c)&&c>=1&&c<=12?c:null;}
+function teacherCanAccessClass(classNo){return window.schoolHubRole!=="teacher"||Number(teacherAssignedClass())===Number(classNo);}
+function requireTeacherClassAccess(classNo){if(teacherCanAccessClass(classNo))return true;alert("Aap sirf apni assigned class ki Attendance aur Result manage kar sakte hain.");return false;}
+function logoutUser(){document.getElementById("app").style.display="none";document.getElementById("loginPage").style.display="flex";window.schoolHubRole="admin";window.schoolHubTeacherId=null;window.schoolHubStudentId=null;updateLoginRoleFields();}
+function openRegister(){if(document.getElementById("loginRole")?.value!=="owner" && !document.getElementById("ownerPanelModal")?.style.display.includes("flex")){alert("Only SchoolHub Owner can register a school.");return;}document.getElementById("registerModal").style.display="flex";}
+function closeRegister(){document.getElementById("registerModal").style.display="none";if(document.getElementById("ownerPanelModal"))document.getElementById("ownerPanelModal").style.display="flex";}
 function registerSchool(){
-
-let school=document.getElementById("regSchoolName").value.trim();
-let email=document.getElementById("regSchoolEmail").value.trim();
-let mobile=document.getElementById("regSchoolMobile").value.trim();
-let city=document.getElementById("regSchoolCity").value.trim();
-let password=document.getElementById("regSchoolPassword").value;
-
-if(!school||!email||!mobile||!city){
-alert("Please fill all fields");
-return;
-}
-
-if(password.length<6){
-alert("Password must be at least 6 characters");
-return;
-}
-
-localStorage.setItem("schoolName",school);
-localStorage.setItem("schoolEmail",email);
-localStorage.setItem("schoolMobile",mobile);
-localStorage.setItem("schoolCity",city);
-localStorage.setItem("schoolPassword",password);
-
-closeRegister();
-document.getElementById("loginEmail").value=email;
-
-alert("School Registered Successfully!");
+  let school=document.getElementById("regSchoolName").value.trim(),principal=document.getElementById("regPrincipalName").value.trim(),mobile=document.getElementById("regSchoolMobile").value.trim(),email=document.getElementById("regSchoolEmail").value.trim(),city=document.getElementById("regSchoolCity").value.trim(),loginId=document.getElementById("regSchoolId").value.trim(),password=document.getElementById("regSchoolPassword").value;
+  if(!school||!principal||!mobile||!email||!city||!loginId){alert("Please fill all fields");return;}
+  if(password.length<6){alert("Password must be at least 6 characters");return;}
+  let accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");if(!Array.isArray(accounts))accounts=[];
+  const exists=accounts.some(a=>String(a.loginId||"").trim().toLowerCase()===loginId.toLowerCase()||String(a.email||"").trim().toLowerCase()===email.toLowerCase()||String(a.mobile||"").trim()===mobile);
+  if(exists){alert("School Login ID / Email / Mobile already registered.");return;}
+  const id="SCH"+Date.now().toString(36).toUpperCase();
+  const account={id,schoolName:school,principalName:principal,loginId,email,mobile,city,password,createdAt:new Date().toISOString()};
+  accounts.push(account);localStorage.setItem("schoolAccounts",JSON.stringify(accounts));
+  // If old demo/local data exists, preserve it for the first registered school only.
+  if(accounts.length===1)migrateLegacySchoolData(id);
+  closeRegister();
+  ["regSchoolName","regPrincipalName","regSchoolMobile","regSchoolEmail","regSchoolCity","regSchoolId","regSchoolPassword"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+  alert("School Registered Successfully!\nLogin ID: "+loginId+"\nPassword: "+password);
 }
 
 /* DEMO STUDENTS */
 
+
 function createDemoStudents(){
 
+if(!getActiveSchoolId())return;
 if(getStudents().length)return;
 
 let names=[
@@ -5935,9 +5921,15 @@ let email=document.getElementById("settingsEmail").value.trim();
 
 localStorage.setItem("schoolName",school);
 localStorage.setItem("schoolEmail",email);
-
+const activeId=getActiveSchoolId();
+if(activeId){
+  let accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");
+  if(Array.isArray(accounts)){
+    const a=accounts.find(x=>String(x.id)===activeId);
+    if(a){a.schoolName=school;a.email=email;localStorage.setItem("schoolAccounts",JSON.stringify(accounts));}
+  }
+}
 document.getElementById("displaySchool").innerText=school;
-
 alert("Settings saved successfully!");
 }
 
