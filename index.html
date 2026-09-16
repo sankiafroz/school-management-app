@@ -223,6 +223,11 @@ th{background:#fafbfd;color:#667085}
 .gallery-preview-grid img{background:#f8faff}
 #classTimetableTable th:nth-child(2),#classTimetableTable td:nth-child(2){min-width:200px}
 
+
+.result-register-table th,.result-register-table td{white-space:nowrap}
+.result-register-table th small{font-size:10px;color:#667085}
+.result-register-table tbody tr:hover{background:#f8faff}
+.result-register-table .result-student-link:hover{text-decoration:underline}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -2228,38 +2233,87 @@ return;
 }
 
 if(type==="exams"){
-  const sorted=[...students].sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
-  const examSessions=[...new Set(getExams().filter(e=>sorted.some(st=>Number(st.id)===Number(e.studentId))).map(e=>String(e.session||"2026-27")).filter(Boolean))];
-  let rows=sorted.map((st,i)=>`<tr>
-    <td>${i+1}</td>
-    <td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button></td>
-    <td>${escapeHtml(st.roll||i+1)}</td>
-  </tr>`).join("");
+  const sorted=[...students].sort((a,b)=>{
+    const ra=Number(a.roll), rb=Number(b.roll);
+    if(Number.isFinite(ra)&&Number.isFinite(rb)&&ra!==rb)return ra-rb;
+    return String(a.name||"").localeCompare(String(b.name||""));
+  });
+
+  // Show one result register for the whole class instead of separate student boxes.
+  // Columns are built from all subjects found in the students' latest saved results.
+  const latestResults=new Map(sorted.map(st=>[Number(st.id),getExamForStudent(st.id)]));
+  const subjectNames=[];
+  sorted.forEach(st=>{
+    const e=latestResults.get(Number(st.id));
+    (e?.subjects||[]).forEach(sub=>{
+      const n=String(sub?.name||"").trim();
+      if(n && !subjectNames.some(x=>x.toLowerCase()===n.toLowerCase())) subjectNames.push(n);
+    });
+  });
+  if(!subjectNames.length) subjectNames.push(...getResultExcelSubjects());
+
+  const resultRows=sorted.map((st,i)=>{
+    const e=latestResults.get(Number(st.id));
+    const subjectCells=subjectNames.map(sub=>{
+      const found=(e?.subjects||[]).find(x=>String(x?.name||"").trim().toLowerCase()===sub.toLowerCase());
+      if(!found)return `<td style="text-align:center;color:#98a2b3">—</td>`;
+      const n=normalizeExamSubject(found);
+      return `<td style="text-align:center;font-weight:700">${escapeHtml(String(getSubjectObtained(n)))} / ${escapeHtml(String(getSubjectMax(n)))}</td>`;
+    }).join("");
+    const total=e?getExamTotal(e):0;
+    const obtained=e?getExamObtained(e):0;
+    const pct=e?getExamPercentage(e):0;
+    return `<tr>
+      <td>${i+1}</td>
+      <td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button></td>
+      <td>${escapeHtml(st.roll??i+1)}</td>
+      ${subjectCells}
+      <td style="text-align:center;font-weight:800">${e?escapeHtml(String(obtained))+" / "+escapeHtml(String(total)):"—"}</td>
+      <td style="text-align:center;font-weight:800">${e?pct.toFixed(1)+"%":"—"}</td>
+    </tr>`;
+  }).join("");
+
   let html=`<button class="back-btn" onclick="${back}">← Back</button>
   <div class="card">
     <div class="card-header">
-      <div><h3>${title} - Result</h3><p style="color:#777;font-size:12px;margin-top:4px">Student name par click karke direct result add/update karein.</p></div>
+      <div>
+        <h3>${title} - Result</h3>
+        <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
+      </div>
     </div>
+
     <div class="result-excel-tools">
       <strong>📊 Add Result Excel Sheet</strong>
-      <p style="font-size:12px;color:#667085;margin:5px 0 10px">Template download karein, marks fill karein aur upload karte hi matching students ke results automatic save ho jayenge.</p>
+      <p style="font-size:12px;color:#667085;margin:5px 0 10px">
+        Pehle Excel Performa download karein, marks fill karein aur upload karein. Upload ke baad sabhi matching students ke results automatic save/update honge.
+      </p>
       <div class="tool-row">
         <button type="button" class="small-btn" onclick="downloadResultExcelTemplate(${classNo},'${stream||""}','${section||""}')">⬇️ Download Excel Performa</button>
         <input id="resultExcelUpload" type="file" accept=".xlsx,.xls,.csv" onchange="uploadResultExcel(event,${classNo},'${stream||""}','${section||""}')">
       </div>
       <div id="resultExcelStatus" style="font-size:12px;color:#667085;margin-top:8px"></div>
     </div>
+
     <div class="table-container">
-      <table style="min-width:520px">
-        <thead><tr><th>S.No.</th><th>Student Name</th><th>Roll Number</th></tr></thead>
-        <tbody>${rows||`<tr><td colspan="3"><div class="empty">No Students Found</div></td></tr>`}</tbody>
+      <table class="result-register-table" style="min-width:${Math.max(850,480+subjectNames.length*125)}px">
+        <thead>
+          <tr>
+            <th>S.No.</th><th>Student Name</th><th>Roll Number</th>
+            ${subjectNames.map(s=>`<th style="text-align:center">${escapeHtml(s)}<br><small style="font-weight:normal">Obtained / MM</small></th>`).join("")}
+            <th style="text-align:center">Total</th>
+            <th style="text-align:center">%</th>
+          </tr>
+        </thead>
+        <tbody>${resultRows||`<tr><td colspan="${subjectNames.length+5}"><div class="empty">No Students Found</div></td></tr>`}</tbody>
       </table>
+    </div>
+    <div style="padding:12px 18px;color:#667085;font-size:12px">
+      <b>Note:</b> Jis student ka result abhi nahi hai, uske marks <b>—</b> dikhenge. Student name par click karke direct result banaya ja sakta hai.
     </div>
   </div>`;
   document.getElementById("otherPage").innerHTML=html;
   return;
 }
-
 let html=`
 <button class="back-btn" onclick="${back}">← Back</button>
 
@@ -4030,8 +4084,65 @@ function deleteExam(id,classNo,stream,section){
 
 
 /* RESULT EXCEL */
-function getResultExcelSubjects(){
-  return ["Maths","Science","English","Hindi","Social Science"];
+function getResultExcelSubjects(classNo,stream,section){
+  const students=getStudents().filter(s=>
+    Number(s.classNo)===Number(classNo)&&
+    (!stream||s.stream===stream)&&
+    (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
+  );
+  const names=[];
+  students.forEach(st=>{
+    getExamResultsForStudent(st.id).forEach(e=>{
+      (e.subjects||[]).forEach(sub=>{
+        const n=String(sub?.name||"").trim();
+        if(n && !names.some(x=>x.toLowerCase()===n.toLowerCase()))names.push(n);
+      });
+    });
+  });
+  return names.length?names:["Maths","Science","English","Hindi","Social Science"];
+}
+
+function excelSafeDate(value){
+  const v=String(value??"").trim();
+  if(!v)return today();
+  if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)){
+    const p=v.split("-"); return p[0]+"-"+String(p[1]).padStart(2,"0")+"-"+String(p[2]).padStart(2,"0");
+  }
+  if(/^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(v)){
+    const p=v.split(/[\/-]/); return p[2]+"-"+String(p[1]).padStart(2,"0")+"-"+String(p[0]).padStart(2,"0");
+  }
+  // Excel serial date (SheetJS may return a number when raw values are used).
+  const n=Number(v);
+  if(Number.isFinite(n)&&n>20000&&n<70000){
+    const d=new Date(Date.UTC(1899,11,30)+n*86400000);
+    return d.getUTCFullYear()+"-"+String(d.getUTCMonth()+1).padStart(2,"0")+"-"+String(d.getUTCDate()).padStart(2,"0");
+  }
+  const d=new Date(v);
+  if(!Number.isNaN(d.getTime()))return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  return today();
+}
+
+function normalizeResultHeader(s){
+  return String(s??"").trim().toLowerCase()
+    .replace(/[\r\n]+/g," ")
+    .replace(/[^a-z0-9]+/g," ")
+    .replace(/\s+/g," ").trim();
+}
+
+function resultExcelFindKey(obj,keys){
+  const normalized={};
+  Object.keys(obj||{}).forEach(k=>normalized[normalizeResultHeader(k)]=obj[k]);
+  for(const key of keys){
+    const v=normalized[normalizeResultHeader(key)];
+    if(v!==undefined && String(v).trim()!=="")return String(v).trim();
+  }
+  return "";
+}
+
+function resultExcelNumber(v, fallback=0){
+  if(v===null||v===undefined||String(v).trim()==="")return fallback;
+  const n=Number(String(v).replace(/,/g,"").trim());
+  return Number.isFinite(n)?n:fallback;
 }
 
 function downloadResultExcelTemplate(classNo,stream,section){
@@ -4039,23 +4150,30 @@ function downloadResultExcelTemplate(classNo,stream,section){
     Number(s.classNo)===Number(classNo)&&
     (!stream||s.stream===stream)&&
     (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
-  ).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
-
+  ).sort((a,b)=>{
+    const ra=Number(a.roll),rb=Number(b.roll);
+    return Number.isFinite(ra)&&Number.isFinite(rb)?ra-rb:String(a.name||"").localeCompare(String(b.name||""));
+  });
   if(!students.length){alert("No students found in this class.");return;}
 
-  const subjects=getResultExcelSubjects();
+  const subjects=getResultExcelSubjects(classNo,stream,section);
   const headers=["Roll Number","Student Name","Session","Result Type","Result Name","Result Date"];
   subjects.forEach(sub=>{headers.push(sub+" MM");headers.push(sub+" Obtained");});
 
   const rows=students.map(st=>{
-    const row=[st.roll||"",st.name||"",st.session||"2026-27","Unit Test","Unit Test 1",today()];
-    subjects.forEach(()=>{row.push("");row.push("");});
+    const row=[st.roll??"",st.name??"",st.session||"2026-27","Unit Test","Unit Test 1",today()];
+    const latest=getExamForStudent(st.id);
+    subjects.forEach(sub=>{
+      const found=(latest?.subjects||[]).find(x=>String(x?.name||"").trim().toLowerCase()===sub.toLowerCase());
+      row.push(found?getSubjectMax(found):100);
+      row.push(found?getSubjectObtained(found):"");
+    });
     return row;
   });
 
   if(window.XLSX){
     const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
-    ws["!cols"]=headers.map((h,i)=>({wch:i===1?25:18}));
+    ws["!cols"]=headers.map((h,i)=>({wch:i===1?25:i<6?18:15}));
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,"Result");
     XLSX.writeFile(wb,"Class_"+classNo+"_Result_Performa.xlsx");
@@ -4067,7 +4185,6 @@ function downloadResultExcelTemplate(classNo,stream,section){
     a.download="Class_"+classNo+"_Result_Performa.csv";
     a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-    alert("Excel library load nahi hui, isliye CSV performa download hua hai. Excel me seedha open ho jayega.");
   }
 }
 
@@ -4079,13 +4196,13 @@ function parseResultExcelRows(file){
     reader.onload=e=>{
       try{
         if(ext==="csv"){
-          const text=new TextDecoder("utf-8").decode(e.target.result);
-          const lines=text.replace(/^\ufeff/,"").split(/\r?\n/).filter(x=>x.trim());
+          const csvText=new TextDecoder("utf-8").decode(e.target.result).replace(/^\ufeff/,"");
+          const lines=csvText.split(/\r?\n/).filter(x=>x.trim());
           const parseLine=line=>{
             const out=[];let cur="",quoted=false;
             for(let i=0;i<line.length;i++){
               const ch=line[i];
-              if(ch==='"' && line[i+1]==='"'){cur+='"';i++;continue;}
+              if(ch==='"'&&line[i+1]==='"'){cur+='"';i++;continue;}
               if(ch==='"'){quoted=!quoted;continue;}
               if(ch===","&&!quoted){out.push(cur);cur="";}else cur+=ch;
             }
@@ -4097,25 +4214,13 @@ function parseResultExcelRows(file){
           return;
         }
         if(!window.XLSX)throw new Error("Excel reader load nahi hua. Internet on karke page refresh karein.");
-        const wb=XLSX.read(e.target.result,{type:"array"});
+        const wb=XLSX.read(e.target.result,{type:"array",cellDates:false,raw:false});
         const ws=wb.Sheets[wb.SheetNames[0]];
         resolve(XLSX.utils.sheet_to_json(ws,{defval:"",raw:false}));
       }catch(err){reject(err);}
     };
-    if(ext==="csv")reader.readAsArrayBuffer(file);else reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(file);
   });
-}
-
-function resultExcelFindKey(obj,keys){
-  const normalized={};
-  Object.keys(obj||{}).forEach(k=>{
-    normalized[String(k).trim().toLowerCase().replace(/[^a-z0-9]+/g," ")]=obj[k];
-  });
-  for(const key of keys){
-    const v=normalized[key.toLowerCase().replace(/[^a-z0-9]+/g," ")];
-    if(v!==undefined && String(v).trim()!=="")return String(v).trim();
-  }
-  return "";
 }
 
 function uploadResultExcel(event,classNo,stream,section){
@@ -4123,6 +4228,7 @@ function uploadResultExcel(event,classNo,stream,section){
   const status=document.getElementById("resultExcelStatus");
   if(!file)return;
   if(status)status.textContent="Excel sheet read ho rahi hai...";
+
   parseResultExcelRows(file).then(rows=>{
     if(!rows.length)throw new Error("Excel sheet me koi data row nahi mili.");
 
@@ -4131,46 +4237,64 @@ function uploadResultExcel(event,classNo,stream,section){
       (!stream||s.stream===stream)&&
       (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
     );
+    if(!students.length)throw new Error("Is class me koi student nahi mila.");
 
-    const byRoll=new Map(students.map(s=>[String(s.roll||"").trim().toLowerCase(),s]));
-    const byName=new Map(students.map(s=>[String(s.name||"").trim().toLowerCase(),s]));
-    const exams=getExams();
+    const byRoll=new Map();
+    const byName=new Map();
+    students.forEach(s=>{
+      const r=String(s.roll??"").trim().toLowerCase();
+      const n=String(s.name??"").trim().toLowerCase();
+      if(r)byRoll.set(r,s);
+      if(n)byName.set(n,s);
+    });
+
+    // Detect every subject column in the uploaded sheet, including columns with 0 marks.
+    const subjectInfo=new Map();
+    rows.forEach(row=>{
+      Object.keys(row).forEach(key=>{
+        const m=String(key).match(/^(.+?)\s+(MM|Maximum Marks|Max|Obtained|Marks)$/i);
+        if(!m)return;
+        const subject=m[1].trim();
+        const kind=m[2].toLowerCase();
+        const id=subject.toLowerCase();
+        if(!subjectInfo.has(id))subjectInfo.set(id,{name:subject,mmKey:null,obtKey:null});
+        if(["mm","maximum marks","max"].includes(kind))subjectInfo.get(id).mmKey=key;
+        else subjectInfo.get(id).obtKey=key;
+      });
+    });
+
+    const subjectsDetected=[...subjectInfo.values()];
+    if(!subjectsDetected.length){
+      throw new Error("Subject columns nahi mili. Format: Maths MM, Maths Obtained, Science MM, Science Obtained...");
+    }
+
+    const exams=getExams().slice();
     let added=0,updated=0,skipped=0;
+    const processedStudentIds=new Set();
 
     rows.forEach(row=>{
-      const roll=resultExcelFindKey(row,["Roll Number","Roll No","Roll"]);
-      const name=resultExcelFindKey(row,["Student Name","Name"]);
-      const st=(roll&&byRoll.get(roll.toLowerCase())) || (name&&byName.get(name.toLowerCase()));
+      const roll=resultExcelFindKey(row,["Roll Number","Roll No","Roll","RollNo"]);
+      const name=resultExcelFindKey(row,["Student Name","Name","Student"]);
+      const st=(roll&&byRoll.get(roll.toLowerCase()))||(name&&byName.get(name.toLowerCase()));
       if(!st){skipped++;return;}
+
+      processedStudentIds.add(Number(st.id));
 
       const session=resultExcelFindKey(row,["Session"])||st.session||"2026-27";
       const examName=resultExcelFindKey(row,["Result Name","Exam Name","Result","Exam"])||"Unit Test 1";
-      const examDate=resultExcelFindKey(row,["Result Date","Exam Date","Date"])||today();
-      const rt=resultExcelFindKey(row,["Result Type","Type"]).toLowerCase().includes("exam")?"exam":"unit_test";
+      const examDate=excelSafeDate(resultExcelFindKey(row,["Result Date","Exam Date","Date"]));
+      const typeText=resultExcelFindKey(row,["Result Type","Type"]).toLowerCase();
+      const resultType=typeText.includes("exam")?"exam":"unit_test";
 
-      const subjects=[];
-      const keys=Object.keys(row);
-      const pairs={};
-      keys.forEach(k=>{
-        const m=String(k).match(/^(.+?)\s+(MM|Maximum Marks|Max|Obtained|Marks)$/i);
-        if(!m)return;
-        const sub=m[1].trim(),kind=m[2].toLowerCase();
-        const id=sub.toLowerCase();
-        pairs[id]=pairs[id]||{name:sub};
-        if(kind==="mm"||kind==="maximum marks"||kind==="max")pairs[id].mm=Number(row[k])||0;
-        else pairs[id].obtained=Number(row[k])||0;
+      const subjects=subjectsDetected.map(info=>{
+        const mm=resultExcelNumber(info.mmKey?row[info.mmKey]:"",100);
+        const obtained=resultExcelNumber(info.obtKey?row[info.obtKey]:"",0);
+        return {name:info.name,mm:Math.max(0,mm),obtained:Math.max(0,Math.min(obtained,mm)),columnValues:{}};
       });
-      Object.values(pairs).forEach(x=>{
-        if(!x.name)return;
-        const mm=Number(x.mm)||0,obtained=Number(x.obtained)||0;
-        if(mm>0 || obtained>0)subjects.push({name:x.name,mm,obtained,columnValues:{}});
-      });
-      if(!subjects.length){skipped++;return;}
 
       const result={
-        id:Date.now()+Math.floor(Math.random()*100000),
-        studentId:Number(st.id),
-        session,examName,examDate,resultType:rt,
+        id:Date.now()+Math.floor(Math.random()*1000000),
+        studentId:Number(st.id),session,examName,examDate,resultType,
         columns:[
           {id:"mm",name:"MM",max:0},
           {id:"obtained",name:"Obtained",max:0}
@@ -4178,14 +4302,14 @@ function uploadResultExcel(event,classNo,stream,section){
         subjects
       };
 
-      const existing=exams.findIndex(x=>
+      const existingIndex=exams.findIndex(x=>
         Number(x.studentId)===Number(st.id)&&
-        String(x.session||"2026-27")===String(session)&&
+        String(x.session||"2026-27").trim()===String(session).trim()&&
         String(x.examName||"").trim().toLowerCase()===String(examName).trim().toLowerCase()
       );
-      if(existing>=0){
-        result.id=exams[existing].id;
-        exams[existing]=result;
+      if(existingIndex>=0){
+        result.id=exams[existingIndex].id;
+        exams[existingIndex]=result;
         updated++;
       }else{
         exams.push(result);
@@ -4194,8 +4318,11 @@ function uploadResultExcel(event,classNo,stream,section){
     });
 
     saveExams(exams);
-    if(status)status.textContent=`Done: ${added} new, ${updated} updated, ${skipped} skipped.`;
-    alert(`Result Excel upload complete.\\nNew: ${added}\\nUpdated: ${updated}\\nSkipped: ${skipped}`);
+
+    const missing=students.length-processedStudentIds.size;
+    const msg=`Excel Result Upload Complete.\nNew Results: ${added}\nUpdated Results: ${updated}\nStudents matched: ${processedStudentIds.size}/${students.length}\nRows skipped: ${skipped}`;
+    if(status)status.textContent=msg.replace(/\n/g," | ");
+    alert(msg+(missing>0?`\n\n${missing} student(s) sheet me match nahi hue. Template se download ki hui sheet use karein.`:"\n\nSabhi students ke results save/update ho gaye."));
     openStudentsData("exams",classNo,stream,section);
   }).catch(err=>{
     console.error(err);
@@ -4205,7 +4332,6 @@ function uploadResultExcel(event,classNo,stream,section){
     if(event.target)event.target.value="";
   });
 }
-
 /* HOMEWORK */
 
 let editingHomeworkId=null;
