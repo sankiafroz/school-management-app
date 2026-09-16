@@ -1530,13 +1530,25 @@ function downloadFile(filename,content,mime="text/csv;charset=utf-8"){
 
 function attendanceStatusCode(status){
   const s=String(status??"").trim().toLowerCase();
-  if(["p","present","pres","1","yes","true"].includes(s))return "P";
-  if(["a","absent","abs","0","no","false"].includes(s))return "A";
-  if(["l","leave","on leave"].includes(s))return "L";
-  if(["h","holiday"].includes(s))return "H";
-  if(["s","sunday"].includes(s))return "S";
+  if(["p","present","pres","1","true"].includes(s)) return "P";
+  if(["a","absent","abs","0","false"].includes(s)) return "A";
+  if(["l","leave","on leave"].includes(s)) return "L";
+  if(["h","holiday"].includes(s)) return "H";
+  if(["s","sunday"].includes(s)) return "S";
   return "";
 }
+function getAttendanceRecordForStudentDate(records,student,date){
+  const sid=Number(student?.id), target=String(date||"").slice(0,10);
+  return (records||[]).find(x=>{
+    const xid=Number(x?.studentId??x?.studentID??x?.student_id);
+    const xd=String(x?.date??x?.attendanceDate??x?.day??"").slice(0,10);
+    return Number.isFinite(sid)&&Number.isFinite(xid)&&sid===xid&&target===xd;
+  })||null;
+}
+function getAttendanceRecordStatus(rec){
+  return rec ? (rec.status??rec.attendanceStatus??rec.attendance??rec.mark??rec.value??"") : "";
+}
+
 
 function normalizeAttendanceDate(value){
   if(value===undefined||value===null)return "";
@@ -4111,164 +4123,81 @@ return `<div class="card"><div class="empty"><h3>Teachers</h3><p>Click Teachers 
 }
 
 if(page==="timetable"){
-
-let classes=Array.from({length:12},(_,i)=>i+1);
-let selectedClass=Number(window.selectedTimetableClass||1);
-if(selectedClass<1||selectedClass>12)selectedClass=1;
-let tt=getClassTimetable(selectedClass);
-
-return `
-<div class="card">
-  <div class="card-header">
-    <div>
-      <h3>🕐 Class-wise Timetable</h3>
-      <p style="color:#777;font-size:12px;margin-top:4px">Har class ka timetable alag save hoga.</p>
-    </div>
-    <button class="small-btn" onclick="editTimetable(${selectedClass})">✏️ Edit Timetable</button>
-  </div>
-
-  <div style="padding:18px;border-bottom:1px solid #edf0f4">
-    <div class="form-group" style="margin:0;max-width:320px">
-      <label>Select Class</label>
-      <select id="timetableClassSelect" onchange="changeTimetableClass(this.value)">
-        ${classes.map(i=>`<option value="${i}" ${i===selectedClass?"selected":""}>Class ${i}</option>`).join("")}
-      </select>
-    </div>
-  </div>
-
-  <div class="table-container">
-    <table>
-      <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
-      ${tt.length ? tt.map(r=>`<tr><td>${escapeHtml(r.time||"")}</td>${[0,1,2,3,4].map(j=>`<td>${escapeHtml((r.days||[])[j]||"")}</td>`).join("")}</tr>`).join("") :
-      `<tr><td colspan="6" class="empty">No timetable created for Class ${selectedClass}. Click Edit Timetable to add periods.</td></tr>`}
-    </table>
-  </div>
-</div>`;
-}
-
-function getClassTimetable(classNo){
-  const all=getData("schoolTimetablesByClass");
-  if(all && typeof all==="object" && !Array.isArray(all)){
-    const rows=all[String(classNo)];
-    if(Array.isArray(rows))return rows;
-  }
-  // Migrate old single timetable into Class 1 only, without making it appear in every class.
-  if(Number(classNo)===1){
-    const old=getData("schoolTimetable");
-    if(Array.isArray(old)&&old.length)return old;
-  }
-  return [];
-}
-
-function saveClassTimetable(classNo,data){
-  let all=getData("schoolTimetablesByClass");
-  if(!all || typeof all!=="object" || Array.isArray(all))all={};
-  all[String(classNo)]=data;
-  setData("schoolTimetablesByClass",all);
-}
-
-function changeTimetableClass(classNo){
-  window.selectedTimetableClass=Number(classNo);
-  const other=document.getElementById("otherPage");
-  if(other)other.innerHTML=getOtherPage("timetable");
-}
-
-function editTimetable(classNo){
-  classNo=Number(classNo||window.selectedTimetableClass||1);
-  window.selectedTimetableClass=classNo;
-
-  let tt=getClassTimetable(classNo);
-  if(!tt.length){
-    tt=[{time:"08:00",days:["","","","",""]}];
-  }
-
-  let html=`<div class="modal-bg" id="timetableEditModal" style="display:flex">
-    <div class="modal">
-      <div class="modal-header">
-        <div>
-          <h2>Edit Timetable - Class ${classNo}</h2>
-          <p style="font-size:12px;color:#667085;margin-top:4px">Only Class ${classNo} ka timetable edit ho raha hai.</p>
-        </div>
-        <button class="close-btn" onclick="closeTimetableEdit()">×</button>
+  const selected=Number(window.timetableSelectedClass)||1;
+  const tt=getClassTimetable(selected);
+  return `<div class="card">
+    <div class="card-header"><div><h3>🕐 Class-wise Timetable</h3>
+    <p style="color:#777;font-size:12px;margin-top:4px">Har class ka timetable alag banayein.</p></div></div>
+    <div style="padding:18px">
+      <div class="form-group"><label>Select Class</label>
+        <select onchange="changeTimetableClass(this.value)">
+          ${Array.from({length:12},(_,i)=>i+1).map(c=>`<option value="${c}" ${c===selected?"selected":""}>Class ${c}</option>`).join("")}
+        </select>
       </div>
-
-      <div class="table-container">
-        <table id="timetableEditTable" style="min-width:900px">
-          <thead><tr>
-            <th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th>
-            <th>Thursday</th><th>Friday</th><th>Action</th>
-          </tr></thead>
-          <tbody>
-          ${tt.map(r=>`<tr>
-            <td><input class="tt-time" value="${escapeHtml(r.time||"")}" placeholder="08:00"></td>
-            ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="${escapeHtml((r.days||[])[j]||"")}" placeholder="${d}"></td>`).join("")}
-            <td><button type="button" class="delete-btn" onclick="removeTimetableRow(this)">Delete</button></td>
-          </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-
+      <div class="table-container"><table id="classTimetableTable" style="min-width:1100px">
+        <thead><tr><th>Period</th><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th><th>Action</th></tr></thead>
+        <tbody>${tt.map((r,i)=>timetableRowHtml(r,i)).join("")}</tbody>
+      </table></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
-        <button type="button" class="small-btn" onclick="addTimetableRow()">＋ Add Period</button>
-        <button type="button" class="btn btn-primary" style="flex:1;min-width:180px" onclick="saveTimetable(${classNo})">Save Class ${classNo} Timetable</button>
-        <button type="button" class="btn btn-outline" style="flex:1;min-width:120px;margin-top:0" onclick="closeTimetableEdit()">Cancel</button>
+        <button type="button" class="small-btn" onclick="addClassTimetableRow()">＋ Add Period</button>
+        <button type="button" class="btn btn-primary" style="flex:1;min-width:190px" onclick="saveClassTimetable()">Save Class Timetable</button>
       </div>
-    </div>
-  </div>`;
-  document.body.insertAdjacentHTML("beforeend",html);
+    </div></div>`;
 }
-
-function addTimetableRow(){
-  const tbody=document.querySelector("#timetableEditTable tbody");
-  if(!tbody)return;
+function timetableRowHtml(r,i){
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const vals=Array.isArray(r?.days)?r.days:[];
+  return `<tr>
+    <td><input class="ctt-period" type="number" min="1" value="${escapeHtml(r?.period??i+1)}" placeholder="1"></td>
+    <td><input class="ctt-time" value="${escapeHtml(r?.time||"")}" placeholder="08:00 - 08:40"></td>
+    ${days.map((d,j)=>`<td><input class="ctt-subject" data-day="${j}" value="${escapeHtml(vals[j]||"")}" placeholder="Subject"></td>`).join("")}
+    <td><button type="button" class="delete-btn" onclick="removeClassTimetableRow(this)">Delete</button></td>
+  </tr>`;
+}
+function getClassTimetable(classNo){
+  const all=getData("schoolTimetableByClass");
+  if(all&&typeof all==="object"&&!Array.isArray(all)&&Array.isArray(all[String(classNo)]))
+    return all[String(classNo)];
+  return [{period:1,time:"08:00 - 08:40",days:["","","","","",""]}];
+}
+function changeTimetableClass(classNo){
+  window.timetableSelectedClass=Number(classNo)||1;
+  const other=document.getElementById("otherPage");
+  if(other) other.innerHTML=getOtherPage("timetable");
+}
+function addClassTimetableRow(){
+  const tbody=document.querySelector("#classTimetableTable tbody"); if(!tbody)return;
+  const i=tbody.querySelectorAll("tr").length;
   const row=document.createElement("tr");
-  row.innerHTML=`
-    <td><input class="tt-time" value="" placeholder="e.g. 10:00"></td>
-    ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="" placeholder="${d}"></td>`).join("")}
-    <td><button type="button" class="delete-btn" onclick="removeTimetableRow(this)">Delete</button></td>`;
-  tbody.appendChild(row);
-  row.querySelector(".tt-time")?.focus();
+  row.innerHTML=timetableRowHtml({period:i+1,time:"",days:["","","","","",""]},i);
+  tbody.appendChild(row); row.querySelector(".ctt-time")?.focus();
 }
-
-function removeTimetableRow(btn){
-  const tbody=document.querySelector("#timetableEditTable tbody");
-  const row=btn?.closest("tr");
+function removeClassTimetableRow(btn){
+  const tbody=document.querySelector("#classTimetableTable tbody"),row=btn?.closest("tr");
   if(!tbody||!row)return;
-  if(tbody.querySelectorAll("tr").length<=1){
-    alert("At least one timetable period is required.");
-    return;
-  }
+  if(tbody.querySelectorAll("tr").length<=1){alert("At least one period is required.");return;}
   row.remove();
 }
-
-function closeTimetableEdit(){
-  document.getElementById("timetableEditModal")?.remove();
-}
-
-function saveTimetable(classNo){
-  classNo=Number(classNo||window.selectedTimetableClass||1);
-  const modal=document.getElementById("timetableEditModal");
-  if(!modal){alert("Timetable editor is not open.");return;}
-
-  const rows=[...modal.querySelectorAll("#timetableEditTable tbody tr")];
-  const data=rows.map(row=>({
-    time:row.querySelector(".tt-time")?.value.trim()||"",
-    days:[...row.querySelectorAll(".tt-day")].map(x=>x.value.trim())
+function saveClassTimetable(){
+  const classNo=Number(window.timetableSelectedClass)||1;
+  const rows=[...document.querySelectorAll("#classTimetableTable tbody tr")];
+  const data=rows.map((row,i)=>({
+    period:Number(row.querySelector(".ctt-period")?.value)||i+1,
+    time:row.querySelector(".ctt-time")?.value.trim()||"",
+    days:[...row.querySelectorAll(".ctt-subject")].map(x=>x.value.trim())
   })).filter(r=>r.time||r.days.some(Boolean));
-
-  if(!data.length){
-    alert("Please add at least one timetable period.");
-    return;
-  }
-
-  saveClassTimetable(classNo,data);
-  // Keep backward compatibility with Class 1's old key.
-  if(classNo===1)setData("schoolTimetable",data);
-  closeTimetableEdit();
+  if(!data.length){alert("Please add at least one period and subject.");return;}
+  const all=getData("schoolTimetableByClass");
+  const store=(all&&typeof all==="object"&&!Array.isArray(all))?all:{};
+  store[String(classNo)]=data.sort((a,b)=>a.period-b.period);
+  setData("schoolTimetableByClass",store);
   const other=document.getElementById("otherPage");
   if(other)other.innerHTML=getOtherPage("timetable");
   alert("Class "+classNo+" timetable saved successfully!");
 }
+function editTimetable(){ window.timetableSelectedClass=Number(window.timetableSelectedClass)||1; const other=document.getElementById("otherPage"); if(other)other.innerHTML=getOtherPage("timetable"); }
+function closeTimetableEdit(){ document.getElementById("timetableEditModal")?.remove(); }
+function saveTimetable(){ return saveClassTimetable(); }
 
 if(page==="notices"){
 
