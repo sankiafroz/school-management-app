@@ -1530,28 +1530,53 @@ function downloadFile(filename,content,mime="text/csv;charset=utf-8"){
 
 function attendanceStatusCode(status){
   const s=String(status??"").trim().toLowerCase();
-  if(s==="p"||s==="present"||s==="pres")return "P";
-  if(s==="a"||s==="absent"||s==="abs")return "A";
-  if(s==="l"||s==="leave"||s==="on leave")return "L";
-  if(s==="h"||s==="holiday")return "H";
-  if(s==="s"||s==="sunday")return "S";
+  if(["p","present","pres","1","yes","true"].includes(s))return "P";
+  if(["a","absent","abs","0","no","false"].includes(s))return "A";
+  if(["l","leave","on leave"].includes(s))return "L";
+  if(["h","holiday"].includes(s))return "H";
+  if(["s","sunday"].includes(s))return "S";
   return "";
+}
+
+function normalizeAttendanceDate(value){
+  if(value===undefined||value===null)return "";
+  const raw=String(value).trim();
+  if(!raw)return "";
+  if(/^\d{4}-\d{1,2}-\d{1,2}/.test(raw)){
+    const m=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    return m[1]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[3]).padStart(2,"0");
+  }
+  if(/^\d{1,2}-\d{1,2}-\d{4}/.test(raw)){
+    const m=raw.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
+    return m[3]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[1]).padStart(2,"0");
+  }
+  return raw.slice(0,10);
 }
 
 function getAttendanceRecordForStudentDate(records,student,date){
   const sid=Number(student?.id);
-  return records.find(x=>{
+  const roll=String(student?.rollNo ?? student?.rollNumber ?? student?.roll ?? student?.admissionNo ?? student?.admissionNumber ?? "").trim().toLowerCase();
+  const name=String(student?.name||"").trim().toLowerCase();
+  const targetDate=normalizeAttendanceDate(date);
+  return (records||[]).find(x=>{
+    const xd=normalizeAttendanceDate(x?.date ?? x?.attendanceDate ?? x?.day ?? x?.attendance_date);
+    if(xd!==targetDate)return false;
+
     const xid=Number(x?.studentId ?? x?.studentID ?? x?.student_id ?? x?.idStudent);
-    const xd=String(x?.date ?? x?.attendanceDate ?? x?.day ?? "").slice(0,10);
-    return Number.isFinite(sid) && Number.isFinite(xid) && xid===sid && xd===date;
+    if(Number.isFinite(sid) && Number.isFinite(xid) && xid===sid)return true;
+
+    const xr=String(x?.rollNo ?? x?.rollNumber ?? x?.roll ?? x?.admissionNo ?? x?.admissionNumber ?? "").trim().toLowerCase();
+    const xn=String(x?.studentName ?? x?.name ?? "").trim().toLowerCase();
+    if(roll && xr && roll===xr)return true;
+    if(name && xn && name===xn)return true;
+    return false;
   })||null;
 }
 
 function getAttendanceRecordStatus(rec){
   if(!rec)return "";
-  return rec.status ?? rec.attendanceStatus ?? rec.attendance ?? rec.value ?? rec.mark ?? "";
+  return rec.status ?? rec.attendanceStatus ?? rec.attendance ?? rec.value ?? rec.mark ?? rec.state ?? "";
 }
-
 
 function downloadAttendanceReportForClass(classNo){
   let type=document.getElementById("attendanceDownloadType").value;
@@ -1587,8 +1612,8 @@ function downloadAttendanceReportForClass(classNo){
   let header=["Roll No.","Student Name"];
   dates.forEach(dt=>header.push(formatDate(dt)));
 
-  // For a one-day report also include a clear Status column.
-  // Codes are always P / A / L / H / S.
+  // Always include a clear status summary column for one-day reports.
+  // P/A/L/H/S are used in the date columns; the Status column contains the full word.
   if(type==="day") header.push("Status");
 
   let rows=[header];
@@ -1597,9 +1622,11 @@ function downloadAttendanceReportForClass(classNo){
     let dayStatus="";
     dates.forEach(dt=>{
       let rec=getAttendanceRecordForStudentDate(records,s,dt);
-      const code=attendanceStatusCode(getAttendanceRecordStatus(rec));
-      row.push(code);
-      if(type==="day") dayStatus=code;
+      const raw=String(getAttendanceRecordStatus(rec)||"").trim();
+      const code=attendanceStatusCode(raw);
+      // Never leave an actually stored Present/Absent/etc. as "-".
+      row.push(code || raw || "");
+      if(type==="day") dayStatus=code ? ({P:"Present",A:"Absent",L:"Leave",H:"Holiday",S:"Sunday"}[code]) : (raw||"");
     });
     if(type==="day") row.push(dayStatus);
     rows.push(row);
@@ -1652,7 +1679,10 @@ function printAttendanceReport(classNo,students,dates,records){
   let body=students.map((s,i)=>{
     let cells=dates.map(dt=>{
       let rec=getAttendanceRecordForStudentDate(records,s,dt);
-      return `<td style="text-align:center;font-weight:bold">${attendanceStatusCode(getAttendanceRecordStatus(rec))||"-"}</td>`;
+      const raw=String(getAttendanceRecordStatus(rec)||"").trim();
+      const code=attendanceStatusCode(raw);
+      const label=code ? ({P:"Present",A:"Absent",L:"Leave",H:"Holiday",S:"Sunday"}[code]) : (raw||"");
+      return `<td style="text-align:center;font-weight:bold">${escapeHtml(label||"-")}</td>`;
     }).join("");
     return `<tr><td>${escapeHtml(attendanceRoll(s,i))}</td><td>${escapeHtml(s.name||"")}</td>${cells}</tr>`;
   }).join("");
@@ -4082,53 +4112,94 @@ return `<div class="card"><div class="empty"><h3>Teachers</h3><p>Click Teachers 
 
 if(page==="timetable"){
 
-let tt=getData("schoolTimetable");
-if(!Array.isArray(tt)||!tt.length){
-  tt=[
-    {time:"08:00",days:["Maths","Science","English","Maths","Hindi"]},
-    {time:"09:00",days:["English","Maths","Hindi","Science","Computer"]}
-  ];
-}
+let classes=Array.from({length:12},(_,i)=>i+1);
+let selectedClass=Number(window.selectedTimetableClass||1);
+if(selectedClass<1||selectedClass>12)selectedClass=1;
+let tt=getClassTimetable(selectedClass);
 
 return `
 <div class="card">
-<div class="card-header">
-  <h3>Class Timetable</h3>
-  <button class="small-btn" onclick="editTimetable()">✏️ Edit Timetable</button>
-</div>
-<div class="table-container">
-<table>
-<tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
-${tt.map(r=>`<tr><td>${escapeHtml(r.time)}</td>${r.days.map(d=>`<td>${escapeHtml(d||"")}</td>`).join("")}</tr>`).join("")}
-</table>
-</div>
+  <div class="card-header">
+    <div>
+      <h3>🕐 Class-wise Timetable</h3>
+      <p style="color:#777;font-size:12px;margin-top:4px">Har class ka timetable alag save hoga.</p>
+    </div>
+    <button class="small-btn" onclick="editTimetable(${selectedClass})">✏️ Edit Timetable</button>
+  </div>
+
+  <div style="padding:18px;border-bottom:1px solid #edf0f4">
+    <div class="form-group" style="margin:0;max-width:320px">
+      <label>Select Class</label>
+      <select id="timetableClassSelect" onchange="changeTimetableClass(this.value)">
+        ${classes.map(i=>`<option value="${i}" ${i===selectedClass?"selected":""}>Class ${i}</option>`).join("")}
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
+      ${tt.length ? tt.map(r=>`<tr><td>${escapeHtml(r.time||"")}</td>${[0,1,2,3,4].map(j=>`<td>${escapeHtml((r.days||[])[j]||"")}</td>`).join("")}</tr>`).join("") :
+      `<tr><td colspan="6" class="empty">No timetable created for Class ${selectedClass}. Click Edit Timetable to add periods.</td></tr>`}
+    </table>
+  </div>
 </div>`;
 }
 
-function editTimetable(){
-  let tt=getData("schoolTimetable");
-  if(!Array.isArray(tt)||!tt.length){
-    tt=[
-      {time:"08:00",days:["Maths","Science","English","Maths","Hindi"]},
-      {time:"09:00",days:["English","Maths","Hindi","Science","Computer"]}
-    ];
+function getClassTimetable(classNo){
+  const all=getData("schoolTimetablesByClass");
+  if(all && typeof all==="object" && !Array.isArray(all)){
+    const rows=all[String(classNo)];
+    if(Array.isArray(rows))return rows;
+  }
+  // Migrate old single timetable into Class 1 only, without making it appear in every class.
+  if(Number(classNo)===1){
+    const old=getData("schoolTimetable");
+    if(Array.isArray(old)&&old.length)return old;
+  }
+  return [];
+}
+
+function saveClassTimetable(classNo,data){
+  let all=getData("schoolTimetablesByClass");
+  if(!all || typeof all!=="object" || Array.isArray(all))all={};
+  all[String(classNo)]=data;
+  setData("schoolTimetablesByClass",all);
+}
+
+function changeTimetableClass(classNo){
+  window.selectedTimetableClass=Number(classNo);
+  const other=document.getElementById("otherPage");
+  if(other)other.innerHTML=getOtherPage("timetable");
+}
+
+function editTimetable(classNo){
+  classNo=Number(classNo||window.selectedTimetableClass||1);
+  window.selectedTimetableClass=classNo;
+
+  let tt=getClassTimetable(classNo);
+  if(!tt.length){
+    tt=[{time:"08:00",days:["","","","",""]}];
   }
 
   let html=`<div class="modal-bg" id="timetableEditModal" style="display:flex">
     <div class="modal">
       <div class="modal-header">
-        <h2>Edit Timetable</h2>
+        <div>
+          <h2>Edit Timetable - Class ${classNo}</h2>
+          <p style="font-size:12px;color:#667085;margin-top:4px">Only Class ${classNo} ka timetable edit ho raha hai.</p>
+        </div>
         <button class="close-btn" onclick="closeTimetableEdit()">×</button>
       </div>
 
       <div class="table-container">
-        <table id="timetableEditTable" style="min-width:850px">
+        <table id="timetableEditTable" style="min-width:900px">
           <thead><tr>
             <th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th>
             <th>Thursday</th><th>Friday</th><th>Action</th>
           </tr></thead>
           <tbody>
-          ${tt.map((r,i)=>`<tr>
+          ${tt.map(r=>`<tr>
             <td><input class="tt-time" value="${escapeHtml(r.time||"")}" placeholder="08:00"></td>
             ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="${escapeHtml((r.days||[])[j]||"")}" placeholder="${d}"></td>`).join("")}
             <td><button type="button" class="delete-btn" onclick="removeTimetableRow(this)">Delete</button></td>
@@ -4139,7 +4210,7 @@ function editTimetable(){
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
         <button type="button" class="small-btn" onclick="addTimetableRow()">＋ Add Period</button>
-        <button type="button" class="btn btn-primary" style="flex:1;min-width:180px" onclick="saveTimetable()">Save Timetable</button>
+        <button type="button" class="btn btn-primary" style="flex:1;min-width:180px" onclick="saveTimetable(${classNo})">Save Class ${classNo} Timetable</button>
         <button type="button" class="btn btn-outline" style="flex:1;min-width:120px;margin-top:0" onclick="closeTimetableEdit()">Cancel</button>
       </div>
     </div>
@@ -4150,7 +4221,6 @@ function editTimetable(){
 function addTimetableRow(){
   const tbody=document.querySelector("#timetableEditTable tbody");
   if(!tbody)return;
-  const i=tbody.querySelectorAll("tr").length;
   const row=document.createElement("tr");
   row.innerHTML=`
     <td><input class="tt-time" value="" placeholder="e.g. 10:00"></td>
@@ -4171,11 +4241,12 @@ function removeTimetableRow(btn){
   row.remove();
 }
 
-
 function closeTimetableEdit(){
   document.getElementById("timetableEditModal")?.remove();
 }
-function saveTimetable(){
+
+function saveTimetable(classNo){
+  classNo=Number(classNo||window.selectedTimetableClass||1);
   const modal=document.getElementById("timetableEditModal");
   if(!modal){alert("Timetable editor is not open.");return;}
 
@@ -4190,11 +4261,13 @@ function saveTimetable(){
     return;
   }
 
-  setData("schoolTimetable",data);
+  saveClassTimetable(classNo,data);
+  // Keep backward compatibility with Class 1's old key.
+  if(classNo===1)setData("schoolTimetable",data);
   closeTimetableEdit();
   const other=document.getElementById("otherPage");
   if(other)other.innerHTML=getOtherPage("timetable");
-  alert("Timetable saved successfully!");
+  alert("Class "+classNo+" timetable saved successfully!");
 }
 
 if(page==="notices"){
