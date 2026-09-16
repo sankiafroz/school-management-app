@@ -980,7 +980,7 @@ function loginUser(){
     );
     if(teacher){
       openApplication(localStorage.getItem("schoolName")||"ABC Public School",
-        "Teacher - "+(teacher.name||"Teacher"));
+        "Teacher - "+(teacher.name||"Teacher"), teacher.id);
       return false;
     }
 
@@ -992,8 +992,10 @@ function loginUser(){
   return false;
 }
 
-function openApplication(school,role){
+function openApplication(school,role,teacherId){
   window.schoolHubRole = (String(role||"").toLowerCase().includes("teacher")) ? "teacher" : "admin";
+  window.schoolHubTeacherId = window.schoolHubRole==="teacher" ? Number(teacherId||0) : null;
+  updateRoleMenuVisibility();
   const login=document.getElementById("loginPage");
   const app=document.getElementById("app");
   if(login) login.style.display="none";
@@ -1007,6 +1009,33 @@ function openApplication(school,role){
   if(tu) tu.innerText=role||"School Administrator";
 
   try { updateDashboard(); } catch(err) { console.error("Dashboard error:",err); }
+}
+
+function updateRoleMenuVisibility(){
+  const isTeacher=window.schoolHubRole==="teacher";
+  document.querySelectorAll(".menu li").forEach(li=>{
+    const action=String(li.getAttribute("onclick")||"");
+    const adminOnly=action.includes("showPage('teachers'") || action.includes("showPage('teacherLogin'");
+    li.style.display=(isTeacher&&adminOnly)?"none":"";
+  });
+}
+function getCurrentTeacher(){
+  if(window.schoolHubRole!=="teacher")return null;
+  const id=Number(window.schoolHubTeacherId||0);
+  return (Array.isArray(getTeachers())?getTeachers():[]).find(t=>Number(t.id)===id)||null;
+}
+function teacherAssignedClass(){
+  const t=getCurrentTeacher(); if(!t)return null;
+  const c=Number(t.classNo??t.teachingClass??t.class);
+  return Number.isFinite(c)&&c>=1&&c<=12?c:null;
+}
+function teacherCanAccessClass(classNo){
+  return window.schoolHubRole!=="teacher" || Number(teacherAssignedClass())===Number(classNo);
+}
+function requireTeacherClassAccess(classNo){
+  if(teacherCanAccessClass(classNo))return true;
+  alert("Aap sirf apni assigned class ki Attendance aur Result manage kar sakte hain.");
+  return false;
 }
 
 function logoutUser(){
@@ -1313,6 +1342,9 @@ document.getElementById("otherPage").innerHTML=getOtherPage(page);
 /* CLASS */
 
 function openClasses(type){
+  if((type==="attendance"||type==="exams") && window.schoolHubRole==="teacher" && teacherAssignedClass()===null){
+    document.getElementById("otherPage").innerHTML='<div class="card"><div class="empty"><h3>Class Not Assigned</h3><p>Teacher ko Attendance/Result ke liye class assign nahi ki gayi hai.</p></div></div>'; return;
+  }
 
 let html=`
 <div class="card">
@@ -1323,6 +1355,7 @@ let html=`
 `;
 
 for(let i=1;i<=12;i++){
+  if((type==="attendance"||type==="exams"||type==="students") && window.schoolHubRole==="teacher" && Number(teacherAssignedClass())!==i) continue;
 
 let students=getClassStudents(i);
 let boys=students.filter(s=>s.gender==="Boy").length;
@@ -1397,6 +1430,8 @@ document.getElementById("otherPage").innerHTML=html;
 
 function openClass(type,classNo){
 
+if((type==="attendance"||type==="exams") && !requireTeacherClassAccess(classNo)) return;
+
 /* Students, Fees and Result must always open the actual students
    of the selected class. Section is optional and must never block
    access to student data. Attendance keeps its dedicated register. */
@@ -1446,6 +1481,7 @@ function getClassAttendanceStudents(classNo){
 }
 
 function openAttendanceClass(classNo){
+  if(!requireTeacherClassAccess(classNo))return;
   window.attendanceRegisterClass=Number(classNo);
   window.attendanceRegisterDate=today();
   renderAttendanceRegister();
@@ -1519,6 +1555,7 @@ function filterAttendanceRegister(){
 }
 
 function setRegisterAttendance(studentId,classNo,status){
+  if(!requireTeacherClassAccess(classNo))return;
   let date=window.attendanceRegisterDate||today();
   let data=getAttendance();
   let i=data.findIndex(x=>Number(x.studentId)===Number(studentId)&&x.date===date);
@@ -1868,6 +1905,7 @@ function printAttendanceReport(classNo,students,dates,records){
 }
 
 function markAllPresent(classNo){
+  if(!requireTeacherClassAccess(classNo))return;
   let date=window.attendanceRegisterDate||today();
   let students=getClassAttendanceStudents(classNo);
   if(!students.length){alert("No students in this class.");return;}
@@ -1949,6 +1987,7 @@ function closeHolidayModal(){
 }
 
 function saveHoliday(classNo,stream="",section=""){
+  if(!requireTeacherClassAccess(classNo))return;
   const name=(document.getElementById("holidayNameInput")?.value||"").trim();
   const from=document.getElementById("holidayFromDate")?.value||"";
   const to=document.getElementById("holidayToDate")?.value||"";
@@ -2011,6 +2050,7 @@ function saveHoliday(classNo,stream="",section=""){
 }
 
 function markAllAttendanceStatus(classNo,status){
+  if(!requireTeacherClassAccess(classNo))return;
   let date=window.attendanceRegisterDate||today();
   let students=getClassAttendanceStudents(classNo);
   if(!students.length){alert("No students in this class.");return;}
@@ -2030,6 +2070,7 @@ function markAllHoliday(classNo){markAllAttendanceStatus(classNo,"Holiday");}
 function markAllSunday(classNo){markAllAttendanceStatus(classNo,"Sunday");}
 
 function deleteRegisterAttendance(studentId,classNo){
+  if(!requireTeacherClassAccess(classNo))return;
   let date=window.attendanceRegisterDate||today();
   if(!confirm("Delete today's attendance record?"))return;
   saveAttendance(getAttendance().filter(x=>!(Number(x.studentId)===Number(studentId)&&x.date===date)));
@@ -2038,6 +2079,7 @@ function deleteRegisterAttendance(studentId,classNo){
 }
 
 function editRegisterAttendance(studentId,classNo){
+  if(!requireTeacherClassAccess(classNo))return;
   let date=window.attendanceRegisterDate||today();
   let rec=getAttendance().find(x=>Number(x.studentId)===Number(studentId)&&x.date===date);
   if(!rec)return;
@@ -2163,6 +2205,8 @@ document.getElementById("otherPage").innerHTML=html;
 /* STUDENT DATA */
 
 function openStudentsData(type,classNo,stream,section){
+
+if((type==="attendance"||type==="exams") && !requireTeacherClassAccess(classNo)) return;
 
 window.currentStudentType=type;
 window.currentClassNo=classNo;
@@ -2619,13 +2663,13 @@ ${p.receipt?`<br>Receipt: ${escapeHtml(p.receipt)}`:""}
 <br>
 <div class="action-buttons">
 <button class="small-btn" onclick="printFeeSlip(${p.id})">🧾 Slip</button>
-<button class="delete-btn" onclick="deleteFee(${p.id},${classNo},'${stream||""}','${section||""}')">Delete</button>
+${window.schoolHubRole==="teacher"?"":`<button class="delete-btn" onclick="deleteFee(${p.id},${classNo},'${stream||""}','${section||""}')">Delete</button>`}
 </div>
 </div>
 `).join(""):"No Payment"}
 </td>
 <td>
-<button class="small-btn" onclick="openFeeModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Payment</button>
+${window.schoolHubRole==="teacher"?`<span class="badge blue">View Only</span>`:`<button class="small-btn" onclick="openFeeModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Payment</button>`}
 </td>
 </tr>
 `;
@@ -2761,6 +2805,11 @@ input.value=selected||"";
 
 function openAddStudent(classNo,stream,section){
 
+if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(classNo)){
+  alert("Aap sirf apni assigned class me student add kar sakte hain.");
+  return;
+}
+
 editingStudentId=null;
 studentPhotoData="";
 
@@ -2880,6 +2929,13 @@ let mother=document.getElementById("motherName").value.trim();
 let mobile=document.getElementById("studentMobile").value.trim();
 let gender=document.getElementById("studentGender").value;
 let classNo=document.getElementById("studentClass").value;
+
+/* Teacher can add/edit students only inside the assigned class. */
+if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(classNo)){
+  alert("Teacher sirf apni assigned class me student add/edit kar sakta hai.");
+  return;
+}
+
 let section=document.getElementById("studentSection").value;
 let stream=document.getElementById("studentStream").value;
 let dob=document.getElementById("studentDOB").value;
@@ -2907,6 +2963,10 @@ if(editingStudentId){
 let s=students.find(x=>Number(x.id)===Number(editingStudentId));
 
 if(!s)return;
+if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){
+  alert("Teacher sirf apni assigned class ke students ko edit kar sakta hai.");
+  return;
+}
 
 Object.assign(s,{
 session,roll,name,father,mother,mobile,gender,dob,age,caste,religion,
@@ -2992,6 +3052,10 @@ function deleteStudent(id){
 
 let s=getStudents().find(x=>Number(x.id)===Number(id));
 if(!s)return;
+if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){
+  alert("Teacher sirf apni assigned class ke students ko delete kar sakta hai.");
+  return;
+}
 
 if(!confirm("Delete "+s.name+" and all related records?"))return;
 
@@ -3184,6 +3248,7 @@ function generateTeacherPassword(){
 }
 
 function openTeacherModal(id=null){
+  if(window.schoolHubRole!=="admin"){alert("Only School Admin can add or edit teacher data.");return;}
   editingTeacherId=id;
   teacherPhotoData="";
   teacherDocumentsData=[];
@@ -3311,6 +3376,7 @@ function updateTeacherSections(selected=""){
 }
 
 async function saveTeacher(){
+  if(window.schoolHubRole!=="admin"){alert("Only School Admin can add or edit teacher data.");return;}
   let name=document.getElementById("teacherName").value.trim();
   let mobile=document.getElementById("teacherMobile").value.trim();
   let qualification=document.getElementById("teacherQualification").value.trim();
@@ -3391,6 +3457,7 @@ async function saveTeacher(){
 }
 
 function deleteTeacher(id){
+  if(window.schoolHubRole!=="admin"){alert("Only School Admin can delete teacher data.");return;}
   let t=getTeachers().find(x=>Number(x.id)===Number(id));
   if(!t)return;
   if(!confirm("Delete teacher "+t.name+"?"))return;
@@ -3447,6 +3514,7 @@ renderTeacherPage();
 
 /* TEACHER PAGE - FINAL FIX */
 function renderTeacherPage(){
+  if(window.schoolHubRole==="teacher"){ const area=document.getElementById("otherPage"); if(area)area.innerHTML='<div class="card"><div class="empty"><h3>Teachers</h3><p>Teacher account se teacher data add/edit/delete nahi kiya ja sakta.</p></div></div>'; return; }
   const teachers = Array.isArray(getTeachers()) ? getTeachers() : [];
   const area = document.getElementById("otherPage");
   if(!area) return;
@@ -3543,6 +3611,7 @@ function filterTeachers(){
 let teacherLoginEditingId=null;
 
 function renderTeacherLoginPage(){
+  if(window.schoolHubRole!=="admin"){ const area=document.getElementById("otherPage"); if(area)area.innerHTML='<div class="card"><div class="empty"><h3>Teacher Login Management</h3><p>Only School Admin can manage teacher login IDs and passwords.</p></div></div>'; return; }
   const teachers=Array.isArray(getTeachers())?getTeachers():[];
   const area=document.getElementById("otherPage");
   if(!area)return;
@@ -3578,6 +3647,7 @@ function renderTeacherLoginPage(){
 }
 
 function openTeacherLoginEditor(id){
+  if(window.schoolHubRole!=="admin"){alert("Only School Admin can manage teacher login.");return;}
   const t=(Array.isArray(getTeachers())?getTeachers():[]).find(x=>Number(x.id)===Number(id));
   if(!t){alert("Teacher not found.");return;}
   teacherLoginEditingId=Number(id);
@@ -3639,6 +3709,7 @@ function generateTeacherPasswordForEditor(){
 }
 
 function saveTeacherLoginCredentials(){
+  if(window.schoolHubRole!=="admin"){alert("Only School Admin can manage teacher login.");return;}
   const idInput=document.getElementById("teacherLoginIdEdit");
   const passInput=document.getElementById("teacherLoginPasswordEdit");
   const teacherId=(idInput?.value||"").trim();
@@ -3669,6 +3740,8 @@ function closeTeacherLoginEditor(){
 
 function openFeeModal(studentId,classNo,stream,section){
 
+if(window.schoolHubRole==="teacher"){alert("Teacher fee payment add nahi kar sakta. Teacher sirf fees dekh sakta hai.");return;}
+
 let s=getStudents().find(x=>Number(x.id)===Number(studentId));
 if(!s)return;
 
@@ -3687,6 +3760,8 @@ document.getElementById("feeModal").style.display="flex";
 }
 
 function saveFeePayment(){
+
+if(window.schoolHubRole==="teacher"){alert("Teacher fee payment add nahi kar sakta.");return;}
 
 let amount=Number(document.getElementById("feeAmount").value);
 let date=document.getElementById("feeDate").value;
@@ -3815,6 +3890,8 @@ win.document.close();
 
 function deleteFee(id,classNo,stream,section){
 
+if(window.schoolHubRole==="teacher"){alert("Teacher fee payment delete nahi kar sakta.");return;}
+
 if(!confirm("Delete this payment?"))return;
 
 saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
@@ -3837,6 +3914,7 @@ let selectedAttendanceStatus="Present";
 
 function openAttendanceModal(studentId,classNo,stream,section){
 
+if(!requireTeacherClassAccess(classNo))return;
 let s=getStudents().find(x=>Number(x.id)===Number(studentId));
 if(!s)return;
 
@@ -3903,6 +3981,7 @@ document.getElementById("selectedAttendanceStatus").innerText=
 
 function saveAttendanceData(){
 
+if(!requireTeacherClassAccess(attendanceClassNo))return;
 let date=document.getElementById("attendanceDate").value;
 
 if(!date){
@@ -3962,6 +4041,7 @@ saveAttendance(data);
 }
 
 function setStudentAttendance(studentId,status,classNo,stream,section){
+if(!requireTeacherClassAccess(classNo))return;
 let date=getAttendancePageDate();
 saveStudentAttendanceRecord(studentId,status,date);
 window.attendanceSelectedDate=date;
@@ -3970,6 +4050,7 @@ updateDashboard();
 }
 
 function editStudentAttendance(studentId,classNo,stream,section){
+if(!requireTeacherClassAccess(classNo))return;
 let date=getAttendancePageDate();
 let r=getAttendance().find(x=>Number(x.studentId)===Number(studentId)&&x.date===date);
 if(!r){alert("No attendance marked for this date.");return;}
@@ -3985,6 +4066,7 @@ updateDashboard();
 }
 
 function deleteStudentAttendance(id,classNo,stream,section){
+if(!requireTeacherClassAccess(classNo))return;
 if(!confirm("Delete today's attendance record?"))return;
 saveAttendance(getAttendance().filter(x=>Number(x.id)!==Number(id)));
 filterStudentTable("attendance",classNo,stream,section);
@@ -3992,6 +4074,7 @@ updateDashboard();
 }
 
 function markAllAttendanceOnPage(classNo,stream,section,status){
+if(!requireTeacherClassAccess(classNo))return;
 let date=getAttendancePageDate();
 let students=getStudents().filter(s=>
 Number(s.classNo)===Number(classNo)&&
@@ -4010,6 +4093,7 @@ updateDashboard();
 alert("All students marked "+label+".");
 }
 function markAllPresent(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
   // Attendance register button calls this with only classNo.
   // Older/class-page attendance calls it with classNo, stream, section.
   if(arguments.length===1 || (stream===undefined && section===undefined)){
@@ -4090,6 +4174,7 @@ function syncSubjectFromColumns(subject){
 }
 
 function openExamModal(studentId,classNo,stream,section,examId){
+  if(!requireTeacherClassAccess(classNo))return;
   let st=getStudents().find(x=>Number(x.id)===Number(studentId));
   if(!st)return;
 
@@ -4253,6 +4338,7 @@ function getSelectedExamName(){
 }
 
 function saveExam(){
+  if(!requireTeacherClassAccess(window.examClassNo))return;
   let examName=getSelectedExamName();
   let examDate=document.getElementById("examDate").value;
   let resultType=document.getElementById("examResultType").value;
@@ -4329,6 +4415,7 @@ function closeExamModal(){
 }
 
 function deleteExam(id,classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
   if(!confirm("Delete this result?"))return;
   saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
   openStudentsData("exams",classNo,stream,section);
@@ -4398,6 +4485,7 @@ function resultExcelNumber(v, fallback=0){
 }
 
 function downloadResultExcelTemplate(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
   const students=getStudents().filter(s=>
     Number(s.classNo)===Number(classNo)&&
     (!stream||s.stream===stream)&&
@@ -4476,6 +4564,7 @@ function parseResultExcelRows(file){
 }
 
 function uploadResultExcel(event,classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
   const file=event.target.files?.[0];
   const status=document.getElementById("resultExcelStatus");
   if(!file)return;
