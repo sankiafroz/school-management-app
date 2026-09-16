@@ -239,6 +239,30 @@ th{background:#fafbfd;color:#667085}
 .result-register-table th small{font-size:10px;color:#667085}
 .result-register-table tbody tr:hover{background:#f8faff}
 .result-register-table .result-student-link:hover{text-decoration:underline}
+
+/* STUDENT / PARENT PORTAL */
+.student-portal-only{display:none}
+.student-portal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px}
+.student-portal-card{background:#fff;border:1px solid #e5eaf1;border-radius:17px;padding:18px;box-shadow:0 3px 12px #00000008}
+.student-portal-card h3{font-size:17px;margin-bottom:10px}
+.student-portal-stat{font-size:28px;font-weight:800;color:#1769ff}
+.student-portal-muted{font-size:12px;color:#667085;margin-top:4px}
+.student-portal-profile{display:flex;gap:16px;align-items:center}
+.student-portal-avatar{width:78px;height:78px;border-radius:16px;object-fit:cover;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-size:34px;flex:none}
+.student-portal-avatar img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+.student-portal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.student-portal-btn{border:0;background:#1769ff;color:#fff;padding:10px 14px;border-radius:9px;font-weight:bold;cursor:pointer}
+.student-portal-section-title{font-size:18px;font-weight:800;margin:18px 0 10px}
+.student-portal-homework{background:#f8faff;border:1px solid #e5eaf1;border-radius:13px;padding:14px;margin-bottom:10px}
+.student-portal-homework img{width:150px;height:105px;object-fit:cover;border-radius:9px;margin:8px 8px 0 0;border:1px solid #dce2eb}
+.student-month-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid #edf0f4}
+.student-month-row:last-child{border-bottom:0}
+.student-status-counts{display:flex;gap:7px;flex-wrap:wrap}
+.student-status-pill{padding:5px 8px;border-radius:15px;font-size:11px;font-weight:bold;background:#eef4ff;color:#1769ff}
+.student-result-card{border:1px solid #e5eaf1;border-radius:13px;padding:15px;margin-bottom:10px;background:#fff}
+.student-result-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.student-result-subject{display:grid;grid-template-columns:1fr 90px 90px;gap:8px;padding:7px 0;border-bottom:1px solid #edf0f4;font-size:13px}
+@media(max-width:700px){.student-portal-grid{grid-template-columns:1fr}.student-portal-profile{align-items:flex-start}.student-result-subject{grid-template-columns:1fr 70px 80px}}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -253,7 +277,7 @@ th{background:#fafbfd;color:#667085}
 
 <div class="form-group">
 <label>Login As</label>
-<select id="loginRole">
+<select id="loginRole" onchange="updateLoginRoleFields()">
 <option value="school_admin">School Admin</option>
 <option value="teacher">Teacher</option>
 <option value="parent">Parent</option>
@@ -266,9 +290,25 @@ th{background:#fafbfd;color:#667085}
 <input id="loginEmail" placeholder="Enter email or mobile">
 </div>
 
-<div class="form-group">
+<div class="form-group" id="loginPasswordGroup">
 <label>Password</label>
 <input id="loginPassword" type="password" placeholder="Enter password">
+</div>
+
+<div class="form-group" id="studentLoginClassGroup" style="display:none">
+<label>Class</label>
+<select id="studentLoginClass">
+<option value="">Select Class</option>
+<option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+<option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+<option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+<option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+</select>
+</div>
+
+<div class="form-group" id="studentLoginRollGroup" style="display:none">
+<label>Roll Number</label>
+<input id="studentLoginRoll" type="number" placeholder="Enter roll number">
 </div>
 
 <button class="btn btn-primary" onclick="loginUser()">Login</button>
@@ -954,9 +994,56 @@ return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:date;
 
 /* LOGIN */
 
+function updateLoginRoleFields(){
+  const role=document.getElementById("loginRole")?.value||"school_admin";
+  const studentMode=role==="student"||role==="parent";
+  const p=document.getElementById("loginPasswordGroup");
+  const c=document.getElementById("studentLoginClassGroup");
+  const r=document.getElementById("studentLoginRollGroup");
+  const e=document.getElementById("loginEmail");
+  if(p)p.style.display=studentMode?"none":"block";
+  if(c)c.style.display=studentMode?"block":"none";
+  if(r)r.style.display=studentMode?"block":"none";
+  const label=e?.previousElementSibling;
+  if(label)label.innerText=studentMode?"Registered Mobile / Aadhaar":"Email / Mobile";
+  if(e)e.placeholder=studentMode?"Enter registered mobile or Aadhaar number":"Enter email or mobile";
+}
+
+function findStudentForPortal(identifier,classNo,roll){
+  const id=String(identifier||"").replace(/\s+/g,"").trim().toLowerCase();
+  return getStudents().find(s=>{
+    const mobile=String(s.mobile||"").replace(/\s+/g,"").trim().toLowerCase();
+    const aadhaar=String(s.aadhaar||s.aadhar||s.aadhaarNumber||"").replace(/\s+/g,"").trim().toLowerCase();
+    return Number(s.classNo)===Number(classNo) &&
+      String(s.roll??"").trim()===String(roll??"").trim() &&
+      (mobile===id || aadhaar===id);
+  })||null;
+}
+
 function loginUser(){
   try {
-    const email=(document.getElementById("loginEmail")?.value||"").trim().toLowerCase();
+    const role=document.getElementById("loginRole")?.value||"school_admin";
+    const identifier=(document.getElementById("loginEmail")?.value||"").trim();
+
+    if(role==="student"||role==="parent"){
+      const classNo=document.getElementById("studentLoginClass")?.value||"";
+      const roll=document.getElementById("studentLoginRoll")?.value||"";
+      if(!identifier||!classNo||!roll){
+        alert("Registered Mobile / Aadhaar, Class aur Roll Number enter karein.");
+        return false;
+      }
+      const student=findStudentForPortal(identifier,classNo,roll);
+      if(!student){
+        alert("Student login details match nahi hui. Mobile/Aadhaar, Class aur Roll Number check karein.");
+        return false;
+      }
+      openApplication(localStorage.getItem("schoolName")||"ABC Public School",
+        role==="parent"?"Parent - "+(student.name||"Student"):"Student - "+(student.name||"Student"),
+        null, student.id, role);
+      return false;
+    }
+
+    const email=identifier.toLowerCase();
     const password=document.getElementById("loginPassword")?.value||"";
     if(!email||!password){ alert("Please enter login details"); return false; }
 
@@ -992,33 +1079,60 @@ function loginUser(){
   return false;
 }
 
-function openApplication(school,role,teacherId){
-  window.schoolHubRole = (String(role||"").toLowerCase().includes("teacher")) ? "teacher" : "admin";
-  window.schoolHubTeacherId = window.schoolHubRole==="teacher" ? Number(teacherId||0) : null;
+function openApplication(school,role,teacherId,studentId,portalRole){
+  const normalizedRole=portalRole==="student"||portalRole==="parent" ? portalRole :
+    (String(role||"").toLowerCase().includes("teacher") ? "teacher" : "admin");
+  window.schoolHubRole=normalizedRole;
+  window.schoolHubTeacherId=normalizedRole==="teacher" ? Number(teacherId||0) : null;
+  window.schoolHubStudentId=(normalizedRole==="student"||normalizedRole==="parent") ? Number(studentId||0) : null;
   updateRoleMenuVisibility();
+
   const login=document.getElementById("loginPage");
   const app=document.getElementById("app");
-  if(login) login.style.display="none";
-  if(app) app.style.display="block";
+  if(login)login.style.display="none";
+  if(app)app.style.display="block";
 
   const ds=document.getElementById("displaySchool");
   const dr=document.getElementById("displayRole");
   const tu=document.getElementById("topUser");
-  if(ds) ds.innerText=school||"ABC Public School";
-  if(dr) dr.innerText=role||"School Administrator";
-  if(tu) tu.innerText=role||"School Administrator";
+  const student=getCurrentPortalStudent();
+  if(ds)ds.innerText=school||"ABC Public School";
+  if(dr)dr.innerText=(normalizedRole==="student"||normalizedRole==="parent") ?
+    (normalizedRole==="parent"?"Parent Portal":"Student Portal") : (role||"School Administrator");
+  if(tu)tu.innerText=(student?.name && (normalizedRole==="student"||normalizedRole==="parent")) ? student.name : (role||"School Administrator");
 
-  try { updateDashboard(); } catch(err) { console.error("Dashboard error:",err); }
+  try {
+    if(normalizedRole==="student"||normalizedRole==="parent") showStudentPortalDashboard();
+    else updateDashboard();
+  } catch(err){console.error("Dashboard error:",err);}
+}
+
+function getCurrentPortalStudent(){
+  if(window.schoolHubRole!=="student"&&window.schoolHubRole!=="parent")return null;
+  const id=Number(window.schoolHubStudentId||0);
+  return getStudents().find(s=>Number(s.id)===id)||null;
+}
+
+function isStudentPortal(){
+  return window.schoolHubRole==="student"||window.schoolHubRole==="parent";
 }
 
 function updateRoleMenuVisibility(){
   const isTeacher=window.schoolHubRole==="teacher";
+  const isPortal=isStudentPortal();
   document.querySelectorAll(".menu li").forEach(li=>{
     const action=String(li.getAttribute("onclick")||"");
     const adminOnly=action.includes("showPage('teachers'") || action.includes("showPage('teacherLogin'");
-    li.style.display=(isTeacher&&adminOnly)?"none":"";
+    const portalAllowed=action.includes("showPage('dashboard'") ||
+      action.includes("showPage('homework'") ||
+      action.includes("showPage('attendance'") ||
+      action.includes("showPage('exams'") ||
+      action.includes("logoutUser");
+    if(isPortal) li.style.display=portalAllowed?"":"none";
+    else li.style.display=(isTeacher&&adminOnly)?"none":"";
   });
 }
+
 function getCurrentTeacher(){
   if(window.schoolHubRole!=="teacher")return null;
   const id=Number(window.schoolHubTeacherId||0);
@@ -1041,6 +1155,10 @@ function requireTeacherClassAccess(classNo){
 function logoutUser(){
 document.getElementById("app").style.display="none";
 document.getElementById("loginPage").style.display="flex";
+window.schoolHubRole="admin";
+window.schoolHubTeacherId=null;
+window.schoolHubStudentId=null;
+updateLoginRoleFields();
 }
 
 function openRegister(){
@@ -1147,6 +1265,7 @@ saveAttendance(att);
 }
 
 createDemoStudents();
+updateLoginRoleFields();
 
 /* HELPERS */
 
@@ -1264,7 +1383,181 @@ function toggleSidebar(){
   }
 }
 
+
+function portalMoney(n){return "₹"+Number(n||0).toLocaleString("en-IN");}
+
+function portalAttendanceSummary(studentId){
+  const records=getAttendanceForStudent(studentId)||[];
+  const map={};
+  records.forEach(a=>{
+    const d=String(a.date||"");
+    const month=d.slice(0,7)||"Unknown";
+    if(!map[month])map[month]={P:0,A:0,L:0,H:0,S:0};
+    let st=String(a.status||"").toLowerCase();
+    let code=st==="present"?"P":st==="absent"?"A":st==="leave"?"L":st==="holiday"?"H":st==="sunday"?"S":String(a.status||"").toUpperCase();
+    if(["P","A","L","H","S"].includes(code))map[month][code]++;
+  });
+  return Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0]));
+}
+
+function portalHomeworkForStudent(student){
+  return getHomework().filter(h=>{
+    if(Number(h.classNo)!==Number(student.classNo))return false;
+    if(h.section && String(h.section).trim().toLowerCase()!==String(student.section||"").trim().toLowerCase())return false;
+    if(h.stream && String(h.stream).trim().toLowerCase()!==String(student.stream||"").trim().toLowerCase())return false;
+    return true;
+  }).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+}
+
+function portalResultsForStudent(studentId){
+  return getExamResultsForStudent(studentId).sort((a,b)=>String(b.examDate||"").localeCompare(String(a.examDate||"")));
+}
+
+function showStudentPortalDashboard(){
+  const student=getCurrentPortalStudent();
+  if(!student){alert("Student profile not found.");logoutUser();return;}
+  document.getElementById("dashboardPage").style.display="block";
+  document.getElementById("otherPage").style.display="none";
+  document.getElementById("pageTitle").innerText="Dashboard";
+
+  const paid=getStudentPaid(student.id);
+  const total=Number(student.fee||0);
+  const pending=Math.max(total-paid,0);
+  const notices=getData("schoolNotices");
+  const homework=portalHomeworkForStudent(student);
+  const attendance=portalAttendanceSummary(student.id);
+  const results=portalResultsForStudent(student.id);
+  const gallery=getData("schoolGalleryImages");
+  const school=localStorage.getItem("schoolName")||"ABC Public School";
+  const photos=gallery.slice(0,5);
+
+  const imageHtml=photos.length ? `
+    <div class="student-portal-card" style="margin-bottom:16px">
+      <h3>🖼️ School Gallery</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${photos.map(x=>`<img src="${typeof x==="string"?x:x?.data||""}" style="width:150px;height:100px;object-fit:cover;border-radius:10px;border:1px solid #dce2eb">`).join("")}
+      </div>
+    </div>`:"";
+
+  const noticeHtml=notices.length?notices.slice(0,3).map(n=>`
+    <div class="notice"><strong>📢 ${escapeHtml(n.title||"Notice")}</strong><div>${escapeHtml(n.text||"")}</div><span>${formatDate(n.date)}</span></div>`).join(""):
+    `<div class="empty">No notices available.</div>`;
+
+  const hwHtml=homework.length?homework.slice(0,3).map(h=>`
+    <div class="student-portal-homework">
+      <strong>📚 ${escapeHtml(h.subject||"Homework")}</strong>
+      <div class="student-portal-muted">Class ${student.classNo}${h.section?" • Section "+escapeHtml(h.section):""} • ${formatDate(h.date)}</div>
+      <div style="margin-top:8px;white-space:pre-wrap;line-height:1.55">${escapeHtml(h.text||"")}</div>
+      ${h.dueDate?`<div class="student-portal-muted">Due: ${formatDate(h.dueDate)}</div>`:""}
+      ${Array.isArray(h.images)&&h.images.length?`<div>${h.images.map(img=>`<img src="${img.data||img}" alt="Homework"></div>`).join("")}`:""}
+    </div>`).join(""):`<div class="empty">No homework available.</div>`;
+
+  const attHtml=attendance.length?attendance.slice(0,4).map(([month,c])=>`
+    <div class="student-month-row">
+      <strong>${month}</strong>
+      <div class="student-status-counts">
+        <span class="student-status-pill">P ${c.P}</span><span class="student-status-pill">A ${c.A}</span>
+        <span class="student-status-pill">L ${c.L}</span><span class="student-status-pill">H ${c.H}</span><span class="student-status-pill">S ${c.S}</span>
+      </div>
+    </div>`).join(""):`<div class="empty">No attendance records available.</div>`;
+
+  document.getElementById("dashboardPage").innerHTML=`
+    <div class="dashboard-branding">
+      <div class="dashboard-school-title">${escapeHtml(school)}</div>
+    </div>
+    <div class="student-portal-card" style="margin-bottom:16px">
+      <div class="student-portal-profile">
+        <div class="student-portal-avatar">${student.photo?`<img src="${student.photo}" alt="Student">`:"👨‍🎓"}</div>
+        <div>
+          <h2>${escapeHtml(student.name||"Student")}</h2>
+          <div class="student-portal-muted">Class ${escapeHtml(student.classNo)}${student.section?" • Section "+escapeHtml(student.section):""}${student.stream?" • "+escapeHtml(student.stream):""} • Roll No. ${escapeHtml(student.roll)}</div>
+          <div class="student-portal-muted">${window.schoolHubRole==="parent"?"Parent Portal":"Student Portal"}</div>
+        </div>
+      </div>
+    </div>
+    <div class="student-portal-grid">
+      <div class="student-portal-card"><h3>💰 Fee Paid</h3><div class="student-portal-stat">${portalMoney(paid)}</div><div class="student-portal-muted">Total Fee: ${portalMoney(total)}</div></div>
+      <div class="student-portal-card"><h3>⏳ Fee Pending</h3><div class="student-portal-stat" style="color:#b77900">${portalMoney(pending)}</div><div class="student-portal-muted">Current pending amount</div></div>
+      <div class="student-portal-card"><h3>📅 Attendance</h3><div class="student-portal-stat">${attendance.reduce((n,[m,c])=>n+c.P,0)} P</div><div class="student-portal-muted">Month-wise attendance available below</div></div>
+      <div class="student-portal-card"><h3>📝 Results</h3><div class="student-portal-stat">${results.length}</div><div class="student-portal-muted">Result records available</div></div>
+    </div>
+    ${imageHtml}
+    <div class="two-column">
+      <div class="card"><div class="card-header"><h3>📢 Notices</h3></div>${noticeHtml}</div>
+      <div class="card"><div class="card-header"><h3>📚 Latest Homework</h3></div><div style="padding:12px">${hwHtml}</div></div>
+    </div>
+    <div class="card"><div class="card-header"><h3>📅 Month-wise Attendance</h3><button class="small-btn" onclick="showStudentPortalAttendance()">View All</button></div>${attHtml}</div>
+    <div class="card"><div class="card-header"><h3>📝 Latest Results</h3><button class="small-btn" onclick="showStudentPortalResults()">View All</button></div><div style="padding:12px">${results.length?results.slice(0,2).map(r=>portalResultHtml(r)).join(""):`<div class="empty">No result available.</div>`}</div></div>
+  `;
+}
+
+function portalResultHtml(r){
+  const subjects=Array.isArray(r.subjects)?r.subjects:[];
+  const totalMax=subjects.reduce((n,x)=>n+Number(normalizeExamSubject(x).mm||0),0);
+  const totalObt=subjects.reduce((n,x)=>n+Number(normalizeExamSubject(x).obtained||0),0);
+  return `<div class="student-result-card">
+    <div class="student-result-head"><strong>${escapeHtml(r.examName||r.name||"Result")}</strong><span class="badge blue">${formatDate(r.examDate||"")}</span></div>
+    ${subjects.map(x=>{const q=normalizeExamSubject(x);return `<div class="student-result-subject"><span>${escapeHtml(q.name||"Subject")}</span><strong>${q.obtained}</strong><span>${q.mm?"/ "+q.mm:""}</span></div>`}).join("")}
+    <div style="margin-top:10px;font-weight:bold">Total: ${totalObt}${totalMax?"/ "+totalMax:""}</div>
+  </div>`;
+}
+
+function showStudentPortalHomework(){
+  if(!isStudentPortal())return;
+  const student=getCurrentPortalStudent(); if(!student)return;
+  const records=portalHomeworkForStudent(student);
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText="Homework";
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="showStudentPortalDashboard()">← Dashboard</button>
+    <div class="card"><div class="card-header"><h3>📚 My Homework</h3><span class="badge blue">Class ${student.classNo}</span></div>
+    <div style="padding:15px">${records.length?records.map(h=>`
+      <div class="student-portal-homework"><h3>${escapeHtml(h.subject||"Homework")}</h3>
+      <div class="homework-meta"><span>📅 ${formatDate(h.date)}</span>${h.dueDate?`<span>⏰ Due: ${formatDate(h.dueDate)}</span>`:""}${h.teacherName?`<span>👨‍🏫 ${escapeHtml(h.teacherName)}</span>`:""}</div>
+      <div style="white-space:pre-wrap;line-height:1.6">${escapeHtml(h.text||"")}</div>
+      ${Array.isArray(h.images)&&h.images.length?`<div>${h.images.map(img=>`<img src="${img.data||img}" alt="Homework"></div>`).join("")}`:""}</div>`).join(""):`<div class="empty">No homework available for your class.</div>`}</div></div>`;
+}
+
+function showStudentPortalAttendance(){
+  if(!isStudentPortal())return;
+  const student=getCurrentPortalStudent(); if(!student)return;
+  const records=portalAttendanceSummary(student.id);
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText="Attendance";
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="showStudentPortalDashboard()">← Dashboard</button>
+    <div class="card"><div class="card-header"><h3>📅 My Month-wise Attendance</h3><span class="badge blue">Class ${student.classNo}</span></div>
+      ${records.length?records.map(([m,c])=>`<div class="student-month-row"><strong>${m}</strong><div class="student-status-counts"><span class="student-status-pill">P ${c.P}</span><span class="student-status-pill">A ${c.A}</span><span class="student-status-pill">L ${c.L}</span><span class="student-status-pill">H ${c.H}</span><span class="student-status-pill">S ${c.S}</span></div></div>`).join(""):`<div class="empty">No attendance records available.</div>`}
+    </div>`;
+}
+
+function showStudentPortalResults(){
+  if(!isStudentPortal())return;
+  const student=getCurrentPortalStudent(); if(!student)return;
+  const records=portalResultsForStudent(student.id);
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText="My Results";
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="showStudentPortalDashboard()">← Dashboard</button>
+    <div class="card"><div class="card-header"><h3>📝 My Results</h3><span class="badge blue">Class ${student.classNo}</span></div>
+      <div style="padding:15px">${records.length?records.map(portalResultHtml).join(""):`<div class="empty">No result available.</div>`}</div>
+    </div>`;
+}
 function showPage(page,element){
+if(isStudentPortal()){
+  document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
+  if(element)element.classList.add("active");
+  document.getElementById("sidebar").classList.remove("open");
+  if(page==="dashboard"){showStudentPortalDashboard();return;}
+  if(page==="homework"){showStudentPortalHomework();return;}
+  if(page==="attendance"){showStudentPortalAttendance();return;}
+  if(page==="exams"){showStudentPortalResults();return;}
+  if(page==="logout"){logoutUser();return;}
+  return;
+}
 
 document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
 
