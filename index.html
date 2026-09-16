@@ -220,6 +220,7 @@ th{background:#fafbfd;color:#667085}
 #classTimetableTable .ctt-time{min-width:180px;width:180px}
 #classTimetableTable .ctt-period{min-width:85px;width:85px}
 #classTimetableTable .ctt-subject{min-width:145px;width:145px}
+.gallery-preview-grid img{background:#f8faff}
 #classTimetableTable th:nth-child(2),#classTimetableTable td:nth-child(2){min-width:200px}
 
 </style>
@@ -286,6 +287,7 @@ SchoolHub
 <li onclick="showPage('exams',this)">📝 Exam / Result</li>
 <li onclick="showPage('homework',this)">📚 Homework</li>
 <li onclick="showPage('timetable',this)">🕐 Timetable</li>
+<li onclick="showPage('gallery',this)">🖼️ Gallery</li>
 <li onclick="showPage('notices',this)">📢 Notices</li>
 <li onclick="showPage('reports',this)">📊 Reports</li>
 <li onclick="showPage('settings',this)">⚙️ Settings</li>
@@ -314,15 +316,9 @@ SchoolHub
   <div class="dashboard-logo-wrap">
     <img id="dashboardSchoolLogo" class="dashboard-school-logo" src="" alt="School Logo" style="display:none">
     <div id="dashboardLogoPlaceholder" style="font-size:48px">🏫</div>
-    <label class="dashboard-logo-upload">📷 Upload School Logo
-      <input id="dashboardSchoolLogoInput" type="file" accept="image/*" onchange="saveDashboardSchoolLogo(event)">
-    </label>
   </div>
   <div class="dashboard-school-title" id="dashboardSchoolName"></div>
   <div id="dashboardSchoolSlideshow" class="dashboard-slideshow" style="display:none"></div>
-  <label class="dashboard-logo-upload" style="margin-top:10px">🖼️ Add 5 School Images
-    <input id="dashboardSchoolImagesInput" type="file" accept="image/*" multiple onchange="saveDashboardSchoolImages(event)">
-  </label>
 </div>
 <div class="dashboard-notice-ticker" id="dashboardNoticeTicker"
      onclick="showPage('notices')" role="button" tabindex="0"
@@ -916,6 +912,7 @@ function loginUser(){
 }
 
 function openApplication(school,role){
+  window.schoolHubRole = (String(role||"").toLowerCase().includes("teacher")) ? "teacher" : "admin";
   const login=document.getElementById("loginPage");
   const app=document.getElementById("app");
   if(login) login.style.display="none";
@@ -1174,6 +1171,7 @@ fees:"Fees",
 exams:"Exam / Result",
 homework:"Homework",
 timetable:"Timetable",
+gallery:"Gallery",
 notices:"Notices",
 reports:"Reports",
 settings:"Settings"
@@ -1199,6 +1197,15 @@ return;
 if(page==="homework"){
 openHomeworkClasses();
 return;
+}
+
+if(page==="gallery"){
+  if(window.schoolHubRole!=="admin"){
+    document.getElementById("otherPage").innerHTML='<div class="card"><div class="empty"><h3>Gallery</h3><p>Only School Admin can manage gallery images.</p></div></div>';
+  }else{
+    document.getElementById("otherPage").innerHTML=getOtherPage("gallery");
+  }
+  return;
 }
 
 if(page==="teachers"){
@@ -4296,6 +4303,41 @@ if(page==="teachers"){
 return `<div class="card"><div class="empty"><h3>Teachers</h3><p>Click Teachers in the menu to view teacher profiles.</p></div></div>`;
 }
 
+if(page==="gallery"){
+  if(window.schoolHubRole!=="admin"){
+    return `<div class="card"><div class="empty"><h3>Gallery</h3><p>Only School Admin can manage gallery images.</p></div></div>`;
+  }
+  const dashboardImages=getData("schoolGalleryImages");
+  const allImages=getData("schoolAllImages");
+  const logo=localStorage.getItem("schoolLogo")||"";
+  const dash=Array.isArray(dashboardImages)?dashboardImages.filter(Boolean).slice(0,5):[];
+  const all=Array.isArray(allImages)?allImages.filter(Boolean):[];
+  return `<div class="card">
+    <div class="card-header"><div><h3>🖼️ Gallery</h3><p style="color:#777;font-size:12px;margin-top:4px">Only School Admin can upload and manage images.</p></div></div>
+    <div style="padding:18px">
+      <div class="card" style="padding:18px">
+        <h3 style="margin-bottom:12px">1. School Logo</h3>
+        <input id="galleryLogoInput" type="file" accept="image/*" onchange="saveGalleryLogo(event)">
+        <div id="galleryLogoPreview" style="margin-top:12px;text-align:center">${logo?`<img src="${escapeHtml(logo)}" style="width:110px;height:110px;object-fit:contain;border:1px solid #e5eaf1;border-radius:14px;padding:5px">`:`<div class="empty">No logo uploaded</div>`}</div>
+      </div>
+      <div class="card" style="padding:18px">
+        <h3 style="margin-bottom:12px">2. Images for Dashboard <small style="color:#777;font-weight:normal">(Maximum 5)</small></h3>
+        <input id="galleryDashboardInput" type="file" accept="image/*" multiple onchange="saveGalleryDashboardImages(event)">
+        <div class="gallery-preview-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px">
+          ${dash.map((x,i)=>`<div><img src="${escapeHtml(x)}" style="width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #e5eaf1"><button type="button" class="delete-btn" style="margin-top:5px;width:100%" onclick="deleteGalleryDashboardImage(${i})">Delete</button></div>`).join("") || `<div class="empty">No dashboard images uploaded</div>`}
+        </div>
+      </div>
+      <div class="card" style="padding:18px">
+        <h3 style="margin-bottom:12px">3. Images for All</h3>
+        <input id="galleryAllInput" type="file" accept="image/*" multiple onchange="saveGalleryAllImages(event)">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px">
+          ${all.map((x,i)=>`<div><img src="${escapeHtml(x)}" style="width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #e5eaf1"><button type="button" class="delete-btn" style="margin-top:5px;width:100%" onclick="deleteGalleryAllImage(${i})">Delete</button></div>`).join("") || `<div class="empty">No images uploaded</div>`}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 if(page==="timetable"){
   const selected=Number(window.timetableSelectedClass)||1;
   const tt=getClassTimetable(selected);
@@ -4313,7 +4355,7 @@ if(page==="timetable"){
         <tbody>${tt.map((r,i)=>timetableRowHtml(r,i)).join("")}</tbody>
       </table></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
-        <button type="button" id="addClassTimetablePeriodBtn" class="small-btn" onclick="addClassTimetableRow();return false;">＋ Add Period</button>
+        <button type="button" id="addClassTimetablePeriodBtn" class="small-btn" onclick="return addClassTimetableRow(event);">＋ Add Period</button>
         <button type="button" class="btn btn-primary" style="flex:1;min-width:190px" onclick="saveClassTimetable()">Save Class Timetable</button>
       </div>
     </div></div>`;
@@ -4339,43 +4381,52 @@ function changeTimetableClass(classNo){
   const other=document.getElementById("otherPage");
   if(other) other.innerHTML=getOtherPage("timetable");
 }
-function addClassTimetableRow(){
-  try{
-    const tbody=document.querySelector("#classTimetableTable tbody");
-    const classNo=Number(window.timetableSelectedClass)||1;
-    if(!tbody){ alert("Please open Timetable first."); return false; }
+function addClassTimetableRow(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const tbody=document.querySelector("#classTimetableTable tbody");
+  if(!tbody){
+    alert("Please open Timetable first.");
+    return false;
+  }
 
-    // Read current rows so existing unsaved entries are preserved.
+  const rows=[...tbody.querySelectorAll("tr")];
+  const nextPeriod=rows.reduce((max,row,i)=>{
+    const n=Number(row.querySelector(".ctt-period")?.value);
+    return Math.max(max,Number.isFinite(n)&&n>0?n:i+1);
+  },0)+1;
+
+  const newRow={period:nextPeriod,time:"",days:["","","","","",""]};
+  const tr=document.createElement("tr");
+  tr.innerHTML=timetableRowHtml(newRow,rows.length);
+  tbody.appendChild(tr);
+
+  // Keep the new period immediately available; final values are saved by Save Class Timetable.
+  try{
+    const classNo=Number(window.timetableSelectedClass)||1;
+    let all=getData("schoolTimetableByClass");
+    if(!all || typeof all!=="object" || Array.isArray(all)) all={};
     const current=[...tbody.querySelectorAll("tr")].map((row,i)=>({
       period:Number(row.querySelector(".ctt-period")?.value)||i+1,
       time:String(row.querySelector(".ctt-time")?.value||"").trim(),
       days:[...row.querySelectorAll(".ctt-subject")].map(x=>String(x.value||"").trim())
     }));
-
-    const nextPeriod=current.reduce((max,r)=>Math.max(max,Number(r.period)||0),0)+1;
-    current.push({period:nextPeriod,time:"",days:["","","","","",""]});
-
-    let all=getData("schoolTimetableByClass");
-    if(!all || typeof all!=="object" || Array.isArray(all)) all={};
     all[String(classNo)]=current;
     setData("schoolTimetableByClass",all);
-
-    // Append directly to the current table. This guarantees the click visibly adds a row.
-    const row=document.createElement("tr");
-    row.innerHTML=timetableRowHtml(current[current.length-1],current.length-1);
-    tbody.appendChild(row);
-
-    setTimeout(()=>{
-      row.scrollIntoView({behavior:"smooth",block:"nearest"});
-      const input=row.querySelector(".ctt-time");
-      if(input) input.focus();
-    },50);
-    return false;
   }catch(err){
-    console.error("Add Period error:",err);
-    alert("Add Period error: "+(err.message||"Please refresh the page."));
-    return false;
+    console.warn("Timetable temporary save skipped:",err);
   }
+
+  const input=tr.querySelector(".ctt-time");
+  if(input){
+    setTimeout(()=>{
+      input.focus();
+      tr.scrollIntoView({behavior:"smooth",block:"nearest"});
+    },50);
+  }
+  return false;
 }
 function removeClassTimetableRow(btn){
   const tbody=document.querySelector("#classTimetableTable tbody"),row=btn?.closest("tr");
@@ -4684,8 +4735,111 @@ function updateDashboardNotice(){
   }
 }
 
+/* GALLERY - ADMIN ONLY */
+function isSchoolAdmin(){
+  return window.schoolHubRole==="admin";
+}
+function saveGalleryLogo(event){
+  if(!isSchoolAdmin()){ alert("Only School Admin can upload images."); return; }
+  const file=event?.target?.files?.[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      localStorage.setItem("schoolLogo",reader.result);
+      updateDashboardBranding();
+      const other=document.getElementById("otherPage");
+      if(other && document.getElementById("pageTitle")?.innerText==="Gallery"){
+        other.innerHTML=getOtherPage("gallery");
+      }
+    }catch(e){ alert("Logo save failed. Please use a smaller image."); }
+  };
+  reader.readAsDataURL(file);
+}
+function saveGalleryDashboardImages(event){
+  if(!isSchoolAdmin()){ alert("Only School Admin can upload images."); return; }
+  const files=[...(event?.target?.files||[])].filter(f=>f.type&&f.type.startsWith("image/"));
+  if(!files.length)return;
+  const existing=getData("schoolGalleryImages");
+  const old=Array.isArray(existing)?existing.filter(Boolean):[];
+  const selected=files.slice(0,Math.max(0,5-old.length));
+  if(!selected.length){
+    alert("Maximum 5 dashboard images are already added.");
+    if(event?.target)event.target.value="";
+    return;
+  }
+  const out=new Array(selected.length);
+  let done=0;
+  selected.forEach((file,i)=>{
+    const reader=new FileReader();
+    reader.onload=function(){
+      out[i]=reader.result;
+      done++;
+      if(done===selected.length){
+        try{
+          setData("schoolGalleryImages",old.concat(out).filter(Boolean).slice(0,5));
+          window.dashboardSlideIndex=0;
+          updateDashboardBranding();
+          const other=document.getElementById("otherPage");
+          if(other && document.getElementById("pageTitle")?.innerText==="Gallery") other.innerHTML=getOtherPage("gallery");
+        }catch(e){ alert("Dashboard images save failed. Please use smaller images."); }
+      }
+    };
+    reader.onerror=function(){ done++; if(done===selected.length) alert("Some images could not be read."); };
+    reader.readAsDataURL(file);
+  });
+  if(event?.target)event.target.value="";
+}
+function saveGalleryAllImages(event){
+  if(!isSchoolAdmin()){ alert("Only School Admin can upload images."); return; }
+  const files=[...(event?.target?.files||[])].filter(f=>f.type&&f.type.startsWith("image/"));
+  if(!files.length)return;
+  const old=getData("schoolAllImages");
+  const existing=Array.isArray(old)?old.filter(Boolean):[];
+  const out=new Array(files.length);
+  let done=0;
+  files.forEach((file,i)=>{
+    const reader=new FileReader();
+    reader.onload=function(){
+      out[i]=reader.result;
+      done++;
+      if(done===files.length){
+        try{
+          setData("schoolAllImages",existing.concat(out).filter(Boolean));
+          const other=document.getElementById("otherPage");
+          if(other && document.getElementById("pageTitle")?.innerText==="Gallery") other.innerHTML=getOtherPage("gallery");
+        }catch(e){ alert("Gallery images save failed. Please use smaller images."); }
+      }
+    };
+    reader.onerror=function(){ done++; };
+    reader.readAsDataURL(file);
+  });
+  if(event?.target)event.target.value="";
+}
+function deleteGalleryDashboardImage(index){
+  if(!isSchoolAdmin())return;
+  const a=getData("schoolGalleryImages");
+  if(!Array.isArray(a))return;
+  a.splice(index,1);
+  setData("schoolGalleryImages",a);
+  window.dashboardSlideIndex=0;
+  updateDashboardBranding();
+  const other=document.getElementById("otherPage");
+  if(other)other.innerHTML=getOtherPage("gallery");
+}
+function deleteGalleryAllImage(index){
+  if(!isSchoolAdmin())return;
+  const a=getData("schoolAllImages");
+  if(!Array.isArray(a))return;
+  a.splice(index,1);
+  setData("schoolAllImages",a);
+  const other=document.getElementById("otherPage");
+  if(other)other.innerHTML=getOtherPage("gallery");
+}
+
 /* SCHOOL LOGO + 5-IMAGE SLIDESHOW */
 function saveDashboardSchoolLogo(event){
+  if(!isSchoolAdmin()){ return; }
   const file=event?.target?.files?.[0];
   if(!file)return;
   const reader=new FileReader();
@@ -4696,6 +4850,7 @@ function saveDashboardSchoolLogo(event){
   reader.readAsDataURL(file);
 }
 function saveDashboardSchoolImages(event){
+  if(!isSchoolAdmin()){ return; }
   const files=[...(event?.target?.files||[])];
   if(!files.length)return;
 
@@ -4801,52 +4956,6 @@ function updateDashboardBranding(){
 }
 
 /* Make Add Period work reliably on the current timetable screen. */
-function addClassTimetableRow(){
-  try{
-    const tbody=document.querySelector("#classTimetableTable tbody");
-    if(!tbody){
-      alert("Please open Timetable first.");
-      return false;
-    }
-
-    const rows=[...tbody.querySelectorAll("tr")];
-    const current=rows.map((row,i)=>({
-      period:Number(row.querySelector(".ctt-period")?.value)||i+1,
-      time:String(row.querySelector(".ctt-time")?.value||"").trim(),
-      days:[...row.querySelectorAll(".ctt-subject")].map(x=>String(x.value||"").trim())
-    }));
-
-    const nextPeriod=current.reduce((m,r)=>Math.max(m,Number(r.period)||0),0)+1;
-    const newRow={period:nextPeriod,time:"",days:["","","","","",""]};
-
-    current.push(newRow);
-
-    const classNo=Number(window.timetableSelectedClass)||1;
-    let all=getData("schoolTimetableByClass");
-    if(!all || typeof all!=="object" || Array.isArray(all))all={};
-    all[String(classNo)]=current;
-    setData("schoolTimetableByClass",all);
-
-    const tr=document.createElement("tr");
-    tr.innerHTML=timetableRowHtml(newRow,current.length-1);
-    tbody.appendChild(tr);
-
-    const input=tr.querySelector(".ctt-time");
-    if(input){
-      setTimeout(function(){
-        input.focus();
-        tr.scrollIntoView({behavior:"smooth",block:"nearest"});
-      },50);
-    }
-
-    return false;
-  }catch(err){
-    console.error(err);
-    alert("Add Period error: "+(err.message||"Please refresh the page."));
-    return false;
-  }
-}
-
 function dashboardClassAttendance(classNo){
   let ids=getClassStudents(classNo).map(s=>Number(s.id));
   let records=getAttendance().filter(x=>x.date===today()&&ids.includes(Number(x.studentId)));
