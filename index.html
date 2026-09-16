@@ -1342,7 +1342,7 @@ function renderAttendanceRegister(){
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
 <button class="small-btn" onclick="markAllPresent(${classNo})">🟢 Mark All Present</button>
-<button class="small-btn" style="background:#64748b" onclick="markAllHoliday(${classNo})">🔵 Mark All Holiday</button>
+<button class="small-btn" style="background:#64748b" onclick="openHolidayModal(${classNo})">🔵 Mark Holiday</button>
 <button class="small-btn" style="background:#475569" onclick="markAllSunday(${classNo})">📅 Mark All Sunday</button>
 <button class="small-btn" style="background:#15803d" onclick="openAttendanceDownload(${classNo})">⬇️ Download Attendance</button>
 </div>
@@ -1755,6 +1755,133 @@ function markAllPresent(classNo){
   renderAttendanceRegister();
 }
 
+function openHolidayModal(classNo,stream="",section=""){
+  const todayDate=today();
+  document.getElementById("holidayModal")?.remove();
+
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="modal-bg" id="holidayModal" style="display:flex">
+      <div class="modal" style="max-width:560px">
+        <div class="modal-header">
+          <div>
+            <h2>🔵 Enter Holiday</h2>
+            <p style="color:#667085;font-size:12px;margin-top:5px">
+              Class ${classNo} — holiday ek din ya date range ke liye lagayein.
+            </p>
+          </div>
+          <button class="close-btn" onclick="closeHolidayModal()">×</button>
+        </div>
+
+        <div class="form-group">
+          <label>Holiday Day Name *</label>
+          <input id="holidayNameInput" placeholder="e.g. School Holiday, Independence Day, Janmashtami">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>From Date *</label>
+            <input id="holidayFromDate" type="date" value="${todayDate}">
+          </div>
+          <div class="form-group">
+            <label>To Date *</label>
+            <input id="holidayToDate" type="date" value="${todayDate}">
+          </div>
+        </div>
+
+        <div id="holidayDateHint" style="background:#f8faff;padding:12px;border-radius:10px;font-size:13px;color:#475467;margin-bottom:15px">
+          Select same date for one-day holiday, or choose a range such as 15 September to 18 September.
+        </div>
+
+        <button class="btn btn-primary" onclick="saveHoliday(${classNo},'${escapeHtml(stream)}','${escapeHtml(section)}')">
+          Save Holiday
+        </button>
+      </div>
+    </div>
+  `);
+
+  const from=document.getElementById("holidayFromDate");
+  const to=document.getElementById("holidayToDate");
+  const updateHint=()=>{
+    const f=from?.value||"", t=to?.value||"";
+    const hint=document.getElementById("holidayDateHint");
+    if(!hint)return;
+    if(!f||!t){hint.innerText="Select holiday date.";return;}
+    if(f>t){hint.innerText="To Date cannot be before From Date.";return;}
+    hint.innerText = f===t
+      ? "Holiday: "+formatDate(f)
+      : "Holiday: "+formatDate(f)+" to "+formatDate(t);
+  };
+  from?.addEventListener("change",updateHint);
+  to?.addEventListener("change",updateHint);
+  updateHint();
+}
+
+function closeHolidayModal(){
+  document.getElementById("holidayModal")?.remove();
+}
+
+function saveHoliday(classNo,stream="",section=""){
+  const name=(document.getElementById("holidayNameInput")?.value||"").trim();
+  const from=document.getElementById("holidayFromDate")?.value||"";
+  const to=document.getElementById("holidayToDate")?.value||"";
+
+  if(!name){alert("Please enter holiday day name.");return;}
+  if(!from||!to){alert("Please select From Date and To Date.");return;}
+  if(from>to){alert("To Date cannot be before From Date.");return;}
+
+  let students=getClassStudents(classNo).filter(s=>
+    (!stream || s.stream===stream) &&
+    (!section || String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
+  );
+  if(!students.length){alert("No students found in this class.");return;}
+
+  const start=new Date(Number(from.slice(0,4)),Number(from.slice(5,7))-1,Number(from.slice(8,10)));
+  const end=new Date(Number(to.slice(0,4)),Number(to.slice(5,7))-1,Number(to.slice(8,10)));
+  let data=getAttendance();
+
+  for(let cur=new Date(start);cur<=end;cur.setDate(cur.getDate()+1)){
+    const date=cur.getFullYear()+"-"+String(cur.getMonth()+1).padStart(2,"0")+"-"+String(cur.getDate()).padStart(2,"0");
+    students.forEach(s=>{
+      const i=data.findIndex(x=>Number(x.studentId)===Number(s.id)&&String(x.date||"").slice(0,10)===date);
+      const rec={
+        id:i>=0?data[i].id:Date.now()+Math.floor(Math.random()*1000000),
+        studentId:Number(s.id),
+        date,
+        status:"Holiday",
+        holidayName:name
+      };
+      if(i>=0)data[i]=rec; else data.push(rec);
+    });
+  }
+
+  saveAttendance(data);
+
+  let holidays=getData("schoolHolidays");
+  if(!Array.isArray(holidays))holidays=[];
+  holidays.unshift({
+    id:Date.now(),
+    classNo:Number(classNo),
+    stream:stream||"",
+    section:section||"",
+    name,
+    from,
+    to
+  });
+  setData("schoolHolidays",holidays);
+
+  closeHolidayModal();
+  window.attendanceRegisterDate=from;
+  if(typeof updateDashboard==="function")updateDashboard();
+  if(typeof renderAttendanceRegister==="function" &&
+     Number(window.attendanceRegisterClass)===Number(classNo)){
+    renderAttendanceRegister();
+  }
+  alert(
+    "Holiday saved: "+name+" — "+
+    (from===to ? formatDate(from) : formatDate(from)+" to "+formatDate(to))
+  );
+}
+
 function markAllAttendanceStatus(classNo,status){
   let date=window.attendanceRegisterDate||today();
   let students=getClassAttendanceStudents(classNo);
@@ -1988,7 +2115,7 @@ let html=`
 <div class="form-group" style="margin-bottom:0;display:flex;align-items:end">
 <div style="display:flex;gap:7px;width:100%;flex-wrap:wrap">
 <button class="small-btn" style="height:47px;flex:1;min-width:140px" onclick="markAllPresent(${classNo},'${stream||""}','${section||""}')">🟢 Mark All Present</button>
-<button class="small-btn" style="height:47px;flex:1;min-width:140px;background:#64748b" onclick="markAllHolidayPage(${classNo},'${stream||""}','${section||""}')">🔵 Mark All Holiday</button>
+<button class="small-btn" style="height:47px;flex:1;min-width:140px;background:#64748b" onclick="openHolidayModal(${classNo},'${stream||""}','${section||""}')">🔵 Mark Holiday</button>
 <button class="small-btn" style="height:47px;flex:1;min-width:140px;background:#475569" onclick="markAllSundayPage(${classNo},'${stream||""}','${section||""}')">📅 Mark All Sunday</button>
 </div>
 </div>
@@ -4180,8 +4307,12 @@ function changeTimetableClass(classNo){
 }
 function addClassTimetableRow(){
   const tbody=document.querySelector("#classTimetableTable tbody");
-  if(!tbody)return;
-  const i=tbody.querySelectorAll("tr").length;
+  if(!tbody){alert("Timetable table not found.");return;}
+
+  const classNo=Number(window.timetableSelectedClass)||1;
+  const rows=[...tbody.querySelectorAll("tr")];
+  const i=rows.length;
+
   const row=document.createElement("tr");
   row.innerHTML=timetableRowHtml({
     period:i+1,
@@ -4189,7 +4320,19 @@ function addClassTimetableRow(){
     days:["","","","","",""]
   },i);
   tbody.appendChild(row);
-  // Keep the new period visible immediately and focus its Time field.
+
+  // Persist the new period immediately. This makes Add Period work even
+  // before the user presses Save Class Timetable.
+  const data=[...tbody.querySelectorAll("tr")].map((r,idx)=>({
+    period:Number(r.querySelector(".ctt-period")?.value)||idx+1,
+    time:r.querySelector(".ctt-time")?.value.trim()||"",
+    days:[...r.querySelectorAll(".ctt-subject")].map(x=>x.value.trim())
+  }));
+  const all=getData("schoolTimetableByClass");
+  const store=(all&&typeof all==="object"&&!Array.isArray(all))?all:{};
+  store[String(classNo)]=data;
+  setData("schoolTimetableByClass",store);
+
   row.scrollIntoView({behavior:"smooth",block:"nearest",inline:"nearest"});
   setTimeout(()=>row.querySelector(".ctt-time")?.focus(),50);
 }
