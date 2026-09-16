@@ -1464,7 +1464,7 @@ function openAttendanceDownload(classNo){
       </div>
 
       <div style="background:#f8faff;padding:14px;border-radius:10px;margin:10px 0 18px;color:#667085;font-size:13px">
-        Excel/CSV & PDF me sirf Roll No., Student Name aur har date ka P / A / L / H / S status aayega.
+        Excel/CSV & PDF me Roll No., Student Name aur har date ka P / A / L / H / S status aayega. One Day report me separate Status column bhi hoga.
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1573,13 +1573,21 @@ function downloadAttendanceReportForClass(classNo){
   let header=["Roll No.","Student Name"];
   dates.forEach(dt=>header.push(formatDate(dt)));
 
+  // For a one-day report also include a clear Status column.
+  // Codes are always P / A / L / H / S.
+  if(type==="day") header.push("Status");
+
   let rows=[header];
   students.forEach((s,i)=>{
     let row=[attendanceRoll(s,i),s.name||""];
+    let dayStatus="";
     dates.forEach(dt=>{
       let rec=records.find(x=>Number(x.studentId)===Number(s.id)&&x.date===dt);
-      row.push(attendanceStatusCode(rec?.status));
+      const code=attendanceStatusCode(rec?.status);
+      row.push(code);
+      if(type==="day") dayStatus=code;
     });
+    if(type==="day") row.push(dayStatus);
     rows.push(row);
   });
 
@@ -3251,7 +3259,15 @@ filterStudentTable("attendance",classNo,stream,section);
 updateDashboard();
 alert("All students marked "+label+".");
 }
-function markAllPresent(classNo,stream,section){markAllAttendanceOnPage(classNo,stream,section,"Present");}
+function markAllPresent(classNo,stream,section){
+  // Attendance register button calls this with only classNo.
+  // Older/class-page attendance calls it with classNo, stream, section.
+  if(arguments.length===1 || (stream===undefined && section===undefined)){
+    markAllAttendanceStatus(classNo,"Present");
+    return;
+  }
+  markAllAttendanceOnPage(classNo,stream,section,"Present");
+}
 function markAllHolidayPage(classNo,stream,section){markAllAttendanceOnPage(classNo,stream,section,"Holiday");}
 function markAllSundayPage(classNo,stream,section){markAllAttendanceOnPage(classNo,stream,section,"Sunday");}
 
@@ -4252,6 +4268,106 @@ return `
 }
 
 return "";
+}
+
+
+/* GLOBAL TIMETABLE / NOTICE ACTIONS
+   These functions must be global because the HTML buttons use onclick="...".
+   The original file accidentally placed them inside getOtherPage(). */
+
+function editTimetable(){
+  let tt=getData("schoolTimetable");
+  if(!Array.isArray(tt)||!tt.length){
+    tt=[
+      {time:"08:00",days:["Maths","Science","English","Maths","Hindi"]},
+      {time:"09:00",days:["English","Maths","Hindi","Science","Computer"]}
+    ];
+  }
+  let html=`<div class="modal-bg" id="timetableEditModal" style="display:flex">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Timetable</h2>
+        <button class="close-btn" onclick="closeTimetableEdit()">×</button>
+      </div>
+      <div class="table-container">
+        <table style="min-width:700px">
+          <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
+          ${tt.map((r,i)=>`<tr>
+            <td><input class="tt-time" value="${escapeHtml(r.time||"")}"></td>
+            ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="${escapeHtml((r.days||[])[j]||"")}"></td>`).join("")}
+          </tr>`).join("")}
+        </table>
+      </div>
+      <br>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="saveTimetable()">Save Timetable</button>
+        <button class="btn btn-outline" style="margin-top:0" onclick="closeTimetableEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+
+function closeTimetableEdit(){
+  document.getElementById("timetableEditModal")?.remove();
+}
+
+function saveTimetable(){
+  const modal=document.getElementById("timetableEditModal");
+  if(!modal){alert("Timetable editor is not open.");return;}
+  const rows=[...modal.querySelectorAll("table tr")].slice(1);
+  const data=rows.map(row=>({
+    time:row.querySelector(".tt-time")?.value.trim()||"",
+    days:[...row.querySelectorAll(".tt-day")].map(x=>x.value.trim())
+  }));
+  setData("schoolTimetable",data);
+  closeTimetableEdit();
+  const other=document.getElementById("otherPage");
+  if(other)other.innerHTML=getOtherPage("timetable");
+  alert("Timetable saved successfully!");
+}
+
+function openNoticeModal(index=null){
+  const notices=getData("schoolNotices");
+  const n=index!==null&&notices[index]?notices[index]:{title:"",text:""};
+  document.getElementById("noticeEditModal")?.remove();
+  document.body.insertAdjacentHTML("beforeend",`<div class="modal-bg" id="noticeEditModal" style="display:flex">
+    <div class="modal">
+      <div class="modal-header"><h2>${index===null?"Add New Notice":"Edit Notice"}</h2><button class="close-btn" onclick="closeNoticeModal()">×</button></div>
+      <div class="form-group"><label>Notice Title *</label><input id="noticeTitleInput" value="${escapeHtml(n.title||"")}"></div>
+      <div class="form-group"><label>Notice Details *</label><textarea id="noticeTextInput">${escapeHtml(n.text||"")}</textarea></div>
+      <button class="btn btn-primary" onclick="saveNotice(${index===null?"null":index})">Save Notice</button>
+    </div></div>`);
+}
+
+function closeNoticeModal(){
+  document.getElementById("noticeEditModal")?.remove();
+}
+
+function saveNotice(index){
+  let title=document.getElementById("noticeTitleInput")?.value.trim();
+  let text=document.getElementById("noticeTextInput")?.value.trim();
+  if(!title||!text){alert("Please enter notice title and details.");return;}
+  let notices=getData("schoolNotices");
+  if(!Array.isArray(notices))notices=[];
+  if(index===null)notices.unshift({title,text,date:today()});
+  else notices[index]={...(notices[index]||{}),title,text,date:(notices[index]&&notices[index].date)||today()};
+  setData("schoolNotices",notices);
+  closeNoticeModal();
+  document.getElementById("otherPage").innerHTML=getOtherPage("notices");
+  updateDashboardNotice();
+}
+
+function editNotice(index){openNoticeModal(index);}
+
+function deleteNotice(index){
+  if(!confirm("Delete this notice?"))return;
+  let notices=getData("schoolNotices");
+  if(!Array.isArray(notices))notices=[];
+  notices.splice(index,1);
+  setData("schoolNotices",notices);
+  document.getElementById("otherPage").innerHTML=getOtherPage("notices");
+  updateDashboardNotice();
 }
 
 function saveSettings(){
