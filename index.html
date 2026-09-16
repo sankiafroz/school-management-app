@@ -224,6 +224,17 @@ th{background:#fafbfd;color:#667085}
 #classTimetableTable th:nth-child(2),#classTimetableTable td:nth-child(2){min-width:200px}
 
 
+.teacher-documents-box{background:#f8faff;border:1px solid #dce5f3;border-radius:12px;padding:14px;margin-top:15px}
+.teacher-documents-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.teacher-document-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid #e5eaf1;border-radius:9px;padding:9px 11px;font-size:13px}
+.teacher-document-item a{color:#1769ff;font-weight:bold;text-decoration:none}
+.teacher-document-item button{border:0;background:#feecec;color:#dc2626;padding:5px 8px;border-radius:7px;font-weight:bold}
+.teacher-login-credentials{background:#ecfdf3;border:1px solid #bbf7d0;color:#166534;border-radius:12px;padding:13px;margin-top:15px}
+.teacher-login-credentials strong{color:#14532d}
+.teacher-credential-copy{border:0;background:#1769ff;color:#fff;padding:7px 10px;border-radius:8px;font-weight:bold;margin-top:8px}
+.teacher-profile-login{margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px;font-size:12px}
+.teacher-profile-docs{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap}
+.teacher-profile-docs a{background:#eef4ff;color:#1769ff;text-decoration:none;padding:7px 9px;border-radius:8px;font-size:12px;font-weight:bold}
 .result-register-table th,.result-register-table td{white-space:nowrap}
 .result-register-table th small{font-size:10px;color:#667085}
 .result-register-table tbody tr:hover{background:#f8faff}
@@ -638,6 +649,19 @@ SchoolHub
 </select>
 </div>
 
+<div class="teacher-documents-box">
+  <div style="font-weight:800;margin-bottom:5px">📄 Teacher Documents</div>
+  <div style="font-size:12px;color:#667085;margin-bottom:10px">
+    Aadhaar, PAN, marksheets, certificates, experience, joining letter aur anya sabhi documents ek saath upload kar sakte hain.
+  </div>
+  <input id="teacherDocuments" type="file"
+         accept="image/*,.pdf,.doc,.docx,.jpg,.jpeg,.png"
+         multiple onchange="handleTeacherDocuments(event)">
+  <div id="teacherDocumentsList" class="teacher-documents-list"></div>
+</div>
+
+<div id="teacherLoginCredentials" class="teacher-login-credentials" style="display:none"></div>
+
 <br>
 <button class="btn btn-primary" onclick="saveTeacher()">Save Teacher</button>
 </div>
@@ -948,9 +972,10 @@ function loginUser(){
     }
 
     const teacher=getTeachers().find(t=>
-      (String(t.email||"").trim().toLowerCase()===email ||
-       String(t.mobile||"").trim()===email) &&
-      String(t.password||"")===password
+       (String(t.teacherId||"").trim().toLowerCase()===email ||
+        String(t.email||"").trim().toLowerCase()===email ||
+        String(t.mobile||"").trim()===email) &&
+       String(t.password||"")===password
     );
     if(teacher){
       openApplication(localStorage.getItem("schoolName")||"ABC Public School",
@@ -3133,163 +3158,244 @@ document.getElementById("studentProfileModal").style.display="none";
 
 let editingTeacherId=null;
 let teacherPhotoData="";
+let teacherDocumentsData=[];
+
+function generateTeacherLoginId(){
+  const teachers=Array.isArray(getTeachers())?getTeachers():[];
+  let id="";
+  do{
+    id="TCH"+String(Math.floor(100000+Math.random()*900000));
+  }while(teachers.some(t=>String(t.teacherId||"").toLowerCase()===id.toLowerCase()));
+  return id;
+}
+
+function generateTeacherPassword(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  let out="";
+  for(let i=0;i<8;i++) out+=chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
 
 function openTeacherModal(id=null){
+  editingTeacherId=id;
+  teacherPhotoData="";
+  teacherDocumentsData=[];
 
-editingTeacherId=id;
-teacherPhotoData="";
+  let t=id?getTeachers().find(x=>Number(x.id)===Number(id)):null;
 
-let t=id?getTeachers().find(x=>Number(x.id)===Number(id)):null;
+  document.getElementById("teacherModalTitle").innerText=t?"Edit Teacher":"Add Teacher";
+  document.getElementById("teacherName").value=t?.name||"";
+  document.getElementById("teacherMobile").value=t?.mobile||"";
+  document.getElementById("teacherQualification").value=t?.qualification||"";
+  document.getElementById("teacherClass").value=t?.classNo||"";
 
-document.getElementById("teacherModalTitle").innerText=t?"Edit Teacher":"Add Teacher";
+  let subjects=Array.isArray(t?.subjects)?t.subjects:(t?.subject?[t.subject]:[]);
+  for(let i=1;i<=4;i++){
+    document.getElementById("teacherSubject"+i).value=subjects[i-1]||"";
+  }
 
-document.getElementById("teacherName").value=t?.name||"";
-document.getElementById("teacherMobile").value=t?.mobile||"";
-document.getElementById("teacherQualification").value=t?.qualification||"";
-document.getElementById("teacherClass").value=t?.classNo||"";
+  document.getElementById("teacherPhoto").value="";
+  document.getElementById("teacherDocuments").value="";
+  teacherPhotoData=t?.photo||"";
+  teacherDocumentsData=Array.isArray(t?.documents)?t.documents.map(x=>({...x})):[];
+  renderTeacherDocuments();
 
-let subjects=Array.isArray(t?.subjects)?
-t.subjects:
-(t?.subject?[t.subject]:[]);
+  if(t?.photo){
+    document.getElementById("teacherPhotoPreview").innerHTML=
+      `<img class="profile-photo" src="${t.photo}">`;
+  }else{
+    document.getElementById("teacherPhotoPreview").innerHTML="👨‍🏫";
+  }
 
-for(let i=1;i<=4;i++){
-document.getElementById("teacherSubject"+i).value=subjects[i-1]||"";
-}
+  updateTeacherSections(t?.section||"");
 
-document.getElementById("teacherPhoto").value="";
+  const cred=document.getElementById("teacherLoginCredentials");
+  if(cred){
+    if(t){
+      cred.style.display="block";
+      cred.innerHTML=`<div><b>🔐 Teacher Login Credentials</b></div>
+        <div style="margin-top:7px">Login ID: <strong>${escapeHtml(t.teacherId||t.mobile||"-")}</strong></div>
+        <div>Password: <strong>${escapeHtml(t.password||"-")}</strong></div>
+        <div style="font-size:11px;margin-top:6px;color:#667085">Teacher login page par isi ID aur password se login karega.</div>`;
+    }else{
+      cred.style.display="none";
+      cred.innerHTML="";
+    }
+  }
 
-teacherPhotoData=t?.photo||"";
-
-if(t?.photo){
-document.getElementById("teacherPhotoPreview").innerHTML=
-`<img class="profile-photo" src="${t.photo}">`;
-}else{
-document.getElementById("teacherPhotoPreview").innerHTML="👨‍🏫";
-}
-
-updateTeacherSections(t?.section||"");
-
-document.getElementById("teacherModal").style.display="flex";
+  document.getElementById("teacherModal").style.display="flex";
 }
 
 function previewTeacherPhoto(event){
+  let file=event.target.files[0];
+  if(!file)return;
+  let reader=new FileReader();
+  reader.onload=function(e){
+    teacherPhotoData=e.target.result;
+    document.getElementById("teacherPhotoPreview").innerHTML=
+      `<img class="profile-photo" src="${teacherPhotoData}">`;
+  };
+  reader.readAsDataURL(file);
+}
 
-let file=event.target.files[0];
-if(!file)return;
+function handleTeacherDocuments(event){
+  const files=[...(event.target.files||[])];
+  if(!files.length)return;
 
-let reader=new FileReader();
+  let pending=files.map(file=>new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>resolve({
+      id:"DOC"+Date.now()+Math.floor(Math.random()*1000000),
+      name:file.name,
+      type:file.type||"application/octet-stream",
+      size:file.size||0,
+      data:e.target.result
+    });
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  }));
 
-reader.onload=function(e){
+  Promise.all(pending).then(items=>{
+    teacherDocumentsData.push(...items);
+    renderTeacherDocuments();
+    event.target.value="";
+  }).catch(err=>{
+    console.error("Teacher document upload error:",err);
+    alert("Some document could not be uploaded.");
+  });
+}
 
-teacherPhotoData=e.target.result;
+function renderTeacherDocuments(){
+  const area=document.getElementById("teacherDocumentsList");
+  if(!area)return;
 
-document.getElementById("teacherPhotoPreview").innerHTML=
-`<img class="profile-photo" src="${teacherPhotoData}">`;
-};
+  if(!teacherDocumentsData.length){
+    area.innerHTML=`<div style="font-size:12px;color:#98a2b3;padding:7px 0">No documents uploaded yet.</div>`;
+    return;
+  }
 
-reader.readAsDataURL(file);
+  area.innerHTML=teacherDocumentsData.map((doc,index)=>{
+    const name=escapeHtml(doc.name||("Document "+(index+1)));
+    return `<div class="teacher-document-item">
+      <span>📄 ${name}</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <a href="${doc.data}" target="_blank" rel="noopener">View</a>
+        <button type="button" onclick="removeTeacherDocument(${index})">Remove</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function removeTeacherDocument(index){
+  teacherDocumentsData.splice(Number(index),1);
+  renderTeacherDocuments();
 }
 
 function updateTeacherSections(selected=""){
+  let classNo=Number(document.getElementById("teacherClass").value);
+  let select=document.getElementById("teacherSection");
+  select.innerHTML=`<option value="">All / Not Assigned</option>`;
+  if(!classNo)return;
 
-let classNo=Number(document.getElementById("teacherClass").value);
-let select=document.getElementById("teacherSection");
-
-select.innerHTML=`<option value="">All / Not Assigned</option>`;
-
-if(!classNo)return;
-
-getSections()
-.filter(x=>Number(x.classNo)===classNo)
-.forEach(x=>{
-select.innerHTML+=
-`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
-});
-
-select.value=selected||"";
+  getSections().filter(x=>Number(x.classNo)===classNo).forEach(x=>{
+    select.innerHTML+=`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}</option>`;
+  });
+  select.value=selected||"";
 }
 
-function saveTeacher(){
+async function saveTeacher(){
+  let name=document.getElementById("teacherName").value.trim();
+  let mobile=document.getElementById("teacherMobile").value.trim();
+  let qualification=document.getElementById("teacherQualification").value.trim();
+  let classNo=document.getElementById("teacherClass").value;
+  let section=document.getElementById("teacherSection").value;
 
-let name=document.getElementById("teacherName").value.trim();
-let mobile=document.getElementById("teacherMobile").value.trim();
-let qualification=document.getElementById("teacherQualification").value.trim();
-let classNo=document.getElementById("teacherClass").value;
-let section=document.getElementById("teacherSection").value;
+  let subjects=[];
+  for(let i=1;i<=4;i++){
+    let value=document.getElementById("teacherSubject"+i).value.trim();
+    if(value)subjects.push(value);
+  }
 
-let subjects=[];
-for(let i=1;i<=4;i++){
-let value=document.getElementById("teacherSubject"+i).value.trim();
-if(value)subjects.push(value);
-}
+  if(!name||!mobile){
+    alert("Please fill Teacher Name and Mobile Number");
+    return;
+  }
 
-if(!name||!mobile){
-alert("Please fill Teacher Name and Mobile Number");
-return;
-}
+  let teachers=Array.isArray(getTeachers())?getTeachers():[];
+  let credentials=null;
 
-let teachers=getTeachers();
+  if(editingTeacherId){
+    let t=teachers.find(x=>Number(x.id)===Number(editingTeacherId));
+    if(t){
+      Object.assign(t,{
+        name,mobile,qualification,classNo,section,subjects,
+        subject:subjects[0]||"",
+        documents:teacherDocumentsData
+      });
+      if(teacherPhotoData)t.photo=teacherPhotoData;
 
-if(editingTeacherId){
+      if(!t.teacherId)t.teacherId=generateTeacherLoginId();
+      if(!t.password)t.password=generateTeacherPassword();
 
-let t=teachers.find(x=>Number(x.id)===Number(editingTeacherId));
+      credentials={teacherId:t.teacherId,password:t.password};
+    }
+  }else{
+    const teacherId=generateTeacherLoginId();
+    const password=generateTeacherPassword();
 
-if(t){
+    teachers.push({
+      id:Date.now(),
+      name,
+      mobile,
+      qualification,
+      classNo,
+      section,
+      subjects,
+      subject:subjects[0]||"",
+      photo:teacherPhotoData||"",
+      documents:teacherDocumentsData,
+      teacherId,
+      password
+    });
 
-Object.assign(t,{
-name,
-mobile,
-qualification,
-classNo,
-section,
-subjects
-});
+    credentials={teacherId,password};
+  }
 
-if(teacherPhotoData)t.photo=teacherPhotoData;
-}
+  try{
+    saveTeachers(teachers);
+  }catch(err){
+    console.error("Teacher save error:",err);
+    alert("Teacher save nahi ho paya. Documents ka size bahut bada ho sakta hai. Chhoti files upload karke try karein.");
+    return;
+  }
 
-}else{
+  const credentialText=credentials?
+    `Teacher Login ID: ${credentials.teacherId}\\nPassword: ${credentials.password}`:"";
 
-teachers.push({
-id:Date.now(),
-name,
-mobile,
-qualification,
-classNo,
-section,
-subjects,
-subject:subjects[0]||"",
-photo:teacherPhotoData||"",
-password:"123456"
-});
+  closeTeacherModal();
+  showPage("teachers");
 
-}
-
-saveTeachers(teachers);
-
-closeTeacherModal();
-showPage("teachers");
-
-alert("Teacher saved successfully.");
+  if(credentialText){
+    alert("Teacher saved successfully!\\n\\n"+credentialText+
+      "\\n\\nTeacher login ke liye isi ID aur password ka use karein.");
+  }else{
+    alert("Teacher saved successfully.");
+  }
 }
 
 function deleteTeacher(id){
-
-let t=getTeachers().find(x=>Number(x.id)===Number(id));
-if(!t)return;
-
-if(!confirm("Delete teacher "+t.name+"?"))return;
-
-saveTeachers(getTeachers().filter(x=>Number(x.id)!==Number(id)));
-
-showPage("teachers");
+  let t=getTeachers().find(x=>Number(x.id)===Number(id));
+  if(!t)return;
+  if(!confirm("Delete teacher "+t.name+"?"))return;
+  saveTeachers(getTeachers().filter(x=>Number(x.id)!==Number(id)));
+  showPage("teachers");
 }
 
 function closeTeacherModal(){
-
-document.getElementById("teacherModal").style.display="none";
-editingTeacherId=null;
-teacherPhotoData="";
+  document.getElementById("teacherModal").style.display="none";
+  editingTeacherId=null;
+  teacherPhotoData="";
+  teacherDocumentsData=[];
 }
 
 /* SECTION MANAGEMENT */
@@ -3391,6 +3497,18 @@ function buildTeacherProfileCards(teachers){
           ${subjects.slice(0,4).map((sub,i)=>`<div class="teacher-subject-box">Subject ${i+1}: ${escapeHtml(sub||"Optional")}</div>`).join("")}
         </div>
       </div>
+
+      <div class="teacher-profile-login">
+        <b>🔐 Teacher Login</b><br>
+        ID: <strong>${escapeHtml(t.teacherId||t.mobile||"-")}</strong>
+        &nbsp; | &nbsp;
+        Password: <strong>${escapeHtml(t.password||"-")}</strong>
+      </div>
+
+      ${Array.isArray(t.documents)&&t.documents.length?`
+      <div class="teacher-profile-docs">
+        ${t.documents.map((doc,i)=>`<a href="${doc.data}" target="_blank" rel="noopener">📄 ${escapeHtml(doc.name||("Document "+(i+1)))}</a>`).join("")}
+      </div>`:""}
 
       <div class="action-buttons" style="margin-top:13px">
         <button class="edit-btn" onclick="openTeacherModal(${Number(t.id)||0})">✏️ Edit</button>
