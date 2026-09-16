@@ -392,6 +392,19 @@ SchoolHub
 <button class="close-btn" onclick="closeStudentModal()">×</button>
 </div>
 
+<div class="form-group">
+<label>Session *</label>
+<select id="studentSession">
+<option value="2026-27">2026-27</option>
+<option value="2025-26">2025-26</option>
+<option value="2027-28">2027-28</option>
+<option value="__ADD_MORE__">+ Add / Select Other Session</option>
+</select>
+<div id="studentCustomSessionWrap" style="display:none;margin-top:8px">
+<input id="studentCustomSession" placeholder="Enter session e.g. 2028-29">
+</div>
+</div>
+
 <div class="photo-wrap">
 <div id="studentPhotoPreview" class="photo-placeholder">👨‍🎓</div>
 </div>
@@ -416,6 +429,26 @@ SchoolHub
 <div class="form-group">
 <label>Father Name *</label>
 <input id="fatherName">
+</div>
+
+<div class="form-group">
+<label>Previous Class</label>
+<input id="studentPreviousClass" placeholder="Enter previous class">
+</div>
+
+<div class="form-group">
+<label>Previous School Name</label>
+<input id="studentPreviousSchool" placeholder="Enter previous school name">
+</div>
+
+<div class="form-group">
+<label>Aadhaar Number</label>
+<input id="studentAadhaar" inputmode="numeric" maxlength="12" placeholder="12 digit Aadhaar number">
+</div>
+
+<div class="form-group">
+<label>PAN Number</label>
+<input id="studentPAN" maxlength="10" placeholder="PAN number">
 </div>
 
 <div class="form-group">
@@ -680,6 +713,19 @@ SchoolHub
 <div class="form-group">
 <label>Student</label>
 <input id="examStudentName" readonly>
+</div>
+
+<div class="form-group">
+<label>Session *</label>
+<select id="examSession">
+<option value="2026-27">2026-27</option>
+<option value="2025-26">2025-26</option>
+<option value="2027-28">2027-28</option>
+<option value="__ADD_MORE__">+ Add / Select Other Session</option>
+</select>
+<div id="examCustomSessionWrap" style="display:none;margin-top:8px">
+<input id="examCustomSession" placeholder="Enter session e.g. 2028-29">
+</div>
 </div>
 
 <div class="form-grid">
@@ -2498,7 +2544,7 @@ if(type==="exams"){
 
     let resultHtml=`<div style="border:1px solid #e4e7ec;border-radius:10px;padding:10px;background:#fff">
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-        <div><strong>${escapeHtml(e.examName)}</strong> <span style="color:#667085;font-size:12px">${formatDate(e.examDate)}</span>
+        <div><div style="font-weight:800;color:#1769ff;font-size:12px;margin-bottom:3px">Session: ${escapeHtml(e.session||"2026-27")}</div><strong>${escapeHtml(e.examName)}</strong> <span style="color:#667085;font-size:12px">${formatDate(e.examDate)}</span>
         <span class="badge blue" style="margin-left:5px">${e.resultType==="unit_test"?"Unit Test":"Exam"}</span></div>
         <div><b>${obtained}/${total}</b> · ${percentage.toFixed(1)}% <span class="badge ${pass?"green":"red"}">${pass?"PASS":"FAIL"}</span></div>
       </div>
@@ -2549,6 +2595,26 @@ document.getElementById("studentTableArea").innerHTML=
 buildStudentTable(type,classNo,stream,section,students);
 }
 
+/* SESSION HELPERS */
+function setupSessionSelect(selectId,wrapId,inputId,value){
+  const sel=document.getElementById(selectId),wrap=document.getElementById(wrapId),input=document.getElementById(inputId);
+  if(!sel)return;
+  const saved=String(value||"").trim();
+  const exists=[...sel.options].some(o=>o.value===saved);
+  if(saved && exists){sel.value=saved;if(wrap)wrap.style.display="none";}
+  else if(saved){sel.value="__ADD_MORE__";if(wrap)wrap.style.display="";if(input)input.value=saved;}
+  else{sel.value="2026-27";if(wrap)wrap.style.display="none";if(input)input.value="";}
+  sel.onchange=function(){
+    if(this.value==="__ADD_MORE__"){if(wrap)wrap.style.display="";if(input)input.focus();}
+    else{if(wrap)wrap.style.display="none";if(input)input.value="";}
+  };
+}
+function getSelectedSession(selectId,inputId){
+  const sel=document.getElementById(selectId);
+  if(!sel)return "2026-27";
+  return sel.value==="__ADD_MORE__" ? (document.getElementById(inputId)?.value||"").trim() : (sel.value||"").trim();
+}
+
 /* STUDENT */
 
 let editingStudentId=null;
@@ -2573,8 +2639,10 @@ document.getElementById("studentModalTitle").innerText="Add Student";
 
 [
 "studentName","fatherName","motherName","studentMobile",
-"studentDOB","studentAge","studentCaste","studentReligion"
+"studentDOB","studentAge","studentCaste","studentReligion",
+"studentPreviousClass","studentPreviousSchool","studentAadhaar","studentPAN"
 ].forEach(id=>document.getElementById(id).value="");
+setupSessionSelect("studentSession","studentCustomSessionWrap","studentCustomSession","2026-27");
 
 document.getElementById("studentGender").value="";
 document.getElementById("studentClass").value=classNo;
@@ -2633,7 +2701,12 @@ function saveStudent(){
 
 let name=document.getElementById("studentName").value.trim();
 let roll=document.getElementById("studentRoll").value.trim();
+let session=getSelectedSession("studentSession","studentCustomSession");
 let father=document.getElementById("fatherName").value.trim();
+let previousClass=document.getElementById("studentPreviousClass").value.trim();
+let previousSchool=document.getElementById("studentPreviousSchool").value.trim();
+let aadhaar=document.getElementById("studentAadhaar").value.trim();
+let pan=document.getElementById("studentPAN").value.trim();
 let mother=document.getElementById("motherName").value.trim();
 let mobile=document.getElementById("studentMobile").value.trim();
 let gender=document.getElementById("studentGender").value;
@@ -2646,7 +2719,7 @@ let caste=document.getElementById("studentCaste").value.trim();
 let religion=document.getElementById("studentReligion").value.trim();
 let fee=Number(document.getElementById("studentFee").value)||0;
 
-if(!name||!father||!mobile||!gender||!classNo){
+if(!session||!name||!father||!mobile||!gender||!classNo){
 alert("Please fill all required fields");
 return;
 }
@@ -2665,7 +2738,8 @@ let s=students.find(x=>Number(x.id)===Number(editingStudentId));
 if(!s)return;
 
 Object.assign(s,{
-roll,name,father,mother,mobile,gender,dob,age,caste,religion,
+session,roll,name,father,mother,mobile,gender,dob,age,caste,religion,
+previousClass,previousSchool,aadhaar,pan,
 classNo:Number(classNo),section,stream,fee
 });
 
@@ -2675,8 +2749,9 @@ if(studentPhotoData)s.photo=studentPhotoData;
 
 students.push({
 id:Date.now(),
-roll:roll||"",
+session,roll:roll||"",
 name,father,mother,mobile,gender,dob,age,caste,religion,
+previousClass,previousSchool,aadhaar,pan,
 classNo:Number(classNo),section,stream,fee,
 photo:studentPhotoData||""
 });
@@ -2705,9 +2780,14 @@ studentPhotoData=s.photo||"";
 
 document.getElementById("studentModalTitle").innerText="Edit Student";
 
+setupSessionSelect("studentSession","studentCustomSessionWrap","studentCustomSession",s.session||"2026-27");
 document.getElementById("studentName").value=s.name||"";
 document.getElementById("studentRoll").value=s.roll||"";
 document.getElementById("fatherName").value=s.father||"";
+document.getElementById("studentPreviousClass").value=s.previousClass||"";
+document.getElementById("studentPreviousSchool").value=s.previousSchool||"";
+document.getElementById("studentAadhaar").value=s.aadhaar||"";
+document.getElementById("studentPAN").value=s.pan||"";
 document.getElementById("motherName").value=s.mother||"";
 document.getElementById("studentMobile").value=s.mobile||"";
 document.getElementById("studentGender").value=s.gender||"";
@@ -2792,6 +2872,11 @@ ${s.stream?" • "+escapeHtml(s.stream):""}
 <div class="profile-details">
 
 <div class="detail-item">
+<small>Session</small>
+<strong>${escapeHtml(s.session||"2026-27")}</strong>
+</div>
+
+<div class="detail-item">
 <small>Student Name</small>
 <strong>${escapeHtml(s.name)}</strong>
 </div>
@@ -2804,6 +2889,26 @@ ${s.stream?" • "+escapeHtml(s.stream):""}
 <div class="detail-item">
 <small>Mother Name</small>
 <strong>${escapeHtml(s.mother||"-")}</strong>
+</div>
+
+<div class="detail-item">
+<small>Previous Class</small>
+<strong>${escapeHtml(s.previousClass||"-")}</strong>
+</div>
+
+<div class="detail-item">
+<small>Previous School Name</small>
+<strong>${escapeHtml(s.previousSchool||"-")}</strong>
+</div>
+
+<div class="detail-item">
+<small>Aadhaar Number</small>
+<strong>${escapeHtml(s.aadhaar||"-")}</strong>
+</div>
+
+<div class="detail-item">
+<small>PAN Number</small>
+<strong>${escapeHtml(s.pan||"-")}</strong>
 </div>
 
 <div class="detail-item">
@@ -3630,6 +3735,7 @@ function openExamModal(studentId,classNo,stream,section,examId){
 
   document.getElementById("examModalTitle").innerText=e?"Edit Result":"Add Result";
   document.getElementById("examStudentName").value=st.name;
+  setupSessionSelect("examSession","examCustomSessionWrap","examCustomSession",e?.session||st.session||"2026-27");
 
   const nameSel=document.getElementById("examName");
   const customWrap=document.getElementById("examCustomNameWrap");
@@ -3742,8 +3848,9 @@ function saveExam(){
   let examName=getSelectedExamName();
   let examDate=document.getElementById("examDate").value;
   let resultType=document.getElementById("examResultType").value;
+  let session=getSelectedSession("examSession","examCustomSession");
 
-  if(!examName||!examDate){alert("Select Result / Exam Name and date");return;}
+  if(!session||!examName||!examDate){alert("Select Result / Exam Name and date");return;}
   if(!examSubjects.length){alert("Add at least one subject");return;}
 
   let clean=[];
@@ -3792,7 +3899,7 @@ function saveExam(){
   let result={
     id:editingExamId||Date.now(),
     studentId:Number(window.examStudentId),
-    examName,examDate,resultType,
+    session,examName,examDate,resultType,
     columns:resultColumns.map(c=>({id:c.id,name:c.name,max:Number(c.max)||0})),
     subjects:clean
   };
@@ -4386,45 +4493,44 @@ function addClassTimetableRow(event){
     event.preventDefault();
     event.stopPropagation();
   }
-  const tbody=document.querySelector("#classTimetableTable tbody");
+  const tbody=document.getElementById("classTimetableTable")?.querySelector("tbody");
   if(!tbody){
     alert("Please open Timetable first.");
     return false;
   }
 
   const rows=[...tbody.querySelectorAll("tr")];
-  const nextPeriod=rows.reduce((max,row,i)=>{
-    const n=Number(row.querySelector(".ctt-period")?.value);
-    return Math.max(max,Number.isFinite(n)&&n>0?n:i+1);
-  },0)+1;
+  let maxPeriod=0;
+  rows.forEach((row,i)=>{
+    const n=parseInt(row.querySelector(".ctt-period")?.value,10);
+    if(Number.isFinite(n) && n>maxPeriod) maxPeriod=n;
+  });
 
-  const newRow={period:nextPeriod,time:"",days:["","","","","",""]};
+  const newRow={period:maxPeriod+1,time:"",days:["","","","","",""]};
   const tr=document.createElement("tr");
   tr.innerHTML=timetableRowHtml(newRow,rows.length);
   tbody.appendChild(tr);
 
-  // Keep the new period immediately available; final values are saved by Save Class Timetable.
+  // Save the new row immediately so it cannot disappear on page refresh.
   try{
     const classNo=Number(window.timetableSelectedClass)||1;
+    const data=[...tbody.querySelectorAll("tr")].map((row,i)=>({
+      period:parseInt(row.querySelector(".ctt-period")?.value,10)||i+1,
+      time:(row.querySelector(".ctt-time")?.value||"").trim(),
+      days:[...row.querySelectorAll(".ctt-subject")].map(x=>(x.value||"").trim())
+    }));
     let all=getData("schoolTimetableByClass");
     if(!all || typeof all!=="object" || Array.isArray(all)) all={};
-    const current=[...tbody.querySelectorAll("tr")].map((row,i)=>({
-      period:Number(row.querySelector(".ctt-period")?.value)||i+1,
-      time:String(row.querySelector(".ctt-time")?.value||"").trim(),
-      days:[...row.querySelectorAll(".ctt-subject")].map(x=>String(x.value||"").trim())
-    }));
-    all[String(classNo)]=current;
+    all[String(classNo)]=data;
     setData("schoolTimetableByClass",all);
   }catch(err){
-    console.warn("Timetable temporary save skipped:",err);
+    console.error("Add Period save error:",err);
   }
 
   const input=tr.querySelector(".ctt-time");
   if(input){
-    setTimeout(()=>{
-      input.focus();
-      tr.scrollIntoView({behavior:"smooth",block:"nearest"});
-    },50);
+    input.focus();
+    setTimeout(()=>tr.scrollIntoView({behavior:"smooth",block:"nearest"}),30);
   }
   return false;
 }
