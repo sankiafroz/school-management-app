@@ -195,7 +195,7 @@ th{background:#fafbfd;color:#667085}
 }
 
 .dashboard-school-title{text-align:center;font-size:28px;font-weight:800;margin:0 0 10px;color:#172033}
-.dashboard-notice-ticker{background:#fff3cd;border:1px solid #ffe08a;color:#9a6700;border-radius:12px;padding:11px 15px;margin:0 0 18px;display:flex;align-items:center;gap:10px;white-space:nowrap;overflow:hidden}
+.dashboard-notice-ticker{background:#fff3cd;border:1px solid #ffe08a;color:#9a6700;border-radius:12px;padding:11px 15px;margin:0 0 18px;display:flex;align-items:center;gap:10px;white-space:nowrap;overflow:hidden;cursor:pointer} .dashboard-notice-ticker:hover{box-shadow:0 4px 15px #0001;transform:translateY(-1px)}
 .dashboard-notice-ticker span:last-child{font-weight:bold;overflow:hidden;text-overflow:ellipsis;animation:noticeBlink 1.2s infinite}
 .dashboard-notice-label{font-weight:800;flex:none}
 @keyframes noticeBlink{0%,45%{opacity:1}55%,100%{opacity:.25}}
@@ -294,15 +294,14 @@ SchoolHub
 <div id="dashboardPage">
 
 <div class="dashboard-school-title" id="dashboardSchoolName"></div>
-<div class="dashboard-notice-ticker" id="dashboardNoticeTicker">
+<div class="dashboard-notice-ticker" id="dashboardNoticeTicker"
+     onclick="showPage('notices')" role="button" tabindex="0"
+     title="Click to view all current and previous notices"
+     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showPage('notices')}">
   <span class="dashboard-notice-label">📢 NOTICE</span>
-  <span id="dashboardNoticeText">School Notice</span>
+  <span id="dashboardNoticeText">Click to view all notices</span>
+  <span style="margin-left:auto;font-size:12px;flex:none">View All →</span>
 </div>
-<div class="welcome">
-<h2>Welcome 👋</h2>
-<p>Dashboard par kisi bhi class ko select karein.</p>
-</div>
-
 <div class="card">
   <div class="card-header">
     <div>
@@ -1530,14 +1529,29 @@ function downloadFile(filename,content,mime="text/csv;charset=utf-8"){
 }
 
 function attendanceStatusCode(status){
-  const s=String(status||"").trim().toLowerCase();
-  if(s==="p"||s==="present")return "P";
-  if(s==="a"||s==="absent")return "A";
-  if(s==="l"||s==="leave")return "L";
+  const s=String(status??"").trim().toLowerCase();
+  if(s==="p"||s==="present"||s==="pres")return "P";
+  if(s==="a"||s==="absent"||s==="abs")return "A";
+  if(s==="l"||s==="leave"||s==="on leave")return "L";
   if(s==="h"||s==="holiday")return "H";
   if(s==="s"||s==="sunday")return "S";
   return "";
 }
+
+function getAttendanceRecordForStudentDate(records,student,date){
+  const sid=Number(student?.id);
+  return records.find(x=>{
+    const xid=Number(x?.studentId ?? x?.studentID ?? x?.student_id ?? x?.idStudent);
+    const xd=String(x?.date ?? x?.attendanceDate ?? x?.day ?? "").slice(0,10);
+    return Number.isFinite(sid) && Number.isFinite(xid) && xid===sid && xd===date;
+  })||null;
+}
+
+function getAttendanceRecordStatus(rec){
+  if(!rec)return "";
+  return rec.status ?? rec.attendanceStatus ?? rec.attendance ?? rec.value ?? rec.mark ?? "";
+}
+
 
 function downloadAttendanceReportForClass(classNo){
   let type=document.getElementById("attendanceDownloadType").value;
@@ -1582,8 +1596,8 @@ function downloadAttendanceReportForClass(classNo){
     let row=[attendanceRoll(s,i),s.name||""];
     let dayStatus="";
     dates.forEach(dt=>{
-      let rec=records.find(x=>Number(x.studentId)===Number(s.id)&&x.date===dt);
-      const code=attendanceStatusCode(rec?.status);
+      let rec=getAttendanceRecordForStudentDate(records,s,dt);
+      const code=attendanceStatusCode(getAttendanceRecordStatus(rec));
       row.push(code);
       if(type==="day") dayStatus=code;
     });
@@ -1594,7 +1608,7 @@ function downloadAttendanceReportForClass(classNo){
   let csv="\uFEFF"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
   let suffix=type==="day"?from:(from+"_to_"+to);
 
-  // Excel-compatible CSV: only Roll No., Student Name and P/A/L/H are exported.
+  // Excel-compatible CSV: Roll No., Student Name and attendance status P/A/L/H/S are exported.
   downloadFile(`Attendance_Class_${classNo}_${suffix}.csv`,csv,"text/csv;charset=utf-8");
   document.getElementById("attendanceDownloadModal")?.remove();
 }
@@ -1637,8 +1651,8 @@ function printAttendanceReport(classNo,students,dates,records){
   let head=dates.map(dt=>`<th>${escapeHtml(formatDate(dt))}</th>`).join("");
   let body=students.map((s,i)=>{
     let cells=dates.map(dt=>{
-      let rec=records.find(x=>Number(x.studentId)===Number(s.id)&&x.date===dt);
-      return `<td style="text-align:center;font-weight:bold">${attendanceStatusCode(rec?.status)||"-"}</td>`;
+      let rec=getAttendanceRecordForStudentDate(records,s,dt);
+      return `<td style="text-align:center;font-weight:bold">${attendanceStatusCode(getAttendanceRecordStatus(rec))||"-"}</td>`;
     }).join("");
     return `<tr><td>${escapeHtml(attendanceRoll(s,i))}</td><td>${escapeHtml(s.name||"")}</td>${cells}</tr>`;
   }).join("");
@@ -4099,39 +4113,83 @@ function editTimetable(){
       {time:"09:00",days:["English","Maths","Hindi","Science","Computer"]}
     ];
   }
+
   let html=`<div class="modal-bg" id="timetableEditModal" style="display:flex">
     <div class="modal">
       <div class="modal-header">
         <h2>Edit Timetable</h2>
         <button class="close-btn" onclick="closeTimetableEdit()">×</button>
       </div>
+
       <div class="table-container">
-        <table style="min-width:700px">
-          <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
+        <table id="timetableEditTable" style="min-width:850px">
+          <thead><tr>
+            <th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th>
+            <th>Thursday</th><th>Friday</th><th>Action</th>
+          </tr></thead>
+          <tbody>
           ${tt.map((r,i)=>`<tr>
-            <td><input class="tt-time" value="${escapeHtml(r.time||"")}"></td>
-            ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="${escapeHtml((r.days||[])[j]||"")}"></td>`).join("")}
+            <td><input class="tt-time" value="${escapeHtml(r.time||"")}" placeholder="08:00"></td>
+            ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="${escapeHtml((r.days||[])[j]||"")}" placeholder="${d}"></td>`).join("")}
+            <td><button type="button" class="delete-btn" onclick="removeTimetableRow(this)">Delete</button></td>
           </tr>`).join("")}
+          </tbody>
         </table>
       </div>
-      <br>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="saveTimetable()">Save Timetable</button>
-        <button class="btn btn-outline" style="margin-top:0" onclick="closeTimetableEdit()">Cancel</button>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
+        <button type="button" class="small-btn" onclick="addTimetableRow()">＋ Add Period</button>
+        <button type="button" class="btn btn-primary" style="flex:1;min-width:180px" onclick="saveTimetable()">Save Timetable</button>
+        <button type="button" class="btn btn-outline" style="flex:1;min-width:120px;margin-top:0" onclick="closeTimetableEdit()">Cancel</button>
       </div>
     </div>
   </div>`;
   document.body.insertAdjacentHTML("beforeend",html);
 }
+
+function addTimetableRow(){
+  const tbody=document.querySelector("#timetableEditTable tbody");
+  if(!tbody)return;
+  const i=tbody.querySelectorAll("tr").length;
+  const row=document.createElement("tr");
+  row.innerHTML=`
+    <td><input class="tt-time" value="" placeholder="e.g. 10:00"></td>
+    ${["Monday","Tuesday","Wednesday","Thursday","Friday"].map((d,j)=>`<td><input class="tt-day" data-day="${j}" value="" placeholder="${d}"></td>`).join("")}
+    <td><button type="button" class="delete-btn" onclick="removeTimetableRow(this)">Delete</button></td>`;
+  tbody.appendChild(row);
+  row.querySelector(".tt-time")?.focus();
+}
+
+function removeTimetableRow(btn){
+  const tbody=document.querySelector("#timetableEditTable tbody");
+  const row=btn?.closest("tr");
+  if(!tbody||!row)return;
+  if(tbody.querySelectorAll("tr").length<=1){
+    alert("At least one timetable period is required.");
+    return;
+  }
+  row.remove();
+}
+
+
 function closeTimetableEdit(){
   document.getElementById("timetableEditModal")?.remove();
 }
 function saveTimetable(){
-  const rows=[...document.querySelectorAll("#timetableEditModal table tr")].slice(1);
+  const modal=document.getElementById("timetableEditModal");
+  if(!modal){alert("Timetable editor is not open.");return;}
+
+  const rows=[...modal.querySelectorAll("#timetableEditTable tbody tr")];
   const data=rows.map(row=>({
     time:row.querySelector(".tt-time")?.value.trim()||"",
     days:[...row.querySelectorAll(".tt-day")].map(x=>x.value.trim())
-  }));
+  })).filter(r=>r.time||r.days.some(Boolean));
+
+  if(!data.length){
+    alert("Please add at least one timetable period.");
+    return;
+  }
+
   setData("schoolTimetable",data);
   closeTimetableEdit();
   const other=document.getElementById("otherPage");
@@ -4142,25 +4200,29 @@ function saveTimetable(){
 if(page==="notices"){
 
 let notices=getData("schoolNotices");
-if(!Array.isArray(notices)||!notices.length){
-  notices=[
-    {title:"Independence Day Holiday",text:"School holiday notice"},
-    {title:"Parent Teacher Meeting",text:"PTM scheduled Saturday"},
-    {title:"Annual Sports Day",text:"All students can participate"}
-  ];
-}
+if(!Array.isArray(notices))notices=[];
 
 return `
 <div class="card">
 <div class="card-header">
-<h3>Notice Board</h3>
-<button class="small-btn" onclick="openNoticeModal()">+ New Notice</button>
+  <div>
+    <h3>📢 Notice Board</h3>
+    <p style="color:#777;font-size:12px;margin-top:4px">${notices.length} Current & Previous Notice${notices.length===1?"":"s"}</p>
+  </div>
+  <button class="small-btn" onclick="openNoticeModal()">+ New Notice</button>
 </div>
-${notices.map((n,i)=>`<div class="notice">
-<strong>${escapeHtml(n.title||"")}</strong>
-<span>${escapeHtml(n.text||"")}</span>
-<div style="margin-top:8px"><button class="edit-btn" onclick="editNotice(${i})">Edit</button> <button class="delete-btn" onclick="deleteNotice(${i})">Delete</button></div>
-</div>`).join("")}
+
+${notices.length ? notices.map((n,i)=>`<div class="notice">
+  <strong>${escapeHtml(n.title||"Untitled Notice")}</strong>
+  <span>${escapeHtml(n.text||"")}</span>
+  <div style="margin-top:6px;color:#98a2b3;font-size:11px">
+    ${n.date?escapeHtml(formatDate(n.date)):"Date not available"}
+  </div>
+  <div style="margin-top:8px">
+    <button class="edit-btn" onclick="editNotice(${i})">Edit</button>
+    <button class="delete-btn" onclick="deleteNotice(${i})">Delete</button>
+  </div>
+</div>`).join("") : `<div class="empty"><h3>No notices yet</h3><p>Click “+ New Notice” to add a notice.</p></div>`}
 </div>`;
 }
 
@@ -4394,17 +4456,15 @@ function updateDashboardNotice(){
   const name=document.getElementById("dashboardSchoolName");
   if(name)name.innerText=school;
   let notices=getData("schoolNotices");
-  if(!Array.isArray(notices)||!notices.length){
-    notices=[
-      {title:"Independence Day Holiday",text:"School holiday notice"},
-      {title:"Parent Teacher Meeting",text:"PTM scheduled Saturday"},
-      {title:"Annual Sports Day",text:"All students can participate"}
-    ];
-  }
+  if(!Array.isArray(notices))notices=[];
   const ticker=document.getElementById("dashboardNoticeText");
   if(ticker){
-    const n=notices[0];
-    ticker.innerText=(n.title||"School Notice")+(n.text?" — "+n.text:"");
+    if(notices.length){
+      const n=notices[0];
+      ticker.innerText=(n.title||"School Notice")+(n.text?" — "+n.text:"");
+    }else{
+      ticker.innerText="No notices yet — click to view Notice Board";
+    }
   }
 }
 
