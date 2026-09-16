@@ -224,6 +224,7 @@ th{background:#fafbfd;color:#667085}
 #classTimetableTable th:nth-child(2),#classTimetableTable td:nth-child(2){min-width:200px}
 
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -432,6 +433,21 @@ SchoolHub
 </div>
 
 <div class="form-group">
+<label>Mother Name</label>
+<input id="motherName">
+</div>
+
+<div class="form-group">
+<label>Mobile Number *</label>
+<input id="studentMobile">
+</div>
+
+<div class="form-group">
+<label>Aadhaar Number</label>
+<input id="studentAadhaar" inputmode="numeric" maxlength="12" placeholder="12 digit Aadhaar number">
+</div>
+
+<div class="form-group">
 <label>Previous Class</label>
 <input id="studentPreviousClass" placeholder="Enter previous class">
 </div>
@@ -442,23 +458,13 @@ SchoolHub
 </div>
 
 <div class="form-group">
-<label>Aadhaar Number</label>
-<input id="studentAadhaar" inputmode="numeric" maxlength="12" placeholder="12 digit Aadhaar number">
+<label>PEN Number (Permanent Education Number)</label>
+<input id="studentPAN" maxlength="20" placeholder="Enter PEN number">
 </div>
 
 <div class="form-group">
-<label>PAN Number</label>
-<input id="studentPAN" maxlength="10" placeholder="PAN number">
-</div>
-
-<div class="form-group">
-<label>Mother Name</label>
-<input id="motherName">
-</div>
-
-<div class="form-group">
-<label>Mobile *</label>
-<input id="studentMobile">
+<label>Address</label>
+<textarea id="studentAddress" placeholder="Enter full address" style="min-height:47px"></textarea>
 </div>
 
 <div class="form-group">
@@ -484,18 +490,10 @@ SchoolHub
 <label>Class *</label>
 <select id="studentClass">
 <option value="">Select Class</option>
-<option value="1">Class 1</option>
-<option value="2">Class 2</option>
-<option value="3">Class 3</option>
-<option value="4">Class 4</option>
-<option value="5">Class 5</option>
-<option value="6">Class 6</option>
-<option value="7">Class 7</option>
-<option value="8">Class 8</option>
-<option value="9">Class 9</option>
-<option value="10">Class 10</option>
-<option value="11">Class 11</option>
-<option value="12">Class 12</option>
+<option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+<option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+<option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+<option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
 </select>
 </div>
 
@@ -529,6 +527,12 @@ SchoolHub
 <input id="studentFee" type="number" value="35000">
 </div>
 
+</div>
+
+<div style="margin-top:8px">
+<button type="button" class="small-btn" onclick="addStudentExtraField()">＋ Add More</button>
+<div id="studentExtraFields" style="margin-top:10px"></div>
+<p style="font-size:12px;color:#667085;margin-top:5px">Add More se agar koi extra information chahiye ho to naya column/field add kar sakte hain.</p>
 </div>
 
 <br>
@@ -2223,6 +2227,39 @@ document.getElementById("otherPage").innerHTML=html;
 return;
 }
 
+if(type==="exams"){
+  const sorted=[...students].sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+  const examSessions=[...new Set(getExams().filter(e=>sorted.some(st=>Number(st.id)===Number(e.studentId))).map(e=>String(e.session||"2026-27")).filter(Boolean))];
+  let rows=sorted.map((st,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button></td>
+    <td>${escapeHtml(st.roll||i+1)}</td>
+  </tr>`).join("");
+  let html=`<button class="back-btn" onclick="${back}">← Back</button>
+  <div class="card">
+    <div class="card-header">
+      <div><h3>${title} - Result</h3><p style="color:#777;font-size:12px;margin-top:4px">Student name par click karke direct result add/update karein.</p></div>
+    </div>
+    <div class="result-excel-tools">
+      <strong>📊 Add Result Excel Sheet</strong>
+      <p style="font-size:12px;color:#667085;margin:5px 0 10px">Template download karein, marks fill karein aur upload karte hi matching students ke results automatic save ho jayenge.</p>
+      <div class="tool-row">
+        <button type="button" class="small-btn" onclick="downloadResultExcelTemplate(${classNo},'${stream||""}','${section||""}')">⬇️ Download Excel Performa</button>
+        <input id="resultExcelUpload" type="file" accept=".xlsx,.xls,.csv" onchange="uploadResultExcel(event,${classNo},'${stream||""}','${section||""}')">
+      </div>
+      <div id="resultExcelStatus" style="font-size:12px;color:#667085;margin-top:8px"></div>
+    </div>
+    <div class="table-container">
+      <table style="min-width:520px">
+        <thead><tr><th>S.No.</th><th>Student Name</th><th>Roll Number</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="3"><div class="empty">No Students Found</div></td></tr>`}</tbody>
+      </table>
+    </div>
+  </div>`;
+  document.getElementById("otherPage").innerHTML=html;
+  return;
+}
+
 let html=`
 <button class="back-btn" onclick="${back}">← Back</button>
 
@@ -2285,7 +2322,7 @@ ${s.stream?" • "+escapeHtml(s.stream):""}
 <div class="student-profile-detail"><small>Student Name</small><strong>${escapeHtml(s.name)}</strong></div>
 <div class="student-profile-detail"><small>Roll Number</small><strong>${escapeHtml(s.roll||index+1)}</strong></div>
 <div class="student-profile-detail"><small>Father Name</small><strong>${escapeHtml(s.father||"-")}</strong></div>
-<div class="student-profile-detail"><small>Mother Name</small><strong>${escapeHtml(s.mother||"-")}</strong></div>
+<div class="student-profile-detail"><small>Mother Name</small><strong>${escapeHtml(s.mother||"-")}</strong></div><div class="student-profile-detail"><small>Address</small><strong>${escapeHtml(s.address||"-")}</strong></div>
 <div class="student-profile-detail"><small>Date of Birth</small><strong>${formatDate(s.dob)}</strong></div>
 <div class="student-profile-detail"><small>Mobile Number</small><strong>${escapeHtml(s.mobile||"-")}</strong></div>
 <div class="student-profile-detail"><small>Caste</small><strong>${escapeHtml(s.caste||"-")}</strong></div>
@@ -2349,6 +2386,9 @@ html+=`
 <th>Father Name</th>
 <th>Mother Name</th>
 <th>Mobile</th>
+<th>Aadhaar</th>
+<th>PEN</th>
+<th>Address</th>
 <th>DOB</th>
 <th>Age</th>
 <th>Caste</th>
@@ -2446,6 +2486,9 @@ html+=`
 <td>${escapeHtml(s.father)}</td>
 <td>${escapeHtml(s.mother||"-")}</td>
 <td>${escapeHtml(s.mobile)}</td>
+<td>${escapeHtml(s.aadhaar||"-")}</td>
+<td>${escapeHtml(s.pan||"-")}</td>
+<td>${escapeHtml(s.address||"-")}</td>
 <td>${formatDate(s.dob)}</td>
 <td>${escapeHtml(s.age||"-")}</td>
 <td>${escapeHtml(s.caste||"-")}</td>
@@ -2640,8 +2683,10 @@ document.getElementById("studentModalTitle").innerText="Add Student";
 [
 "studentName","fatherName","motherName","studentMobile",
 "studentDOB","studentAge","studentCaste","studentReligion",
-"studentPreviousClass","studentPreviousSchool","studentAadhaar","studentPAN"
-].forEach(id=>document.getElementById(id).value="");
+"studentPreviousClass","studentPreviousSchool","studentAadhaar","studentPAN","studentAddress"
+].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+studentExtraFields=[];
+document.getElementById("studentExtraFields").innerHTML="";
 setupSessionSelect("studentSession","studentCustomSessionWrap","studentCustomSession","2026-27");
 
 document.getElementById("studentGender").value="";
@@ -2655,6 +2700,44 @@ document.getElementById("studentPhotoPreview").className="photo-placeholder";
 
 updateSectionOptions(section||"");
 document.getElementById("studentModal").style.display="flex";
+}
+
+let studentExtraFields=[];
+
+function addStudentExtraField(label="",value=""){
+  const box=document.getElementById("studentExtraFields");
+  if(!box)return;
+  const idx=studentExtraFields.length;
+  studentExtraFields.push({label:String(label||""),value:String(value||"")});
+  const row=document.createElement("div");
+  row.className="extra-field-row";
+  row.dataset.extraIndex=idx;
+  row.innerHTML=`<div class="form-group" style="margin:0">
+    <label>Field Name</label><input class="extra-label" value="${escapeHtml(label||"")}" placeholder="e.g. Blood Group">
+  </div>
+  <div class="form-group" style="margin:0">
+    <label>Value</label><input class="extra-value" value="${escapeHtml(value||"")}" placeholder="Enter value">
+  </div>
+  <button type="button" class="delete-btn" onclick="removeStudentExtraField(${idx})">Delete</button>`;
+  box.appendChild(row);
+}
+function removeStudentExtraField(idx){
+  studentExtraFields.splice(idx,1);
+  renderStudentExtraFields();
+}
+function renderStudentExtraFields(){
+  const box=document.getElementById("studentExtraFields");
+  if(!box)return;
+  box.innerHTML="";
+  const copy=studentExtraFields.slice();
+  studentExtraFields=[];
+  copy.forEach(x=>addStudentExtraField(x.label,x.value));
+}
+function collectStudentExtraFields(){
+  return [...document.querySelectorAll("#studentExtraFields .extra-field-row")].map(row=>({
+    label:(row.querySelector(".extra-label")?.value||"").trim(),
+    value:(row.querySelector(".extra-value")?.value||"").trim()
+  })).filter(x=>x.label);
 }
 
 function previewStudentPhoto(event){
@@ -2718,6 +2801,8 @@ let age=document.getElementById("studentAge").value||calculateAgeFromDOB(dob);
 let caste=document.getElementById("studentCaste").value.trim();
 let religion=document.getElementById("studentReligion").value.trim();
 let fee=Number(document.getElementById("studentFee").value)||0;
+let address=(document.getElementById("studentAddress")?.value||"").trim();
+let extraFields=collectStudentExtraFields();
 
 if(!session||!name||!father||!mobile||!gender||!classNo){
 alert("Please fill all required fields");
@@ -2739,7 +2824,7 @@ if(!s)return;
 
 Object.assign(s,{
 session,roll,name,father,mother,mobile,gender,dob,age,caste,religion,
-previousClass,previousSchool,aadhaar,pan,
+previousClass,previousSchool,aadhaar,pan,address,extraFields,
 classNo:Number(classNo),section,stream,fee
 });
 
@@ -2751,7 +2836,7 @@ students.push({
 id:Date.now(),
 session,roll:roll||"",
 name,father,mother,mobile,gender,dob,age,caste,religion,
-previousClass,previousSchool,aadhaar,pan,
+previousClass,previousSchool,aadhaar,pan,address,extraFields,
 classNo:Number(classNo),section,stream,fee,
 photo:studentPhotoData||""
 });
@@ -2788,7 +2873,10 @@ document.getElementById("studentPreviousClass").value=s.previousClass||"";
 document.getElementById("studentPreviousSchool").value=s.previousSchool||"";
 document.getElementById("studentAadhaar").value=s.aadhaar||"";
 document.getElementById("studentPAN").value=s.pan||"";
+document.getElementById("studentAddress").value=s.address||"";
 document.getElementById("motherName").value=s.mother||"";
+studentExtraFields=Array.isArray(s.extraFields)?s.extraFields.map(x=>({label:x.label||"",value:x.value||""})):[];
+renderStudentExtraFields();
 document.getElementById("studentMobile").value=s.mobile||"";
 document.getElementById("studentGender").value=s.gender||"";
 document.getElementById("studentClass").value=s.classNo||"";
@@ -2915,6 +3003,11 @@ ${s.stream?" • "+escapeHtml(s.stream):""}
 <small>Mobile</small>
 <strong>${escapeHtml(s.mobile)}</strong>
 </div>
+<div class="detail-item">
+<small>Address</small>
+<strong>${escapeHtml(s.address||"-")}</strong>
+</div>
+${(Array.isArray(s.extraFields)?s.extraFields:[]).filter(x=>x&&x.label).map(x=>`<div class="detail-item"><small>${escapeHtml(x.label)}</small><strong>${escapeHtml(x.value||"-")}</strong></div>`).join("")}
 
 <div class="detail-item">
 <small>Date of Birth</small>
@@ -3367,6 +3460,15 @@ body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:25px;color
 .footer{margin-top:22px;text-align:center;color:#667085;font-size:12px}
 .print{display:block;margin:18px auto 0;border:0;background:#1769ff;color:#fff;padding:11px 20px;border-radius:9px;font-weight:bold;cursor:pointer}
 @media print{body{background:#fff;padding:0}.receipt{border:0;border-radius:0;max-width:none}.print{display:none}}
+
+<style>
+.extra-field-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:10px}
+.result-excel-tools{background:#f8faff;border:1px solid #dce5f3;border-radius:12px;padding:14px;margin-bottom:14px}
+.result-excel-tools .tool-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.result-excel-tools input[type=file]{flex:1;min-width:220px}
+.result-student-link{border:0;background:none;color:#1769ff;font-weight:800;cursor:pointer;padding:0;text-align:left}
+@media(max-width:700px){.extra-field-row{grid-template-columns:1fr}.result-excel-tools .tool-row{flex-direction:column;align-items:stretch}}
+</style>
 </style>
 </head>
 <body>
@@ -3924,6 +4026,184 @@ function deleteExam(id,classNo,stream,section){
   if(!confirm("Delete this result?"))return;
   saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
   openStudentsData("exams",classNo,stream,section);
+}
+
+
+/* RESULT EXCEL */
+function getResultExcelSubjects(){
+  return ["Maths","Science","English","Hindi","Social Science"];
+}
+
+function downloadResultExcelTemplate(classNo,stream,section){
+  const students=getStudents().filter(s=>
+    Number(s.classNo)===Number(classNo)&&
+    (!stream||s.stream===stream)&&
+    (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
+  ).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+
+  if(!students.length){alert("No students found in this class.");return;}
+
+  const subjects=getResultExcelSubjects();
+  const headers=["Roll Number","Student Name","Session","Result Type","Result Name","Result Date"];
+  subjects.forEach(sub=>{headers.push(sub+" MM");headers.push(sub+" Obtained");});
+
+  const rows=students.map(st=>{
+    const row=[st.roll||"",st.name||"",st.session||"2026-27","Unit Test","Unit Test 1",today()];
+    subjects.forEach(()=>{row.push("");row.push("");});
+    return row;
+  });
+
+  if(window.XLSX){
+    const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+    ws["!cols"]=headers.map((h,i)=>({wch:i===1?25:18}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Result");
+    XLSX.writeFile(wb,"Class_"+classNo+"_Result_Performa.xlsx");
+  }else{
+    const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="Class_"+classNo+"_Result_Performa.csv";
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    alert("Excel library load nahi hui, isliye CSV performa download hua hai. Excel me seedha open ho jayega.");
+  }
+}
+
+function parseResultExcelRows(file){
+  return new Promise((resolve,reject)=>{
+    const ext=(file.name.split(".").pop()||"").toLowerCase();
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("File read nahi ho saki."));
+    reader.onload=e=>{
+      try{
+        if(ext==="csv"){
+          const text=new TextDecoder("utf-8").decode(e.target.result);
+          const lines=text.replace(/^\ufeff/,"").split(/\r?\n/).filter(x=>x.trim());
+          const parseLine=line=>{
+            const out=[];let cur="",quoted=false;
+            for(let i=0;i<line.length;i++){
+              const ch=line[i];
+              if(ch==='"' && line[i+1]==='"'){cur+='"';i++;continue;}
+              if(ch==='"'){quoted=!quoted;continue;}
+              if(ch===","&&!quoted){out.push(cur);cur="";}else cur+=ch;
+            }
+            out.push(cur);return out;
+          };
+          const arr=lines.map(parseLine);
+          const headers=arr.shift().map(x=>String(x||"").trim());
+          resolve(arr.map(r=>Object.fromEntries(headers.map((h,i)=>[h,String(r[i]??"").trim()]))));
+          return;
+        }
+        if(!window.XLSX)throw new Error("Excel reader load nahi hua. Internet on karke page refresh karein.");
+        const wb=XLSX.read(e.target.result,{type:"array"});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        resolve(XLSX.utils.sheet_to_json(ws,{defval:"",raw:false}));
+      }catch(err){reject(err);}
+    };
+    if(ext==="csv")reader.readAsArrayBuffer(file);else reader.readAsArrayBuffer(file);
+  });
+}
+
+function resultExcelFindKey(obj,keys){
+  const normalized={};
+  Object.keys(obj||{}).forEach(k=>{
+    normalized[String(k).trim().toLowerCase().replace(/[^a-z0-9]+/g," ")]=obj[k];
+  });
+  for(const key of keys){
+    const v=normalized[key.toLowerCase().replace(/[^a-z0-9]+/g," ")];
+    if(v!==undefined && String(v).trim()!=="")return String(v).trim();
+  }
+  return "";
+}
+
+function uploadResultExcel(event,classNo,stream,section){
+  const file=event.target.files?.[0];
+  const status=document.getElementById("resultExcelStatus");
+  if(!file)return;
+  if(status)status.textContent="Excel sheet read ho rahi hai...";
+  parseResultExcelRows(file).then(rows=>{
+    if(!rows.length)throw new Error("Excel sheet me koi data row nahi mili.");
+
+    const students=getStudents().filter(s=>
+      Number(s.classNo)===Number(classNo)&&
+      (!stream||s.stream===stream)&&
+      (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
+    );
+
+    const byRoll=new Map(students.map(s=>[String(s.roll||"").trim().toLowerCase(),s]));
+    const byName=new Map(students.map(s=>[String(s.name||"").trim().toLowerCase(),s]));
+    const exams=getExams();
+    let added=0,updated=0,skipped=0;
+
+    rows.forEach(row=>{
+      const roll=resultExcelFindKey(row,["Roll Number","Roll No","Roll"]);
+      const name=resultExcelFindKey(row,["Student Name","Name"]);
+      const st=(roll&&byRoll.get(roll.toLowerCase())) || (name&&byName.get(name.toLowerCase()));
+      if(!st){skipped++;return;}
+
+      const session=resultExcelFindKey(row,["Session"])||st.session||"2026-27";
+      const examName=resultExcelFindKey(row,["Result Name","Exam Name","Result","Exam"])||"Unit Test 1";
+      const examDate=resultExcelFindKey(row,["Result Date","Exam Date","Date"])||today();
+      const rt=resultExcelFindKey(row,["Result Type","Type"]).toLowerCase().includes("exam")?"exam":"unit_test";
+
+      const subjects=[];
+      const keys=Object.keys(row);
+      const pairs={};
+      keys.forEach(k=>{
+        const m=String(k).match(/^(.+?)\s+(MM|Maximum Marks|Max|Obtained|Marks)$/i);
+        if(!m)return;
+        const sub=m[1].trim(),kind=m[2].toLowerCase();
+        const id=sub.toLowerCase();
+        pairs[id]=pairs[id]||{name:sub};
+        if(kind==="mm"||kind==="maximum marks"||kind==="max")pairs[id].mm=Number(row[k])||0;
+        else pairs[id].obtained=Number(row[k])||0;
+      });
+      Object.values(pairs).forEach(x=>{
+        if(!x.name)return;
+        const mm=Number(x.mm)||0,obtained=Number(x.obtained)||0;
+        if(mm>0 || obtained>0)subjects.push({name:x.name,mm,obtained,columnValues:{}});
+      });
+      if(!subjects.length){skipped++;return;}
+
+      const result={
+        id:Date.now()+Math.floor(Math.random()*100000),
+        studentId:Number(st.id),
+        session,examName,examDate,resultType:rt,
+        columns:[
+          {id:"mm",name:"MM",max:0},
+          {id:"obtained",name:"Obtained",max:0}
+        ],
+        subjects
+      };
+
+      const existing=exams.findIndex(x=>
+        Number(x.studentId)===Number(st.id)&&
+        String(x.session||"2026-27")===String(session)&&
+        String(x.examName||"").trim().toLowerCase()===String(examName).trim().toLowerCase()
+      );
+      if(existing>=0){
+        result.id=exams[existing].id;
+        exams[existing]=result;
+        updated++;
+      }else{
+        exams.push(result);
+        added++;
+      }
+    });
+
+    saveExams(exams);
+    if(status)status.textContent=`Done: ${added} new, ${updated} updated, ${skipped} skipped.`;
+    alert(`Result Excel upload complete.\\nNew: ${added}\\nUpdated: ${updated}\\nSkipped: ${skipped}`);
+    openStudentsData("exams",classNo,stream,section);
+  }).catch(err=>{
+    console.error(err);
+    if(status)status.textContent="Error: "+(err.message||err);
+    alert(err.message||"Excel upload failed.");
+  }).finally(()=>{
+    if(event.target)event.target.value="";
+  });
 }
 
 /* HOMEWORK */
