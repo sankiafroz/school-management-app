@@ -1641,9 +1641,11 @@ function downloadAttendanceReportForClass(classNo){
       let rec=getAttendanceRecordForStudentDate(records,s,dt);
       const raw=String(getAttendanceRecordStatus(rec)||"").trim();
       const code=attendanceStatusCode(raw);
-      // Never leave an actually stored Present/Absent/etc. as "-".
-      row.push(code || raw || "");
-      if(type==="day") dayStatus=code ? ({P:"Present",A:"Absent",L:"Leave",H:"Holiday",S:"Sunday"}[code]) : (raw||"");
+      // Holiday records keep the entered holiday name (e.g. Diwali).
+      // Other attendance statuses remain P/A/L/S in the date columns.
+      const holidayLabel = code==="H" ? String(rec?.holidayName||rec?.holiday||"Holiday").trim() : "";
+      row.push(holidayLabel || code || raw || "");
+      if(type==="day") dayStatus = holidayLabel || (code ? ({P:"Present",A:"Absent",L:"Leave",H:"Holiday",S:"Sunday"}[code]) : (raw||""));
     });
     if(type==="day") row.push(dayStatus);
     rows.push(row);
@@ -1706,7 +1708,9 @@ function printAttendanceReport(classNo,students,dates,records){
       let rec=getAttendanceRecordForStudentDate(records,s,dt);
       const raw=String(getAttendanceRecordStatus(rec)||"").trim();
       const code=attendanceStatusCode(raw);
-      const label=code ? ({P:"Present",A:"Absent",L:"Leave",H:"Holiday",S:"Sunday"}[code]) : (raw||"");
+      const label = code==="H"
+        ? String(rec?.holidayName||rec?.holiday||"Holiday").trim()
+        : (code ? ({P:"Present",A:"Absent",L:"Leave",H:"Holiday",S:"Sunday"}[code]) : (raw||""));
       return `<td style="text-align:center;font-weight:bold">${escapeHtml(label||"-")}</td>`;
     }).join("");
     return `<tr><td>${escapeHtml(attendanceRoll(s,i))}</td><td>${escapeHtml(s.name||"")}</td>${cells}</tr>`;
@@ -4279,7 +4283,7 @@ if(page==="timetable"){
         <tbody>${tt.map((r,i)=>timetableRowHtml(r,i)).join("")}</tbody>
       </table></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
-        <button type="button" class="small-btn" onclick="addClassTimetableRow()">＋ Add Period</button>
+        <button type="button" id="addClassTimetablePeriodBtn" class="small-btn" data-action="add-class-timetable">＋ Add Period</button>
         <button type="button" class="btn btn-primary" style="flex:1;min-width:190px" onclick="saveClassTimetable()">Save Class Timetable</button>
       </div>
     </div></div>`;
@@ -4306,36 +4310,51 @@ function changeTimetableClass(classNo){
   if(other) other.innerHTML=getOtherPage("timetable");
 }
 function addClassTimetableRow(){
-  const tbody=document.querySelector("#classTimetableTable tbody");
-  if(!tbody){alert("Timetable table not found.");return;}
+  try{
+    const tbody=document.querySelector("#classTimetableTable tbody");
+    const classNo=Number(window.timetableSelectedClass)||1;
+    if(!tbody){
+      alert("Timetable table not found. Please open Timetable again.");
+      return;
+    }
 
-  const classNo=Number(window.timetableSelectedClass)||1;
-  const rows=[...tbody.querySelectorAll("tr")];
-  const i=rows.length;
+    // First preserve anything the user has already typed in the current rows.
+    const current=[...tbody.querySelectorAll("tr")].map((row,i)=>({
+      period:Number(row.querySelector(".ctt-period")?.value)||i+1,
+      time:(row.querySelector(".ctt-time")?.value||"").trim(),
+      days:[...row.querySelectorAll(".ctt-subject")].map(x=>(x.value||"").trim())
+    }));
 
-  const row=document.createElement("tr");
-  row.innerHTML=timetableRowHtml({
-    period:i+1,
-    time:"",
-    days:["","","","","",""]
-  },i);
-  tbody.appendChild(row);
+    const all=getData("schoolTimetableByClass");
+    const store=(all&&typeof all==="object"&&!Array.isArray(all))?all:{};
+    const nextPeriod=current.reduce((m,r)=>Math.max(m,Number(r.period)||0),0)+1;
+    current.push({period:nextPeriod,time:"",days:["","","","","",""]});
+    store[String(classNo)]=current;
+    setData("schoolTimetableByClass",store);
 
-  // Persist the new period immediately. This makes Add Period work even
-  // before the user presses Save Class Timetable.
-  const data=[...tbody.querySelectorAll("tr")].map((r,idx)=>({
-    period:Number(r.querySelector(".ctt-period")?.value)||idx+1,
-    time:r.querySelector(".ctt-time")?.value.trim()||"",
-    days:[...r.querySelectorAll(".ctt-subject")].map(x=>x.value.trim())
-  }));
-  const all=getData("schoolTimetableByClass");
-  const store=(all&&typeof all==="object"&&!Array.isArray(all))?all:{};
-  store[String(classNo)]=data;
-  setData("schoolTimetableByClass",store);
+    // Re-render from the saved data so the new period is guaranteed to appear.
+    const other=document.getElementById("otherPage");
+    if(other) other.innerHTML=getOtherPage("timetable");
 
-  row.scrollIntoView({behavior:"smooth",block:"nearest",inline:"nearest"});
-  setTimeout(()=>row.querySelector(".ctt-time")?.focus(),50);
+    setTimeout(()=>{
+      const newRows=document.querySelectorAll("#classTimetableTable tbody tr");
+      const last=newRows[newRows.length-1];
+      last?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"nearest"});
+      last?.querySelector(".ctt-time")?.focus();
+    },30);
+  }catch(err){
+    console.error("Add Period error:",err);
+    alert("Add Period error: "+(err.message||"Please refresh the page."));
+  }
 }
+// Robust click handler for the dynamically-rendered Add Period button.
+document.addEventListener("click",function(e){
+  const btn=e.target.closest?.('[data-action="add-class-timetable"]');
+  if(!btn)return;
+  e.preventDefault();
+  e.stopPropagation();
+  addClassTimetableRow();
+});
 function removeClassTimetableRow(btn){
   const tbody=document.querySelector("#classTimetableTable tbody"),row=btn?.closest("tr");
   if(!tbody||!row)return;
