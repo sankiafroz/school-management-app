@@ -263,6 +263,26 @@ th{background:#fafbfd;color:#667085}
 .student-result-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
 .student-result-subject{display:grid;grid-template-columns:1fr 90px 90px;gap:8px;padding:7px 0;border-bottom:1px solid #edf0f4;font-size:13px}
 @media(max-width:700px){.student-portal-grid{grid-template-columns:1fr}.student-portal-profile{align-items:flex-start}.student-result-subject{grid-template-columns:1fr 70px 80px}}
+
+/* OTP / Forgot Password */
+.otp-link{display:block;text-align:right;margin-top:8px;color:#1769ff;font-size:13px;font-weight:bold;text-decoration:none;cursor:pointer}
+.otp-options{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.otp-option{flex:1;min-width:120px;border:1px solid #dce2eb;background:#fff;color:#172033;border-radius:10px;padding:10px;font-weight:bold;cursor:pointer}
+.otp-option.active{background:#eef4ff;color:#1769ff;border-color:#1769ff}
+.otp-note{background:#f8faff;border:1px solid #e5eaf1;border-radius:11px;padding:10px;font-size:12px;color:#667085;margin-top:10px}
+
+/* SCHOOLHUB OWNER DASHBOARD */
+.owner-only{display:none!important}
+.owner-dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:20px}
+.owner-action-card{background:#fff;border:1px solid #e5eaf1;border-radius:17px;padding:20px;box-shadow:0 3px 12px #00000008;cursor:pointer}
+.owner-action-card:hover{transform:translateY(-2px);box-shadow:0 7px 20px #00000012}
+.owner-action-card .icon{font-size:32px;margin-bottom:10px}.owner-action-card h3{font-size:17px}.owner-action-card p{font-size:12px;color:#667085;margin-top:5px;line-height:1.5}
+.owner-school-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+.owner-school-card{background:#fff;border:1px solid #e5eaf1;border-radius:16px;padding:16px}
+.owner-school-card h3{font-size:18px;margin-bottom:5px}.owner-school-meta{font-size:12px;color:#667085;line-height:1.7}.owner-school-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.owner-filter{display:grid;grid-template-columns:1fr 220px;gap:10px;margin-bottom:15px}
+.owner-badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:bold}.owner-active{background:#e6f8ed;color:#15803d}.owner-hold{background:#fff5d9;color:#b77900}
+@media(max-width:700px){.owner-filter{grid-template-columns:1fr}}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -313,7 +333,9 @@ th{background:#fafbfd;color:#667085}
 </div>
 
 <button class="btn btn-primary" onclick="loginUser()">Login</button>
+<a class="otp-link" onclick="openForgotPassword()">Forgot Password / OTP Verification?</a>
 <button class="btn btn-outline" id="registerSchoolBtn" style="display:none" onclick="openRegister()">+ Register New School</button>
+<button class="btn btn-outline" id="registerOwnerBtn" style="display:none" onclick="openOwnerRegistration()">+ Register SchoolHub Owner</button>
 
 <div class="demo" id="loginHelp">
 <strong>School Login</strong><br>
@@ -404,6 +426,90 @@ SchoolHub
 </main>
 </div>
 
+
+<!-- FORGOT PASSWORD / OTP -->
+<div class="modal-bg" id="forgotPasswordModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h2 id="forgotModalTitle">Forgot Password</h2>
+      <button class="close-btn" onclick="closeForgotPassword()">×</button>
+    </div>
+    <div id="forgotStep1">
+      <div class="form-group">
+        <label>Account Type</label>
+        <select id="forgotRole" onchange="updateForgotRole()">
+          <option value="school_admin">School Admin</option>
+          <option value="teacher">Teacher</option>
+          <option value="student">Student / Parent</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Login ID / Registered Mobile / Gmail</label>
+        <input id="forgotIdentifier" placeholder="Enter registered ID, mobile or Gmail">
+      </div>
+      <div class="form-group" id="forgotClassWrap" style="display:none">
+        <label>Class</label>
+        <select id="forgotClass">
+          <option value="">Select Class</option>
+          <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+          <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+          <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+          <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+        </select>
+      </div>
+      <div class="form-group" id="forgotRollWrap" style="display:none">
+        <label>Roll Number</label>
+        <input id="forgotRoll" type="number" placeholder="Enter roll number">
+      </div>
+      <div class="otp-options">
+        <button type="button" class="otp-option active" id="otpMobileBtn" onclick="selectOtpMethod('mobile')">📱 Mobile OTP</button>
+        <button type="button" class="otp-option" id="otpEmailBtn" onclick="selectOtpMethod('email')">✉️ Gmail OTP</button>
+        <button type="button" class="otp-option" id="otpBothBtn" onclick="selectOtpMethod('both')">📱 + ✉️ Both</button>
+      </div>
+      <button class="btn btn-primary" onclick="sendForgotOtp()">Send OTP</button>
+      <div class="otp-note">OTP registered mobile/Gmail verification ke liye use hoga. Browser-only version me actual SMS/Gmail bhejne ke liye SMS/Email API backend connect karna zaroori hai.</div>
+    </div>
+
+    <div id="forgotStep2" style="display:none">
+      <div class="form-group">
+        <label>Enter OTP</label>
+        <input id="forgotOtp" inputmode="numeric" maxlength="6" placeholder="Enter 6 digit OTP">
+      </div>
+      <div id="forgotOtpInfo" class="otp-note"></div>
+      <button class="btn btn-primary" onclick="verifyForgotOtp()">Verify OTP</button>
+      <button class="btn btn-outline" onclick="sendForgotOtp()">Resend OTP</button>
+    </div>
+
+    <div id="forgotStep3" style="display:none">
+      <div class="form-group">
+        <label>New Password</label>
+        <input id="forgotNewPassword" type="password" placeholder="Minimum 6 characters">
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input id="forgotConfirmPassword" type="password" placeholder="Re-enter password">
+      </div>
+      <button class="btn btn-primary" onclick="resetForgotPassword()">Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- OWNER REGISTRATION -->
+<div class="modal-bg" id="ownerRegistrationModal">
+<div class="modal" style="max-width:650px">
+<div class="modal-header"><h2>SchoolHub Owner Registration</h2><button class="close-btn" onclick="closeOwnerRegistration()">×</button></div>
+<p style="color:#667085;font-size:13px;margin-bottom:15px">Sabse pehle SchoolHub Owner ka account create karein. Is account se hi schools register/manage honge.</p>
+<div class="form-grid">
+<div class="form-group"><label>Owner Name *</label><input id="ownerRegName" placeholder="Enter owner name"></div>
+<div class="form-group"><label>Mobile Number *</label><input id="ownerRegMobile" placeholder="Enter mobile number" inputmode="numeric"></div>
+<div class="form-group"><label>Gmail ID *</label><input id="ownerRegEmail" type="email" placeholder="owner@gmail.com"></div>
+<div class="form-group"><label>Create User ID *</label><input id="ownerRegId" placeholder="Create owner login ID" autocomplete="off"></div>
+<div class="form-group"><label>Create Password *</label><input id="ownerRegPassword" type="password" placeholder="Minimum 6 characters" autocomplete="new-password"></div>
+<div class="form-group"><label>Confirm Password *</label><input id="ownerRegConfirm" type="password" placeholder="Confirm password" autocomplete="new-password"></div>
+</div>
+<button class="btn btn-primary" onclick="registerOwner()">Register Owner</button>
+</div></div>
+
 <!-- REGISTER -->
 <div class="modal-bg" id="registerModal">
 <div class="modal">
@@ -451,22 +557,8 @@ SchoolHub
 </div>
 </div>
 
-<!-- SCHOOLHUB OWNER PANEL -->
-<div class="modal-bg" id="ownerPanelModal">
-<div class="modal" style="max-width:520px">
-  <div class="modal-header">
-    <h2>SchoolHub Owner</h2>
-    <button class="close-btn" onclick="logoutOwner()">×</button>
-  </div>
-  <div style="background:#f8faff;border:1px solid #e5eaf1;border-radius:14px;padding:18px;text-align:center">
-    <div style="font-size:42px">🔐</div>
-    <h3 style="margin:8px 0">School Registration</h3>
-    <p style="color:#667085;font-size:13px;margin-bottom:16px">Yahan se aap school ki Login ID aur Password khud create karke de sakte hain.</p>
-    <button class="btn btn-primary" onclick="openRegister()">＋ Register New School</button>
-    <button class="btn btn-outline" onclick="logoutOwner()">🚪 Logout</button>
-  </div>
-</div>
-</div>
+<!-- SCHOOLHUB OWNER PANEL (legacy container) -->
+<div class="modal-bg" id="ownerPanelModal" style="display:none"></div>
 
 <!-- STUDENT MODAL -->
 <div class="modal-bg" id="studentModal">
@@ -1019,6 +1111,115 @@ let p=date.split("-");
 return p.length===3?p[2]+"-"+p[1]+"-"+p[0]:date;
 }
 
+
+/* OTP / FORGOT PASSWORD */
+window.schoolHubOtpState={method:"mobile",otp:"",expires:0,account:null,type:"",student:null};
+
+function openForgotPassword(){
+  const m=document.getElementById("forgotPasswordModal");
+  if(m)m.style.display="flex";
+  document.getElementById("forgotStep1").style.display="block";
+  document.getElementById("forgotStep2").style.display="none";
+  document.getElementById("forgotStep3").style.display="none";
+  document.getElementById("forgotIdentifier").value="";
+  document.getElementById("forgotOtp").value="";
+  updateForgotRole();
+}
+function closeForgotPassword(){document.getElementById("forgotPasswordModal")?.style.setProperty("display","none");}
+function updateForgotRole(){
+  const role=document.getElementById("forgotRole")?.value||"school_admin";
+  const student=role==="student";
+  document.getElementById("forgotClassWrap").style.display=student?"block":"none";
+  document.getElementById("forgotRollWrap").style.display=student?"block":"none";
+  const input=document.getElementById("forgotIdentifier");
+  if(input)input.placeholder=student?"Registered mobile or Aadhaar":"Login ID / registered mobile / Gmail";
+}
+function selectOtpMethod(method){
+  window.schoolHubOtpState.method=method;
+  ["mobile","email","both"].forEach(x=>document.getElementById("otp"+(x==="mobile"?"Mobile":x==="email"?"Email":"Both")+"Btn")?.classList.toggle("active",x===method));
+}
+function findOtpTarget(){
+  const role=document.getElementById("forgotRole")?.value||"school_admin";
+  const identifier=(document.getElementById("forgotIdentifier")?.value||"").trim().toLowerCase();
+  if(!identifier)return null;
+  if(role==="owner"){
+    return {type:"owner",account:getOwnerAccount()};
+  }
+  if(role==="school_admin"){
+    const accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");
+    return {type:"school",account:Array.isArray(accounts)?accounts.find(a=>{
+      return [a.loginId,a.email,a.mobile].map(v=>String(v||"").trim().toLowerCase()).includes(identifier);
+    }):null};
+  }
+  if(role==="teacher"){
+    const teachers=Array.isArray(getTeachers())?getTeachers():[];
+    return {type:"teacher",account:teachers.find(t=>{
+      return [t.teacherId,t.email,t.mobile].map(v=>String(v||"").trim().toLowerCase()).includes(identifier);
+    })||null};
+  }
+  const cls=document.getElementById("forgotClass")?.value||"",roll=document.getElementById("forgotRoll")?.value||"";
+  if(!cls||!roll)return null;
+  const student=findStudentForPortal(identifier,cls,roll);
+  return {type:"student",student:student||null};
+}
+function sendForgotOtp(){
+  const target=findOtpTarget();
+  if(!target || (!target.account&&!target.student)){alert("Registered account nahi mila. Details check karein.");return;}
+  const method=window.schoolHubOtpState.method||"mobile";
+  let mobile="",email="";
+  if(target.account){mobile=String(target.account.mobile||"");email=String(target.account.email||"");}
+  else if(target.student){mobile=String(target.student.mobile||"");email=String(target.student.email||target.student.parentEmail||"");}
+  if(method==="mobile"&&!mobile){alert("Registered mobile number available nahi hai.");return;}
+  if(method==="email"&&!email){alert("Registered Gmail ID available nahi hai.");return;}
+  if(method==="both"&&(!mobile||!email)){alert("Mobile aur Gmail dono registered hona zaroori hai.");return;}
+  const otp=String(Math.floor(100000+Math.random()*900000));
+  window.schoolHubOtpState={method,otp,expires:Date.now()+5*60*1000,account:target.account||null,type:target.type,student:target.student||null};
+  document.getElementById("forgotStep1").style.display="none";
+  document.getElementById("forgotStep2").style.display="block";
+  const destinations=[];
+  if(method==="mobile"||method==="both")destinations.push("registered mobile "+maskOtpMobile(mobile));
+  if(method==="email"||method==="both")destinations.push("registered Gmail "+maskOtpEmail(email));
+  document.getElementById("forgotOtpInfo").innerHTML="<b>OTP sent to:</b> "+destinations.join(" and ")+"<br><span style='color:#b77900'>Testing OTP: <b>"+otp+"</b></span><br>OTP 5 minutes ke liye valid hai.";
+}
+function maskOtpMobile(v){v=String(v||"");return v.length>4?"******"+v.slice(-4):v||"not available";}
+function maskOtpEmail(v){v=String(v||"");if(!v)return"not available";const p=v.split("@");return (p[0]?p[0].slice(0,2)+"***":"***")+"@"+(p[1]||"");}
+function verifyForgotOtp(){
+  const entered=(document.getElementById("forgotOtp")?.value||"").trim();
+  const st=window.schoolHubOtpState;
+  if(!st.otp||Date.now()>st.expires){alert("OTP expire ho gaya. Resend OTP karein.");return;}
+  if(entered!==st.otp){alert("Invalid OTP.");return;}
+  document.getElementById("forgotStep2").style.display="none";
+  document.getElementById("forgotStep3").style.display="block";
+}
+function resetForgotPassword(){
+  const np=document.getElementById("forgotNewPassword").value;
+  const cp=document.getElementById("forgotConfirmPassword").value;
+  if(np.length<6){alert("Password must be at least 6 characters.");return;}
+  if(np!==cp){alert("New Password aur Confirm Password match nahi hain.");return;}
+  const st=window.schoolHubOtpState;
+  if(st.type==="owner"&&st.account){
+    const owner=getOwnerAccount();
+    if(!owner){alert("Owner account not found.");return;}
+    owner.password=np;localStorage.setItem("schoolHubOwner",JSON.stringify(owner));
+  }else if(st.type==="school"&&st.account){
+    let accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");
+    const idx=accounts.findIndex(a=>String(a.id)===String(st.account.id));
+    if(idx<0){alert("Account not found.");return;}
+    accounts[idx].password=np;
+    localStorage.setItem("schoolAccounts",JSON.stringify(accounts));
+  }else if(st.type==="teacher"&&st.account){
+    const teachers=getTeachers(),idx=teachers.findIndex(t=>Number(t.id)===Number(st.account.id));
+    if(idx<0){alert("Teacher account not found.");return;}
+    teachers[idx].password=np;saveTeachers(teachers);
+  }else if(st.type==="student"&&st.student){
+    const students=getStudents(),idx=students.findIndex(x=>Number(x.id)===Number(st.student.id));
+    if(idx<0){alert("Student account not found.");return;}
+    students[idx].password=np;saveStudents(students);
+  }else{alert("Account not found.");return;}
+  alert("Password reset successfully. Ab new password se login karein.");
+  closeForgotPassword();
+}
+
 /* LOGIN */
 
 function updateLoginRoleFields(){
@@ -1030,18 +1231,26 @@ function updateLoginRoleFields(){
   const r=document.getElementById("studentLoginRollGroup");
   const e=document.getElementById("loginEmail");
   const reg=document.getElementById("registerSchoolBtn");
+  const ownerReg=document.getElementById("registerOwnerBtn");
   if(p)p.style.display=studentMode?"none":"block";
   if(c)c.style.display=studentMode?"block":"none";
   if(r)r.style.display=studentMode?"block":"none";
-  if(reg)reg.style.display=ownerMode?"block":"none";
+  const ownerExists=!!getOwnerAccount();
+  if(reg)reg.style.display=(ownerMode&&ownerExists)?"block":"none";
+  if(ownerReg)ownerReg.style.display=(ownerMode&&!ownerExists)?"block":"none";
   const label=e?.previousElementSibling;
   if(label)label.innerText=studentMode?"Registered Mobile / Aadhaar":(ownerMode?"Owner Login ID":"School Login ID / Email / Mobile");
   if(e)e.placeholder=studentMode?"Enter registered mobile or Aadhaar":(ownerMode?"Enter owner login ID":"Enter school login ID / email / mobile");
   const help=document.getElementById("loginHelp");
   if(help){
-    help.innerHTML=ownerMode
-      ? "<strong>SchoolHub Owner Login</strong><br>ID: <b>owner@schoolhub.com</b><br>Password: <b>SH2026@Owner</b><br><span style=\"color:#667085\">Owner hi school register karega.</span>"
-      : "<strong>School Login</strong><br>School ki Login ID aur Password sirf SchoolHub Owner register karke dega.";
+    if(ownerMode){
+      const owner=getOwnerAccount();
+      help.innerHTML=owner
+        ? "<strong>SchoolHub Owner Login</strong><br>Registered Owner ID se login karein.<br><span style=\"color:#667085\">Owner hi school register/manage karega.</span>"
+        : "<strong>First Step</strong><br>Sabse pehle <b>Register SchoolHub Owner</b> par click karke owner account banayein.";
+    }else{
+      help.innerHTML="<strong>School Login</strong><br>School ki Login ID aur Password sirf SchoolHub Owner register karke dega.";
+    }
   }
 }
 
@@ -1062,8 +1271,11 @@ function loginUser(){
 
     if(role==="owner"){
       const password=(document.getElementById("loginPassword")?.value||"").trim();
-      if(identifier.trim().toLowerCase()==="owner@schoolhub.com" && password==="SH2026@Owner"){
-        openOwnerPanel();
+      const owner=getOwnerAccount();
+      if(!owner){alert("Pehle SchoolHub Owner registration karein.");openOwnerRegistration();return false;}
+      const ids=[owner.loginId,owner.email,owner.mobile].map(v=>String(v||"").trim().toLowerCase());
+      if(ids.includes(identifier.toLowerCase()) && String(owner.password||"")===password){
+        openOwnerDashboard();
         return false;
       }
       alert("Invalid Owner Login Details.");
@@ -1086,6 +1298,7 @@ function loginUser(){
 
     const account=findSchoolAccount(identifier,password);
     if(account){
+      if(account.hold){alert("This school login is currently on hold by SchoolHub Owner.");return false;}
       setActiveSchoolAccount(account);
       openApplication(account.schoolName,"School Administrator");
       return false;
@@ -1107,6 +1320,79 @@ function loginUser(){
   } catch(err) { console.error("Login error:",err); alert("Login error: "+(err.message||"Please refresh the page.")); }
   return false;
 }
+
+
+function getOwnerAccount(){
+  try{return JSON.parse(localStorage.getItem("schoolHubOwner")||"null");}catch(e){return null;}
+}
+function openOwnerRegistration(){document.getElementById("ownerRegistrationModal")?.style.setProperty("display","flex");}
+function closeOwnerRegistration(){document.getElementById("ownerRegistrationModal")?.style.setProperty("display","none");}
+function registerOwner(){
+  const name=(document.getElementById("ownerRegName")?.value||"").trim();
+  const mobile=(document.getElementById("ownerRegMobile")?.value||"").trim();
+  const email=(document.getElementById("ownerRegEmail")?.value||"").trim();
+  const loginId=(document.getElementById("ownerRegId")?.value||"").trim();
+  const password=document.getElementById("ownerRegPassword")?.value||"";
+  const confirm=document.getElementById("ownerRegConfirm")?.value||"";
+  if(!name||!mobile||!email||!loginId||!password||!confirm){alert("Please fill all owner registration fields.");return;}
+  if(password.length<6){alert("Password must be at least 6 characters.");return;}
+  if(password!==confirm){alert("Password and Confirm Password do not match.");return;}
+  const existing=getOwnerAccount();
+  if(existing){alert("SchoolHub Owner is already registered. Login karke Settings se details change karein.");closeOwnerRegistration();return;}
+  const accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");
+  if(Array.isArray(accounts)&&accounts.some(a=>String(a.loginId||"").toLowerCase()===loginId.toLowerCase())){alert("This User ID is already used by a school.");return;}
+  const owner={id:"OWNER"+Date.now().toString(36).toUpperCase(),name,mobile,email,loginId,password,createdAt:new Date().toISOString()};
+  localStorage.setItem("schoolHubOwner",JSON.stringify(owner));
+  closeOwnerRegistration();
+  ["ownerRegName","ownerRegMobile","ownerRegEmail","ownerRegId","ownerRegPassword","ownerRegConfirm"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+  document.getElementById("loginRole").value="owner";updateLoginRoleFields();
+  document.getElementById("loginEmail").value=loginId;document.getElementById("loginPassword").value=password;
+  alert("SchoolHub Owner Registered Successfully. Ab Login karein.");
+}
+function ownerAccounts(){let a=[];try{a=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");}catch(e){}return Array.isArray(a)?a:[];}
+function ownerSchoolList(){return ownerAccounts().slice().sort((a,b)=>String(a.schoolName||"").localeCompare(String(b.schoolName||""),undefined,{sensitivity:"base"}));}
+function openOwnerDashboard(){
+  window.schoolHubRole="owner";window.schoolHubTeacherId=null;window.schoolHubStudentId=null;
+  document.getElementById("loginPage").style.display="none";document.getElementById("app").style.display="block";
+  const sidebar=document.getElementById("sidebar");
+  sidebar.innerHTML=`<div class="brand"><div class="brand-icon">S</div>SchoolHub</div>
+  <div class="school-box"><strong>SchoolHub Owner</strong><span>Owner Management</span></div>
+  <ul class="menu">
+    <li class="active" onclick="showOwnerSection('dashboard',this)">🏠 Dashboard</li>
+    <li onclick="openRegister();showOwnerSection('dashboard',this)">➕ Register New School</li>
+    <li onclick="showOwnerSection('manage',this)">✏️ Edit / Delete School</li>
+    <li onclick="showOwnerSection('hold',this)">🔒 Hold School ID / Password</li>
+    <li onclick="showOwnerSection('schools',this)">🏫 Schools</li>
+    <li onclick="showOwnerSection('settings',this)">⚙️ Settings</li>
+    <li class="logout" onclick="logoutOwnerAccount()">🚪 Logout</li>
+  </ul>`;
+  document.getElementById("displaySchool").innerText="SchoolHub Owner";document.getElementById("displayRole").innerText="Owner Management";document.getElementById("topUser").innerText=getOwnerAccount()?.name||"Owner";
+  showOwnerSection('dashboard',sidebar.querySelector('.menu li'));
+}
+function ownerShell(title,body){return `<div class="card"><div class="card-header"><h3>${title}</h3></div><div style="padding:18px">${body}</div></div>`;}
+function renderOwnerDashboard(){
+  const schools=ownerSchoolList();
+  const cities=[...new Set(schools.map(a=>String(a.city||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:"base"}));
+  return `<div class="welcome"><h2>SchoolHub Owner Dashboard</h2><p>Registered schools ko manage karein.</p></div>
+  <div class="owner-dashboard-grid">
+    <div class="owner-action-card" onclick="openRegister()"><div class="icon">➕</div><h3>Register New School</h3><p>Naya school register karein.</p></div>
+    <div class="owner-action-card" onclick="showOwnerSection('manage')"><div class="icon">✏️</div><h3>Edit & Delete School</h3><p>School details update ya delete karein.</p></div>
+    <div class="owner-action-card" onclick="showOwnerSection('hold')"><div class="icon">🔒</div><h3>Hold School ID & Password</h3><p>School login ko temporarily hold/release karein.</p></div>
+    <div class="owner-action-card" onclick="showOwnerSection('settings')"><div class="icon">⚙️</div><h3>Owner Settings</h3><p>Sirf apni ID, password, Gmail aur mobile change karein.</p></div>
+  </div>
+  ${ownerSchoolDirectory(schools,cities)}`;
+}
+function ownerSchoolDirectory(schools,cities){return `<div class="card"><div class="card-header"><div><h3>🏫 Registered Schools</h3><p style="color:#667085;font-size:12px;margin-top:4px">School names alphabetically sorted hain.</p></div></div><div style="padding:18px"><div class="owner-filter"><input id="ownerSchoolSearch" placeholder="Search school name..." oninput="filterOwnerSchools()"><select id="ownerCityFilter" onchange="filterOwnerSchools()"><option value="">All Cities</option>${cities.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select></div><div id="ownerSchoolList" class="owner-school-grid">${ownerSchoolCards(schools)}</div></div></div>`;}
+function ownerSchoolCards(schools){if(!schools.length)return '<div class="empty" style="grid-column:1/-1">No school registered yet.</div>';return schools.map(a=>`<div class="owner-school-card" data-school-name="${escapeHtml(a.schoolName||"").toLowerCase()}" data-school-city="${escapeHtml(a.city||"")}"><h3>${escapeHtml(a.schoolName||"-")}</h3><div class="owner-school-meta">Principal: ${escapeHtml(a.principalName||"-" )}<br>City: ${escapeHtml(a.city||"-")}<br>Mobile: ${escapeHtml(a.mobile||"-")}<br>Gmail: ${escapeHtml(a.email||"-")}<br>Login ID: <b>${escapeHtml(a.loginId||"-")}</b><br>Status: <span class="owner-badge ${a.hold?'owner-hold':'owner-active'}">${a.hold?'ON HOLD':'ACTIVE'}</span></div><div class="owner-school-actions"><button class="edit-btn" onclick="editSchoolAccount('${String(a.id)}')">Edit</button><button class="delete-btn" onclick="deleteSchoolAccount('${String(a.id)}')">Delete</button><button class="small-btn" onclick="toggleSchoolHold('${String(a.id)}')">${a.hold?'Release':'Hold'} Login</button></div></div>`).join('');}
+function filterOwnerSchools(){const q=(document.getElementById('ownerSchoolSearch')?.value||'').trim().toLowerCase(),city=document.getElementById('ownerCityFilter')?.value||'';document.querySelectorAll('#ownerSchoolList .owner-school-card').forEach(card=>{const n=card.dataset.schoolName||'',c=card.dataset.schoolCity||'';card.style.display=(!q||n.includes(q))&&(!city||c===city)?'':'none';});}
+function showOwnerSection(section,element){if(window.schoolHubRole!=="owner")return;document.querySelectorAll('.menu li').forEach(x=>x.classList.remove('active'));if(element)element.classList.add('active');const other=document.getElementById('otherPage');document.getElementById('dashboardPage').style.display='none';other.style.display='block';document.getElementById('pageTitle').innerText=section==='dashboard'?'Dashboard':section==='manage'?'Edit / Delete School':section==='hold'?'Hold School Login':section==='schools'?'Schools':'Owner Settings';if(section==='dashboard'){other.innerHTML=renderOwnerDashboard();return;}if(section==='schools'){other.innerHTML=ownerShell('🏫 All Registered Schools',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='manage'){other.innerHTML=ownerShell('✏️ Edit / Delete School',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='hold'){other.innerHTML=ownerShell('🔒 Hold School ID & Password',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='settings'){renderOwnerSettings();}}
+function editSchoolAccount(id){const a=ownerAccounts().find(x=>String(x.id)===String(id));if(!a)return;document.getElementById('ownerEditSchoolModal')?.remove();document.body.insertAdjacentHTML('beforeend',`<div class="modal-bg" id="ownerEditSchoolModal" style="display:flex"><div class="modal"><div class="modal-header"><h2>Edit School</h2><button class="close-btn" onclick="document.getElementById('ownerEditSchoolModal').remove()">×</button></div><div class="form-grid"><div class="form-group"><label>School Name</label><input id="editSchName" value="${escapeHtml(a.schoolName||'')}"></div><div class="form-group"><label>Principal Name</label><input id="editSchPrincipal" value="${escapeHtml(a.principalName||'')}"></div><div class="form-group"><label>Contact Number</label><input id="editSchMobile" value="${escapeHtml(a.mobile||'')}"></div><div class="form-group"><label>Gmail ID</label><input id="editSchEmail" value="${escapeHtml(a.email||'')}"></div><div class="form-group"><label>City</label><input id="editSchCity" value="${escapeHtml(a.city||'')}"></div><div class="form-group"><label>Login ID</label><input id="editSchLoginId" value="${escapeHtml(a.loginId||'')}"></div><div class="form-group"><label>Password</label><input id="editSchPassword" value="${escapeHtml(a.password||'')}"></div></div><button class="btn btn-primary" onclick="saveEditedSchool('${String(a.id)}')">Save Changes</button></div></div>`);}
+function saveEditedSchool(id){let accounts=ownerAccounts(),i=accounts.findIndex(x=>String(x.id)===String(id));if(i<0)return;const a=accounts[i];const school=document.getElementById('editSchName').value.trim(),principal=document.getElementById('editSchPrincipal').value.trim(),mobile=document.getElementById('editSchMobile').value.trim(),email=document.getElementById('editSchEmail').value.trim(),city=document.getElementById('editSchCity').value.trim(),loginId=document.getElementById('editSchLoginId').value.trim(),password=document.getElementById('editSchPassword').value;if(!school||!principal||!mobile||!email||!city||!loginId||!password){alert('Please fill all fields.');return;}const dup=accounts.some((x,idx)=>idx!==i&&(String(x.loginId||'').toLowerCase()===loginId.toLowerCase()||String(x.email||'').toLowerCase()===email.toLowerCase()||String(x.mobile||'')===mobile));if(dup){alert('Login ID / Email / Mobile already used by another school.');return;}Object.assign(a,{schoolName:school,principalName:principal,mobile,email,city,loginId,password});localStorage.setItem('schoolAccounts',JSON.stringify(accounts));document.getElementById('ownerEditSchoolModal').remove();showOwnerSection('manage');alert('School details updated successfully.');}
+function deleteSchoolAccount(id){const a=ownerAccounts().find(x=>String(x.id)===String(id));if(!a)return;if(!confirm('Delete '+(a.schoolName||'this school')+'? This will remove its login account and saved school data.'))return;const accounts=ownerAccounts().filter(x=>String(x.id)!==String(id));localStorage.setItem('schoolAccounts',JSON.stringify(accounts));if(getActiveSchoolId()===String(id)){localStorage.removeItem('schoolHubActiveSchoolId');}const prefix='schoolData_'+String(id)+'_';for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.indexOf(prefix)===0)localStorage.removeItem(k);}showOwnerSection('manage');alert('School deleted successfully.');}
+function toggleSchoolHold(id){const accounts=ownerAccounts(),i=accounts.findIndex(x=>String(x.id)===String(id));if(i<0)return;accounts[i].hold=!accounts[i].hold;localStorage.setItem('schoolAccounts',JSON.stringify(accounts));showOwnerSection('hold');alert(accounts[i].hold?'School login held.':'School login released.');}
+function renderOwnerSettings(){const o=getOwnerAccount()||{};document.getElementById('otherPage').innerHTML=ownerShell('⚙️ Owner Settings',`<p style="color:#667085;font-size:13px;margin-bottom:15px">Yahan sirf SchoolHub Owner ki apni details change hongi.</p><div class="form-grid"><div class="form-group"><label>Owner Name</label><input id="ownerSetName" value="${escapeHtml(o.name||'')}"></div><div class="form-group"><label>Mobile Number</label><input id="ownerSetMobile" value="${escapeHtml(o.mobile||'')}"></div><div class="form-group"><label>Gmail ID</label><input id="ownerSetEmail" type="email" value="${escapeHtml(o.email||'')}"></div><div class="form-group"><label>Change User ID</label><input id="ownerSetId" value="${escapeHtml(o.loginId||'')}"></div><div class="form-group"><label>Change Password</label><input id="ownerSetPassword" type="password" placeholder="Leave blank to keep current"></div><div class="form-group"><label>Confirm New Password</label><input id="ownerSetConfirm" type="password"></div></div><button class="btn btn-primary" onclick="saveOwnerSettings()">Save Owner Settings</button>`);}
+function saveOwnerSettings(){const o=getOwnerAccount();if(!o)return;const name=document.getElementById('ownerSetName').value.trim(),mobile=document.getElementById('ownerSetMobile').value.trim(),email=document.getElementById('ownerSetEmail').value.trim(),loginId=document.getElementById('ownerSetId').value.trim(),pw=document.getElementById('ownerSetPassword').value,cp=document.getElementById('ownerSetConfirm').value;if(!name||!mobile||!email||!loginId){alert('Please fill all owner details.');return;}if(pw&&(pw.length<6||pw!==cp)){alert('New password must be at least 6 characters and match confirm password.');return;}o.name=name;o.mobile=mobile;o.email=email;o.loginId=loginId;if(pw)o.password=pw;localStorage.setItem('schoolHubOwner',JSON.stringify(o));document.getElementById('topUser').innerText=name;alert('Owner settings updated successfully.');}
+function logoutOwnerAccount(){window.schoolHubRole='admin';document.getElementById('app').style.display='none';document.getElementById('loginPage').style.display='flex';document.getElementById('loginRole').value='school_admin';document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';updateLoginRoleFields();}
 
 function setActiveSchoolAccount(account){
   localStorage.setItem("schoolHubActiveSchoolId",String(account.id));
@@ -1144,17 +1430,8 @@ function openApplication(school,role,teacherId,studentId,portalRole){
   try{if(normalizedRole==="student"||normalizedRole==="parent")showStudentPortalDashboard();else updateDashboard();}catch(err){console.error("Dashboard error:",err);}
 }
 
-function openOwnerPanel(){
-  document.getElementById("loginPage").style.display="none";
-  document.getElementById("app").style.display="none";
-  document.getElementById("ownerPanelModal").style.display="flex";
-}
-function logoutOwner(){
-  document.getElementById("ownerPanelModal")?.style.setProperty("display","none");
-  document.getElementById("loginPage").style.display="flex";
-  document.getElementById("loginEmail").value="";document.getElementById("loginPassword").value="";
-  document.getElementById("loginRole").value="school_admin";updateLoginRoleFields();
-}
+function openOwnerPanel(){openOwnerDashboard();}
+function logoutOwner(){logoutOwnerAccount();}
 function getCurrentPortalStudent(){if(window.schoolHubRole!=="student"&&window.schoolHubRole!=="parent")return null;const id=Number(window.schoolHubStudentId||0);return getStudents().find(s=>Number(s.id)===id)||null;}
 function isStudentPortal(){return window.schoolHubRole==="student"||window.schoolHubRole==="parent";}
 function updateRoleMenuVisibility(){
@@ -1591,6 +1868,7 @@ function showStudentPortalTimetable(){
 }
 
 function showPage(page,element){
+if(window.schoolHubRole==="owner"){showOwnerSection(page==="settings"?"settings":"dashboard",element);return;}
 if(isStudentPortal()){
   document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
   if(element)element.classList.add("active");
