@@ -212,10 +212,10 @@ th{background:#fafbfd;color:#667085}
 .dashboard-school-logo{width:92px;height:92px;border-radius:18px;object-fit:contain;background:#fff;border:1px solid #e5eaf1;padding:5px;box-shadow:0 5px 18px #0001}
 .dashboard-logo-upload{display:inline-flex;align-items:center;justify-content:center;background:#eef4ff;color:#1769ff;border:1px solid #d7e5ff;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:bold;cursor:pointer}
 .dashboard-logo-upload input{display:none}
-.dashboard-slideshow{background:#fff;border:1px solid #e5eaf1;border-radius:18px;padding:10px;margin-top:12px;overflow:hidden}
-.dashboard-slide-track{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.dashboard-slide-img{width:100%;height:145px;object-fit:cover;border-radius:12px;background:#f3f6fb}
-@media(max-width:700px){.dashboard-slide-track{grid-template-columns:repeat(2,1fr)}.dashboard-slide-img{height:125px}}
+.dashboard-slideshow{background:#fff;border:1px solid #e5eaf1;border-radius:18px;padding:10px;margin-top:12px;overflow:hidden;max-width:900px;margin-left:auto;margin-right:auto}
+.dashboard-slide-track{width:100%;display:flex;justify-content:center;align-items:center}
+.dashboard-slide-img{width:100%;height:300px;object-fit:cover;border-radius:14px;background:#f3f6fb;display:block}
+@media(max-width:700px){.dashboard-slide-img{height:210px}}
 /* Timetable */
 #classTimetableTable .ctt-time{min-width:180px;width:180px}
 #classTimetableTable .ctt-period{min-width:85px;width:85px}
@@ -320,7 +320,7 @@ SchoolHub
   </div>
   <div class="dashboard-school-title" id="dashboardSchoolName"></div>
   <div id="dashboardSchoolSlideshow" class="dashboard-slideshow" style="display:none"></div>
-  <label class="dashboard-logo-upload" style="margin-top:10px">🖼️ Add School Images
+  <label class="dashboard-logo-upload" style="margin-top:10px">🖼️ Add 5 School Images
     <input id="dashboardSchoolImagesInput" type="file" accept="image/*" multiple onchange="saveDashboardSchoolImages(event)">
   </label>
 </div>
@@ -4698,64 +4698,152 @@ function saveDashboardSchoolLogo(event){
 function saveDashboardSchoolImages(event){
   const files=[...(event?.target?.files||[])];
   if(!files.length)return;
-  const old=getData("schoolGalleryImages");
-  const existing=Array.isArray(old)?old:[];
-  const remaining=Math.max(0,10-existing.length);
+
+  const existing=getData("schoolGalleryImages");
+  const oldImages=Array.isArray(existing)?existing.filter(Boolean):[];
+  const remaining=Math.max(0,5-oldImages.length);
+
   if(remaining===0){
-    alert("Maximum 10 school images are already added.");
-    event.target.value="";
+    alert("Maximum 5 school images are already added.");
+    if(event?.target)event.target.value="";
     return;
   }
+
   const selected=files.slice(0,remaining);
-  let out=[];
+  const out=[];
   let done=0;
+
   selected.forEach(file=>{
+    if(!file.type || !file.type.startsWith("image/")){
+      done++;
+      return;
+    }
+
     const reader=new FileReader();
     reader.onload=function(){
       out.push(reader.result);
       done++;
+
       if(done===selected.length){
-        const merged=existing.concat(out).slice(0,10);
+        const merged=oldImages.concat(out).filter(Boolean).slice(0,5);
         setData("schoolGalleryImages",merged);
+        window.dashboardSlideIndex=0;
+        updateDashboardBranding();
+
+        if(merged.length<selected.length+oldImages.length){
+          alert("Only 5 school images can be displayed.");
+        }
+      }
+    };
+    reader.onerror=function(){
+      done++;
+      if(done===selected.length){
+        const merged=oldImages.concat(out).filter(Boolean).slice(0,5);
+        setData("schoolGalleryImages",merged);
+        window.dashboardSlideIndex=0;
         updateDashboardBranding();
       }
     };
     reader.readAsDataURL(file);
   });
-  event.target.value="";
+
+  if(event?.target)event.target.value="";
 }
+
 function updateDashboardBranding(){
   const logo=localStorage.getItem("schoolLogo")||"";
   const img=document.getElementById("dashboardSchoolLogo");
   const placeholder=document.getElementById("dashboardLogoPlaceholder");
+
   if(img){
-    if(logo){img.src=logo;img.style.display="block";if(placeholder)placeholder.style.display="none";}
-    else{img.style.display="none";if(placeholder)placeholder.style.display="block";}
+    if(logo){
+      img.src=logo;
+      img.style.display="block";
+      if(placeholder)placeholder.style.display="none";
+    }else{
+      img.style.display="none";
+      if(placeholder)placeholder.style.display="block";
+    }
   }
 
   const box=document.getElementById("dashboardSchoolSlideshow");
   if(!box)return;
-  const images=getData("schoolGalleryImages");
-  const gallery=Array.isArray(images)?images.filter(Boolean).slice(0,10):[];
-  if(!gallery.length){box.style.display="none";box.innerHTML="";return;}
 
-  box.style.display="block";
-  let start=Number(window.dashboardSlideStart)||0;
-  if(start>=gallery.length)start=0;
-  const group=gallery.slice(start,start+5);
-  if(group.length<5 && gallery.length>5){
-    group.push(...gallery.slice(0,5-group.length));
-  }
-  box.innerHTML='<div class="dashboard-slide-track">'+group.map((src,i)=>
-    '<img class="dashboard-slide-img" src="'+escapeHtml(src)+'" alt="School Image '+(start+i+1)+'">'
-  ).join('')+'</div>';
+  const images=getData("schoolGalleryImages");
+  const gallery=Array.isArray(images)?images.filter(Boolean).slice(0,5):[];
 
   clearTimeout(window.dashboardSlideTimer);
-  if(gallery.length>5){
-    window.dashboardSlideTimer=setTimeout(()=>{
-      window.dashboardSlideStart=(start+5)%gallery.length;
+
+  if(!gallery.length){
+    box.style.display="none";
+    box.innerHTML="";
+    return;
+  }
+
+  box.style.display="block";
+
+  let index=Number(window.dashboardSlideIndex)||0;
+  if(index<0 || index>=gallery.length)index=0;
+  window.dashboardSlideIndex=index;
+
+  const src=gallery[index];
+  box.innerHTML=
+    '<div class="dashboard-slide-track">'+
+      '<img class="dashboard-slide-img" src="'+escapeHtml(src)+'" alt="School Image '+(index+1)+'">'+
+    '</div>';
+
+  if(gallery.length>1){
+    window.dashboardSlideTimer=setTimeout(function(){
+      window.dashboardSlideIndex=(index+1)%gallery.length;
       updateDashboardBranding();
-    },5000);
+    },3000);
+  }
+}
+
+/* Make Add Period work reliably on the current timetable screen. */
+function addClassTimetableRow(){
+  try{
+    const tbody=document.querySelector("#classTimetableTable tbody");
+    if(!tbody){
+      alert("Please open Timetable first.");
+      return false;
+    }
+
+    const rows=[...tbody.querySelectorAll("tr")];
+    const current=rows.map((row,i)=>({
+      period:Number(row.querySelector(".ctt-period")?.value)||i+1,
+      time:String(row.querySelector(".ctt-time")?.value||"").trim(),
+      days:[...row.querySelectorAll(".ctt-subject")].map(x=>String(x.value||"").trim())
+    }));
+
+    const nextPeriod=current.reduce((m,r)=>Math.max(m,Number(r.period)||0),0)+1;
+    const newRow={period:nextPeriod,time:"",days:["","","","","",""]};
+
+    current.push(newRow);
+
+    const classNo=Number(window.timetableSelectedClass)||1;
+    let all=getData("schoolTimetableByClass");
+    if(!all || typeof all!=="object" || Array.isArray(all))all={};
+    all[String(classNo)]=current;
+    setData("schoolTimetableByClass",all);
+
+    const tr=document.createElement("tr");
+    tr.innerHTML=timetableRowHtml(newRow,current.length-1);
+    tbody.appendChild(tr);
+
+    const input=tr.querySelector(".ctt-time");
+    if(input){
+      setTimeout(function(){
+        input.focus();
+        tr.scrollIntoView({behavior:"smooth",block:"nearest"});
+      },50);
+    }
+
+    return false;
+  }catch(err){
+    console.error(err);
+    alert("Add Period error: "+(err.message||"Please refresh the page."));
+    return false;
   }
 }
 
