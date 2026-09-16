@@ -1127,6 +1127,8 @@ function updateRoleMenuVisibility(){
       action.includes("showPage('homework'") ||
       action.includes("showPage('attendance'") ||
       action.includes("showPage('exams'") ||
+      action.includes("showPage('timetable'") ||
+      action.includes("showPage('notices'") ||
       action.includes("logoutUser");
     if(isPortal) li.style.display=portalAllowed?"":"none";
     else li.style.display=(isTeacher&&adminOnly)?"none":"";
@@ -1483,7 +1485,7 @@ function showStudentPortalDashboard(){
     </div>
     ${imageHtml}
     <div class="two-column">
-      <div class="card"><div class="card-header"><h3>📢 Notices</h3></div>${noticeHtml}</div>
+      <div class="card"><div class="card-header"><h3>📢 Notices</h3><button class="small-btn" onclick="showStudentPortalNotices()">View All</button></div>${noticeHtml}</div>
       <div class="card"><div class="card-header"><h3>📚 Latest Homework</h3></div><div style="padding:12px">${hwHtml}</div></div>
     </div>
     <div class="card"><div class="card-header"><h3>📅 Month-wise Attendance</h3><button class="small-btn" onclick="showStudentPortalAttendance()">View All</button></div>${attHtml}</div>
@@ -1546,6 +1548,62 @@ function showStudentPortalResults(){
       <div style="padding:15px">${records.length?records.map(portalResultHtml).join(""):`<div class="empty">No result available.</div>`}</div>
     </div>`;
 }
+
+function showStudentPortalNotices(){
+  if(!isStudentPortal())return;
+  const notices=getData("schoolNotices");
+  const list=Array.isArray(notices)?notices:[];
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText="Notice Board";
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="showStudentPortalDashboard()">← Dashboard</button>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>📢 All Notices</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">${list.length} Current & Previous Notice${list.length===1?"":"s"}</p>
+        </div>
+      </div>
+      ${list.length?list.map(n=>`
+        <div class="notice">
+          <strong>${escapeHtml(n.title||"Notice")}</strong>
+          <div style="margin-top:5px;white-space:pre-wrap">${escapeHtml(n.text||"")}</div>
+          <span>${n.date?formatDate(n.date):"Date not available"}</span>
+        </div>`).join(""):`<div class="empty">No notices available.</div>`}
+    </div>`;
+}
+
+function showStudentPortalTimetable(){
+  if(!isStudentPortal())return;
+  const student=getCurrentPortalStudent(); if(!student)return;
+  const tt=getClassTimetable(student.classNo);
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText="My Timetable";
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="showStudentPortalDashboard()">← Dashboard</button>
+    <div class="card">
+      <div class="card-header">
+        <h3>🕐 My Class Timetable</h3>
+        <span class="badge blue">Class ${escapeHtml(student.classNo)}</span>
+      </div>
+      <div class="table-container">
+        <table style="min-width:1050px">
+          <thead><tr><th>Period</th><th>Time</th>${days.map(d=>`<th>${d}</th>`).join("")}</tr></thead>
+          <tbody>
+            ${tt.map((r,i)=>`<tr>
+              <td><strong>${escapeHtml(r?.period??i+1)}</strong></td>
+              <td>${escapeHtml(r?.time||"-")}</td>
+              ${days.map((d,j)=>`<td>${escapeHtml((Array.isArray(r?.days)?r.days[j]:"")||"-")}</td>`).join("")}
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
 function showPage(page,element){
 if(isStudentPortal()){
   document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
@@ -1555,6 +1613,8 @@ if(isStudentPortal()){
   if(page==="homework"){showStudentPortalHomework();return;}
   if(page==="attendance"){showStudentPortalAttendance();return;}
   if(page==="exams"){showStudentPortalResults();return;}
+  if(page==="timetable"){showStudentPortalTimetable();return;}
+  if(page==="notices"){showStudentPortalNotices();return;}
   if(page==="logout"){logoutUser();return;}
   return;
 }
@@ -5486,7 +5546,15 @@ if(page==="gallery"){
 }
 
 if(page==="timetable"){
-  const selected=Number(window.timetableSelectedClass)||1;
+  let selected=Number(window.timetableSelectedClass)||1;
+  if(window.schoolHubRole==="teacher"){
+    const assigned=Number(teacherAssignedClass());
+    if(!Number.isFinite(assigned)||assigned<1||assigned>12){
+      return `<div class="card"><div class="empty"><h3>Class Not Assigned</h3><p>Teacher ko timetable manage karne ke liye class assign nahi ki gayi hai.</p></div></div>`;
+    }
+    selected=assigned;
+    window.timetableSelectedClass=assigned;
+  }
   const tt=getClassTimetable(selected);
   return `<div class="card">
     <div class="card-header"><div><h3>🕐 Class-wise Timetable</h3>
@@ -5494,7 +5562,7 @@ if(page==="timetable"){
     <div style="padding:18px">
       <div class="form-group"><label>Select Class</label>
         <select onchange="changeTimetableClass(this.value)">
-          ${Array.from({length:12},(_,i)=>i+1).map(c=>`<option value="${c}" ${c===selected?"selected":""}>Class ${c}</option>`).join("")}
+          ${Array.from({length:12},(_,i)=>i+1).filter(c=>window.schoolHubRole!=="teacher"||Number(teacherAssignedClass())===c).map(c=>`<option value="${c}" ${c===selected?"selected":""}>Class ${c}</option>`).join("")}
         </select>
       </div>
       <div class="table-container"><table id="classTimetableTable" style="min-width:1100px">
@@ -5524,11 +5592,19 @@ function getClassTimetable(classNo){
   return [{period:1,time:"08:00 - 08:40",days:["","","","","",""]}];
 }
 function changeTimetableClass(classNo){
+  if(window.schoolHubRole==="teacher" && Number(teacherAssignedClass())!==Number(classNo)){
+    alert("Teacher sirf apni assigned class ka timetable manage kar sakta hai.");
+    return;
+  }
   window.timetableSelectedClass=Number(classNo)||1;
   const other=document.getElementById("otherPage");
   if(other) other.innerHTML=getOtherPage("timetable");
 }
 function addClassTimetableRow(event){
+  if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(Number(window.timetableSelectedClass)||1)){
+    alert("Teacher sirf apni assigned class ka timetable manage kar sakta hai.");
+    return false;
+  }
   if(event){
     event.preventDefault();
     event.stopPropagation();
@@ -5575,6 +5651,10 @@ function addClassTimetableRow(event){
   return false;
 }
 function removeClassTimetableRow(btn){
+  if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(Number(window.timetableSelectedClass)||1)){
+    alert("Teacher sirf apni assigned class ka timetable manage kar sakta hai.");
+    return;
+  }
   const tbody=document.querySelector("#classTimetableTable tbody"),row=btn?.closest("tr");
   if(!tbody||!row)return;
   if(tbody.querySelectorAll("tr").length<=1){alert("At least one period is required.");return;}
@@ -5582,6 +5662,10 @@ function removeClassTimetableRow(btn){
 }
 function saveClassTimetable(){
   const classNo=Number(window.timetableSelectedClass)||1;
+  if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(classNo)){
+    alert("Teacher sirf apni assigned class ka timetable manage kar sakta hai.");
+    return;
+  }
   const rows=[...document.querySelectorAll("#classTimetableTable tbody tr")];
   if(!rows.length){
     alert("Please add at least one period.");
