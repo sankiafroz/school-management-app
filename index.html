@@ -1605,18 +1605,23 @@ function downloadAttendanceReportForClass(classNo){
     let month=Number(document.getElementById("attendanceDownloadMonth").value);
     let year=Number(document.getElementById("attendanceDownloadYear").value);
     if(!year){alert("Enter year.");return;}
-    from=new Date(year,month,1).toISOString().slice(0,10);
-    to=new Date(year,month+1,0).toISOString().slice(0,10);
+    from=year+"-"+String(month+1).padStart(2,"0")+"-01";
+    const lastDay=new Date(year,month+1,0).getDate();
+    to=year+"-"+String(month+1).padStart(2,"0")+"-"+String(lastDay).padStart(2,"0");
   }
 
   let students=getClassAttendanceStudents(classNo);
   if(!students.length){alert("No students found in this class.");return;}
 
+  // Build dates in local calendar time. Do NOT use toISOString() here:
+  // in India/local time, local midnight converted to UTC can become the previous date.
   let dates=[];
-  let cur=new Date(from+"T00:00:00");
-  let endDate=new Date(to+"T00:00:00");
+  let cur=new Date(Number(from.slice(0,4)),Number(from.slice(5,7))-1,Number(from.slice(8,10)));
+  let endDate=new Date(Number(to.slice(0,4)),Number(to.slice(5,7))-1,Number(to.slice(8,10)));
   while(cur<=endDate){
-    dates.push(cur.toISOString().slice(0,10));
+    dates.push(
+      cur.getFullYear()+"-"+String(cur.getMonth()+1).padStart(2,"0")+"-"+String(cur.getDate()).padStart(2,"0")
+    );
     cur.setDate(cur.getDate()+1);
   }
 
@@ -1666,12 +1671,20 @@ function getAttendanceDownloadDates(){
     let month=Number(document.getElementById("attendanceDownloadMonth").value);
     let year=Number(document.getElementById("attendanceDownloadYear").value);
     if(!year){alert("Enter year.");return null;}
-    from=new Date(year,month,1).toISOString().slice(0,10);
-    to=new Date(year,month+1,0).toISOString().slice(0,10);
+    from=year+"-"+String(month+1).padStart(2,"0")+"-01";
+    const lastDay=new Date(year,month+1,0).getDate();
+    to=year+"-"+String(month+1).padStart(2,"0")+"-"+String(lastDay).padStart(2,"0");
   }
+  // Keep the selected calendar dates exactly as selected (no UTC conversion).
   let dates=[];
-  let cur=new Date(from+"T00:00:00"), endDate=new Date(to+"T00:00:00");
-  while(cur<=endDate){dates.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
+  let cur=new Date(Number(from.slice(0,4)),Number(from.slice(5,7))-1,Number(from.slice(8,10)));
+  let endDate=new Date(Number(to.slice(0,4)),Number(to.slice(5,7))-1,Number(to.slice(8,10)));
+  while(cur<=endDate){
+    dates.push(
+      cur.getFullYear()+"-"+String(cur.getMonth()+1).padStart(2,"0")+"-"+String(cur.getDate()).padStart(2,"0")
+    );
+    cur.setDate(cur.getDate()+1);
+  }
   return {from,to,dates};
 }
 
@@ -4166,11 +4179,19 @@ function changeTimetableClass(classNo){
   if(other) other.innerHTML=getOtherPage("timetable");
 }
 function addClassTimetableRow(){
-  const tbody=document.querySelector("#classTimetableTable tbody"); if(!tbody)return;
+  const tbody=document.querySelector("#classTimetableTable tbody");
+  if(!tbody)return;
   const i=tbody.querySelectorAll("tr").length;
   const row=document.createElement("tr");
-  row.innerHTML=timetableRowHtml({period:i+1,time:"",days:["","","","","",""]},i);
-  tbody.appendChild(row); row.querySelector(".ctt-time")?.focus();
+  row.innerHTML=timetableRowHtml({
+    period:i+1,
+    time:"",
+    days:["","","","","",""]
+  },i);
+  tbody.appendChild(row);
+  // Keep the new period visible immediately and focus its Time field.
+  row.scrollIntoView({behavior:"smooth",block:"nearest",inline:"nearest"});
+  setTimeout(()=>row.querySelector(".ctt-time")?.focus(),50);
 }
 function removeClassTimetableRow(btn){
   const tbody=document.querySelector("#classTimetableTable tbody"),row=btn?.closest("tr");
@@ -4181,16 +4202,24 @@ function removeClassTimetableRow(btn){
 function saveClassTimetable(){
   const classNo=Number(window.timetableSelectedClass)||1;
   const rows=[...document.querySelectorAll("#classTimetableTable tbody tr")];
+  if(!rows.length){
+    alert("Please add at least one period.");
+    return;
+  }
+
+  // Save every visible period, including a newly added blank period.
+  // This prevents the Add Period row from disappearing on Save.
   const data=rows.map((row,i)=>({
     period:Number(row.querySelector(".ctt-period")?.value)||i+1,
     time:row.querySelector(".ctt-time")?.value.trim()||"",
     days:[...row.querySelectorAll(".ctt-subject")].map(x=>x.value.trim())
-  })).filter(r=>r.time||r.days.some(Boolean));
-  if(!data.length){alert("Please add at least one period and subject.");return;}
+  }));
+
   const all=getData("schoolTimetableByClass");
   const store=(all&&typeof all==="object"&&!Array.isArray(all))?all:{};
   store[String(classNo)]=data.sort((a,b)=>a.period-b.period);
   setData("schoolTimetableByClass",store);
+
   const other=document.getElementById("otherPage");
   if(other)other.innerHTML=getOtherPage("timetable");
   alert("Class "+classNo+" timetable saved successfully!");
