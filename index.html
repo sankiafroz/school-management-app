@@ -299,6 +299,7 @@ SchoolHub
 <li class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</li>
 <li onclick="showPage('students',this)">👨‍🎓 Students</li>
 <li onclick="showPage('teachers',this)">👨‍🏫 Teachers</li>
+<li onclick="showPage('teacherLogin',this)">🔐 Teacher Login</li>
 <li onclick="showPage('attendance',this)">📅 Attendance</li>
 <li onclick="showPage('fees',this)">💰 Fees</li>
 <li onclick="showPage('exams',this)">📝 Exam / Result</li>
@@ -1246,6 +1247,7 @@ let titles={
 dashboard:"Dashboard",
 students:"Students",
 teachers:"Teachers",
+teacherLogin:"Teacher Login",
 attendance:"Attendance",
 fees:"Fees",
 exams:"Exam / Result",
@@ -1298,6 +1300,11 @@ console.error("Teacher page error:",e);
 document.getElementById("otherPage").innerHTML=`<div class="card"><div class="empty"><h3>Unable to load Teachers</h3><p>${escapeHtml(e.message||e)}</p></div></div>`;
 }
 return;
+}
+
+if(page==="teacherLogin"){
+  renderTeacherLoginPage();
+  return;
 }
 
 document.getElementById("otherPage").innerHTML=getOtherPage(page);
@@ -3529,6 +3536,133 @@ function filterTeachers(){
   });
   const area=document.getElementById("teacherTableArea");
   if(area) area.innerHTML=buildTeacherProfileCards(teachers);
+}
+
+
+/* TEACHER LOGIN MANAGEMENT */
+let teacherLoginEditingId=null;
+
+function renderTeacherLoginPage(){
+  const teachers=Array.isArray(getTeachers())?getTeachers():[];
+  const area=document.getElementById("otherPage");
+  if(!area)return;
+
+  const rows=teachers.length?teachers.map((t,i)=>{
+    const has=String(t.teacherId||"").trim() && String(t.password||"").trim();
+    return `<tr>
+      <td>${i+1}</td>
+      <td><button type="button" class="result-student-link" onclick="openTeacherLoginEditor(${Number(t.id)||0})">${escapeHtml(t.name||"Teacher")}</button></td>
+      <td>${escapeHtml(t.mobile||"-")}</td>
+      <td>${has?`<span class="badge green">Generated</span>`:`<span class="badge yellow">Not Generated</span>`}</td>
+      <td><button type="button" class="edit-btn" onclick="openTeacherLoginEditor(${Number(t.id)||0})">✏️ Open / Edit Login</button></td>
+    </tr>`;
+  }).join(""): `<tr><td colspan="5"><div class="empty">No teachers added yet. First add a teacher from the Teachers menu.</div></td></tr>`;
+
+  area.innerHTML=`
+    <button class="back-btn" onclick="showPage('dashboard')">← Back to Dashboard</button>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>🔐 Teacher Login Management</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">Teacher ke name par click karke Login ID aur Password generate ya edit karein.</p>
+        </div>
+        <span class="badge blue">${teachers.length} Teacher${teachers.length===1?'':'s'}</span>
+      </div>
+      <div class="table-container">
+        <table style="min-width:850px">
+          <thead><tr><th>S.No.</th><th>Teacher Name</th><th>Mobile</th><th>Login Status</th><th>Action</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function openTeacherLoginEditor(id){
+  const t=(Array.isArray(getTeachers())?getTeachers():[]).find(x=>Number(x.id)===Number(id));
+  if(!t){alert("Teacher not found.");return;}
+  teacherLoginEditingId=Number(id);
+  document.getElementById("teacherLoginEditorModal")?.remove();
+
+  const modal=`
+    <div class="modal-bg" id="teacherLoginEditorModal" style="display:flex">
+      <div class="modal" style="max-width:600px">
+        <div class="modal-header">
+          <div>
+            <h2>🔐 Teacher Login</h2>
+            <p style="color:#667085;font-size:12px;margin-top:4px">${escapeHtml(t.name||"Teacher")}</p>
+          </div>
+          <button class="close-btn" onclick="closeTeacherLoginEditor()">×</button>
+        </div>
+
+        <div class="form-group">
+          <label>Teacher Name</label>
+          <input value="${escapeHtml(t.name||"")}" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>Login ID *</label>
+          <div style="display:flex;gap:8px">
+            <input id="teacherLoginIdEdit" value="${escapeHtml(t.teacherId||"")}" placeholder="Generate or enter Login ID" autocomplete="off">
+            <button type="button" class="small-btn" onclick="generateTeacherLoginForEditor()">⚡ Generate ID</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Password *</label>
+          <div style="display:flex;gap:8px">
+            <input id="teacherLoginPasswordEdit" type="text" value="${escapeHtml(t.password||"")}" placeholder="Generate or enter Password" autocomplete="off">
+            <button type="button" class="small-btn" onclick="generateTeacherPasswordForEditor()">⚡ Generate Password</button>
+          </div>
+        </div>
+
+        <div style="background:#f8faff;border:1px solid #dce5f3;padding:13px;border-radius:10px;margin-bottom:15px;font-size:12px;color:#475467">
+          <b>Login:</b> Teacher login screen par upar wala Login ID aur Password use hoga. Dono fields manually edit bhi ki ja sakti hain.
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" style="flex:1" onclick="saveTeacherLoginCredentials()">💾 Save Login</button>
+          <button class="btn btn-outline" style="flex:1;margin-top:0" onclick="closeTeacherLoginEditor()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML("beforeend",modal);
+}
+
+function generateTeacherLoginForEditor(){
+  const input=document.getElementById("teacherLoginIdEdit");
+  if(input)input.value=generateTeacherLoginId();
+}
+
+function generateTeacherPasswordForEditor(){
+  const input=document.getElementById("teacherLoginPasswordEdit");
+  if(input)input.value=generateTeacherPassword();
+}
+
+function saveTeacherLoginCredentials(){
+  const idInput=document.getElementById("teacherLoginIdEdit");
+  const passInput=document.getElementById("teacherLoginPasswordEdit");
+  const teacherId=(idInput?.value||"").trim();
+  const password=(passInput?.value||"").trim();
+  if(!teacherId||!password){alert("Login ID aur Password dono required hain.");return;}
+  if(password.length<4){alert("Password kam se kam 4 characters ka rakhein.");return;}
+
+  const teachers=Array.isArray(getTeachers())?getTeachers():[];
+  const duplicate=teachers.find(t=>Number(t.id)!==Number(teacherLoginEditingId) && String(t.teacherId||"").trim().toLowerCase()===teacherId.toLowerCase());
+  if(duplicate){alert("Ye Login ID kisi doosre teacher ko already assigned hai. Dusri ID use karein.");return;}
+
+  const t=teachers.find(x=>Number(x.id)===Number(teacherLoginEditingId));
+  if(!t){alert("Teacher not found.");return;}
+  t.teacherId=teacherId;
+  t.password=password;
+  saveTeachers(teachers);
+  closeTeacherLoginEditor();
+  renderTeacherLoginPage();
+  alert("Teacher Login saved successfully!\n\nLogin ID: "+teacherId+"\nPassword: "+password);
+}
+
+function closeTeacherLoginEditor(){
+  document.getElementById("teacherLoginEditorModal")?.remove();
+  teacherLoginEditingId=null;
 }
 
 /* FEES */
