@@ -10,7 +10,20 @@
 body{background:#f4f7fb;color:#172033}
 button{cursor:pointer}
 .login-page{min-height:100vh;background:linear-gradient(135deg,#1769ff,#6546e8);display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{width:100%;max-width:430px;background:#fff;padding:30px;border-radius:24px;box-shadow:0 20px 60px #0004}
+.login-box{width:100%;max-width:520px;background:#fff;padding:30px;border-radius:24px;box-shadow:0 20px 60px #0004}
+.login-role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 20px}
+.login-role-card{border:1px solid #dce2eb;background:#fff;border-radius:15px;padding:12px 7px;text-align:center;cursor:pointer;transition:.18s;min-height:108px}
+.login-role-card:hover{transform:translateY(-2px);box-shadow:0 7px 18px #0001}
+.login-role-card.active{border-color:#1769ff;background:#eef4ff;box-shadow:0 0 0 2px #1769ff22}
+.login-role-icon{width:54px;height:54px;border-radius:15px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;background:#eef4ff;color:#1769ff}
+.login-role-icon svg{width:34px;height:34px}
+.login-role-card strong{display:block;font-size:12px}
+.login-role-card small{display:block;color:#667085;font-size:10px;margin-top:3px}
+.login-security-note{background:#f8faff;border:1px solid #e5eaf1;border-radius:12px;padding:10px 12px;font-size:12px;color:#667085;margin:12px 0}
+.owner-verify-badge{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.owner-verify-badge span{padding:6px 9px;border-radius:20px;background:#fff5d9;color:#9a6700;font-size:11px;font-weight:bold}
+.owner-verify-badge span.ok{background:#e6f8ed;color:#15803d}
+@media(max-width:700px){.login-role-grid{grid-template-columns:repeat(2,1fr)}}
 .logo{width:65px;height:65px;background:#1769ff;color:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;margin:auto}
 .login-title{text-align:center;font-size:28px;font-weight:bold;margin-top:15px}
 .login-subtitle{text-align:center;color:#777;margin:7px 0 25px}
@@ -291,60 +304,96 @@ th{background:#fafbfd;color:#667085}
 
 <div class="login-page" id="loginPage">
 <div class="login-box">
-<div class="logo">S</div>
-<div class="login-title">SchoolHub</div>
-<div class="login-subtitle">Multi-School Management System</div>
+  <div class="logo">S</div>
+  <div class="login-title">SchoolHub</div>
+  <div class="login-subtitle">Multi-School Management System</div>
 
-<div class="form-group">
-<label>Login As</label>
-<select id="loginRole" onchange="updateLoginRoleFields()">
-<option value="school_admin">School Admin</option>
-<option value="owner">SchoolHub Owner</option>
-<option value="teacher">Teacher</option>
-<option value="parent">Parent</option>
-<option value="student">Student</option>
-</select>
-</div>
+  <input type="hidden" id="loginRole" value="school_admin">
 
-<div class="form-group">
-<label>Email / Mobile</label>
-<input id="loginEmail" placeholder="Enter email or mobile">
-</div>
+  <div class="login-role-grid">
+    <div class="login-role-card" data-role="owner" onclick="selectLoginRole('owner')">
+      <div class="login-role-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M17 28h30v22H17z"/><path d="M12 28l20-14 20 14"/><path d="M25 50V38h14v12"/>
+          <path d="M25 25h14"/>
+        </svg>
+      </div>
+      <strong>Owner</strong><small>SchoolHub Owner</small>
+    </div>
 
-<div class="form-group" id="loginPasswordGroup">
-<label>Password</label>
-<input id="loginPassword" type="password" placeholder="Enter password">
-</div>
+    <div class="login-role-card active" data-role="school_admin" onclick="selectLoginRole('school_admin')">
+      <div class="login-role-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M10 54h44"/><path d="M14 54V27l18-13 18 13v27"/><path d="M23 54V39h18v15"/>
+          <path d="M21 29h6M37 29h6M21 35h6M37 35h6"/>
+        </svg>
+      </div>
+      <strong>School</strong><small>School Login</small>
+    </div>
 
-<div class="form-group" id="studentLoginClassGroup" style="display:none">
-<label>Class</label>
-<select id="studentLoginClass">
-<option value="">Select Class</option>
-<option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
-<option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
-<option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
-<option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
-</select>
-</div>
+    <div class="login-role-card" data-role="teacher" onclick="selectLoginRole('teacher')">
+      <div class="login-role-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3">
+          <rect x="8" y="10" width="48" height="31" rx="3"/><path d="M22 53h20M32 41v12"/>
+          <path d="M17 20h20M17 27h27M17 34h15"/>
+          <path d="M44 29l7 8"/>
+        </svg>
+      </div>
+      <strong>Teacher</strong><small>Teacher Login</small>
+    </div>
 
-<div class="form-group" id="studentLoginRollGroup" style="display:none">
-<label>Roll Number</label>
-<input id="studentLoginRoll" type="number" placeholder="Enter roll number">
-</div>
+    <div class="login-role-card" data-role="student" onclick="selectLoginRole('student')">
+      <div class="login-role-icon">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M9 25l23-12 23 12-23 12L9 25z"/><path d="M18 30v13c8 8 20 8 28 0V30"/>
+          <path d="M55 25v17"/>
+        </svg>
+      </div>
+      <strong>Student</strong><small>Student Portal</small>
+    </div>
+  </div>
 
-<button class="btn btn-primary" onclick="loginUser()">Login</button>
-<a class="otp-link" onclick="openForgotPassword()">Forgot Password / OTP Verification?</a>
-<button class="btn btn-outline" id="registerSchoolBtn" style="display:none" onclick="openRegister()">+ Register New School</button>
-<button class="btn btn-outline" id="registerOwnerBtn" style="display:none" onclick="openOwnerRegistration()">+ Register SchoolHub Owner</button>
+  <div class="form-group">
+    <label id="loginIdentifierLabel">School Login ID / Email / Mobile</label>
+    <input id="loginEmail" placeholder="Enter school login ID / email / mobile" autocomplete="username">
+  </div>
 
-<div class="demo" id="loginHelp">
-<strong>School Login</strong><br>
-School ki Login ID aur Password sirf SchoolHub Owner register karke dega.
-</div>
-</div>
-</div>
+  <div class="form-group" id="loginPasswordGroup">
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="Enter password" autocomplete="current-password">
+  </div>
 
-<div class="app" id="app">
+  <div class="form-group" id="studentLoginClassGroup" style="display:none">
+    <label>Class</label>
+    <select id="studentLoginClass">
+      <option value="">Select Class</option>
+      <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+      <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+      <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+      <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+    </select>
+  </div>
+
+  <div class="form-group" id="studentLoginRollGroup" style="display:none">
+    <label>Roll Number</label>
+    <input id="studentLoginRoll" type="number" placeholder="Enter roll number">
+  </div>
+
+  <button class="btn btn-primary" id="mainLoginBtn" onclick="loginUser()">Login</button>
+  <a class="otp-link" onclick="openForgotPassword()">Forgot Password / OTP Verification?</a>
+  <button class="btn btn-outline" id="registerSchoolBtn" style="display:none" onclick="openRegister()">+ Register New School</button>
+  <button class="btn btn-outline" id="registerOwnerBtn" style="display:none" onclick="openOwnerRegistration()">+ Register SchoolHub Owner</button>
+
+  <div class="login-security-note" id="ownerSecurityNote" style="display:none">
+    🔐 Owner account me <b>Mobile OTP + Gmail OTP</b> dono verify hone ke baad hi login complete hoga.
+  </div>
+
+  <div class="demo" id="loginHelp">
+    <strong>School Login</strong><br>
+    School ki Login ID aur Password SchoolHub Owner register karke dega.
+  </div>
+</div>
+</div><div class="app" id="app">
 
 <aside class="sidebar" id="sidebar">
 <div class="brand">
@@ -496,19 +545,74 @@ SchoolHub
 
 <!-- OWNER REGISTRATION -->
 <div class="modal-bg" id="ownerRegistrationModal">
-<div class="modal" style="max-width:650px">
-<div class="modal-header"><h2>SchoolHub Owner Registration</h2><button class="close-btn" onclick="closeOwnerRegistration()">×</button></div>
-<p style="color:#667085;font-size:13px;margin-bottom:15px">Sabse pehle SchoolHub Owner ka account create karein. Is account se hi schools register/manage honge.</p>
-<div class="form-grid">
-<div class="form-group"><label>Owner Name *</label><input id="ownerRegName" placeholder="Enter owner name"></div>
-<div class="form-group"><label>Mobile Number *</label><input id="ownerRegMobile" placeholder="Enter mobile number" inputmode="numeric"></div>
-<div class="form-group"><label>Gmail ID *</label><input id="ownerRegEmail" type="email" placeholder="owner@gmail.com"></div>
-<div class="form-group"><label>Create User ID *</label><input id="ownerRegId" placeholder="Create owner login ID" autocomplete="off"></div>
-<div class="form-group"><label>Create Password *</label><input id="ownerRegPassword" type="password" placeholder="Minimum 6 characters" autocomplete="new-password"></div>
-<div class="form-group"><label>Confirm Password *</label><input id="ownerRegConfirm" type="password" placeholder="Confirm password" autocomplete="new-password"></div>
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h2>SchoolHub Owner Registration</h2>
+      <button class="close-btn" onclick="closeOwnerRegistration()">×</button>
+    </div>
+    <p style="color:#667085;font-size:13px;margin-bottom:15px">
+      Owner ka account sabse pehle register hoga. Registration me sirf mobile, Gmail aur password required hai.
+    </p>
+
+    <div class="form-group">
+      <label>Mobile Number *</label>
+      <input id="ownerRegMobile" placeholder="10 digit mobile number" inputmode="numeric" maxlength="10">
+    </div>
+    <div class="form-group">
+      <label>Gmail ID *</label>
+      <input id="ownerRegEmail" type="email" placeholder="owner@gmail.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Create Password *</label>
+      <input id="ownerRegPassword" type="password" placeholder="Minimum 6 characters" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label>Confirm Password *</label>
+      <input id="ownerRegConfirm" type="password" placeholder="Confirm password" autocomplete="new-password">
+    </div>
+
+    <div class="otp-note">
+      Registration ke baad mobile aur Gmail dono ke liye OTP verification screen khulegi.
+    </div>
+    <button class="btn btn-primary" onclick="registerOwner()">Register & Verify</button>
+  </div>
 </div>
-<button class="btn btn-primary" onclick="registerOwner()">Register Owner</button>
-</div></div>
+
+<!-- OWNER OTP VERIFICATION -->
+<div class="modal-bg" id="ownerOtpModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h2>Verify Owner Account</h2>
+      <button class="close-btn" onclick="closeOwnerOtp()">×</button>
+    </div>
+
+    <div class="owner-verify-badge">
+      <span id="ownerMobileVerifyBadge">📱 Mobile: Pending</span>
+      <span id="ownerEmailVerifyBadge">✉️ Gmail: Pending</span>
+    </div>
+
+    <div class="form-group">
+      <label>Mobile OTP</label>
+      <input id="ownerMobileOtp" inputmode="numeric" maxlength="6" placeholder="Enter mobile OTP">
+    </div>
+    <button class="btn btn-outline" style="margin-top:0" onclick="verifyOwnerMobileOtp()">Verify Mobile OTP</button>
+
+    <div class="form-group" style="margin-top:18px">
+      <label>Gmail OTP</label>
+      <input id="ownerEmailOtp" inputmode="numeric" maxlength="6" placeholder="Enter Gmail OTP">
+    </div>
+    <button class="btn btn-outline" style="margin-top:0" onclick="verifyOwnerEmailOtp()">Verify Gmail OTP</button>
+
+    <div class="otp-note" id="ownerOtpInfo">
+      Demo/browser version: generated OTP is shown here. Real SMS/Gmail delivery ke liye backend SMS + email provider connect karna hoga.
+    </div>
+
+    <button class="btn btn-primary" id="ownerCompleteBtn" style="margin-top:15px" onclick="completeOwnerVerification()" disabled>
+      Verify & Login
+    </button>
+    <button class="btn btn-outline" onclick="resendOwnerOtps()">Resend OTP</button>
+  </div>
+</div>
 
 <!-- REGISTER -->
 <div class="modal-bg" id="registerModal">
@@ -1222,36 +1326,72 @@ function resetForgotPassword(){
 
 /* LOGIN */
 
+function selectLoginRole(role){
+  const select=document.getElementById("loginRole");
+  if(select)select.value=role;
+  document.querySelectorAll(".login-role-card").forEach(card=>{
+    card.classList.toggle("active",card.dataset.role===role);
+  });
+  updateLoginRoleFields();
+
+  // Owner must be registered before owner login.
+  if(role==="owner" && !getOwnerAccount()){
+    setTimeout(()=>openOwnerRegistration(),120);
+  }
+}
+
 function updateLoginRoleFields(){
   const role=document.getElementById("loginRole")?.value||"school_admin";
   const studentMode=role==="student"||role==="parent";
   const ownerMode=role==="owner";
+  const teacherMode=role==="teacher";
   const p=document.getElementById("loginPasswordGroup");
   const c=document.getElementById("studentLoginClassGroup");
   const r=document.getElementById("studentLoginRollGroup");
   const e=document.getElementById("loginEmail");
   const reg=document.getElementById("registerSchoolBtn");
   const ownerReg=document.getElementById("registerOwnerBtn");
+  const ownerNote=document.getElementById("ownerSecurityNote");
+  const loginBtn=document.getElementById("mainLoginBtn");
+  const label=document.getElementById("loginIdentifierLabel");
+
   if(p)p.style.display=studentMode?"none":"block";
   if(c)c.style.display=studentMode?"block":"none";
   if(r)r.style.display=studentMode?"block":"none";
+
   const ownerExists=!!getOwnerAccount();
-  if(reg)reg.style.display=(ownerMode&&ownerExists)?"block":"none";
+  if(reg)reg.style.display=(!ownerMode && !studentMode && !teacherMode)?"block":"none";
   if(ownerReg)ownerReg.style.display=(ownerMode&&!ownerExists)?"block":"none";
-  const label=e?.previousElementSibling;
-  if(label)label.innerText=studentMode?"Registered Mobile / Aadhaar":(ownerMode?"Owner Login ID":"School Login ID / Email / Mobile");
-  if(e)e.placeholder=studentMode?"Enter registered mobile or Aadhaar":(ownerMode?"Enter owner login ID":"Enter school login ID / email / mobile");
+  if(ownerNote)ownerNote.style.display=ownerMode?"block":"none";
+
+  if(label){
+    label.innerText=studentMode?"Registered Mobile / Aadhaar":
+      (ownerMode?"Owner Email / Mobile":
+      (teacherMode?"Teacher Mobile / Email / ID":"School Login ID / Email / Mobile"));
+  }
+  if(e){
+    e.placeholder=studentMode?"Enter registered mobile or Aadhaar":
+      (ownerMode?"Enter registered Gmail or mobile":
+      (teacherMode?"Enter teacher mobile, email or ID":"Enter school login ID / email / mobile"));
+  }
+  if(loginBtn)loginBtn.innerText=ownerMode&&!ownerExists?"Register Owner First":"Login";
+
   const help=document.getElementById("loginHelp");
   if(help){
     if(ownerMode){
       const owner=getOwnerAccount();
       help.innerHTML=owner
-        ? "<strong>SchoolHub Owner Login</strong><br>Registered Owner ID se login karein.<br><span style=\"color:#667085\">Owner hi school register/manage karega.</span>"
-        : "<strong>First Step</strong><br>Sabse pehle <b>Register SchoolHub Owner</b> par click karke owner account banayein.";
+        ? "<strong>SchoolHub Owner Login</strong><br>Registered Gmail/mobile + password enter karein. Login se pehle Mobile OTP aur Gmail OTP verify hoga."
+        : "<strong>First Step</strong><br>Sabse pehle <b>Owner Registration</b> complete karein. Uske baad OTP verification hoga.";
+    }else if(teacherMode){
+      help.innerHTML="<strong>Teacher Login</strong><br>Teacher ko school administrator dwara diya gaya mobile/email/ID aur password use karna hai.";
+    }else if(studentMode){
+      help.innerHTML="<strong>Student Login</strong><br>Registered mobile/Aadhaar, class aur roll number enter karein.";
     }else{
       help.innerHTML="<strong>School Login</strong><br>School ki Login ID aur Password sirf SchoolHub Owner register karke dega.";
     }
   }
+  // Keep legacy parent role functional if selected elsewhere.
 }
 
 function findSchoolAccount(identifier,password){
@@ -1270,15 +1410,39 @@ function loginUser(){
     const identifier=(document.getElementById("loginEmail")?.value||"").trim();
 
     if(role==="owner"){
-      const password=(document.getElementById("loginPassword")?.value||"").trim();
       const owner=getOwnerAccount();
-      if(!owner){alert("Pehle SchoolHub Owner registration karein.");openOwnerRegistration();return false;}
-      const ids=[owner.loginId,owner.email,owner.mobile].map(v=>String(v||"").trim().toLowerCase());
-      if(ids.includes(identifier.toLowerCase()) && String(owner.password||"")===password){
-        openOwnerDashboard();
+      if(!owner){
+        alert("Pehle Owner Registration complete karein.");
+        openOwnerRegistration();
         return false;
       }
-      alert("Invalid Owner Login Details.");
+
+      const password=(document.getElementById("loginPassword")?.value||"").trim();
+      const rawIdentifier=identifier.trim();
+      const normalizedIdentifier=rawIdentifier.toLowerCase();
+      const normalizedMobile=rawIdentifier.replace(/\\D/g,"");
+
+      const ownerEmail=String(owner.email||"").trim().toLowerCase();
+      const ownerLoginId=String(owner.loginId||"").trim().toLowerCase();
+      const ownerMobile=String(owner.mobile||"").replace(/\\D/g,"");
+
+      const idMatched=
+        (ownerEmail && normalizedIdentifier===ownerEmail) ||
+        (ownerLoginId && normalizedIdentifier===ownerLoginId) ||
+        (ownerMobile && normalizedMobile===ownerMobile);
+
+      if(!rawIdentifier||!password){
+        alert("Owner Gmail / Mobile aur Password enter karein.");
+        return false;
+      }
+
+      if(idMatched && String(owner.password||"")===password){
+        // Correct credentials -> open the existing Owner OTP screen.
+        startOwnerLoginOtp(owner);
+        return false;
+      }
+
+      alert("Invalid Owner Login Details. Registered Gmail/Mobile aur password check karein.");
       return false;
     }
 
@@ -1304,7 +1468,6 @@ function loginUser(){
       return false;
     }
 
-    // Teacher login continues to use the currently selected school data.
     const teacher=getTeachers().find(t=>
        (String(t.teacherId||"").trim().toLowerCase()===identifier.toLowerCase() ||
         String(t.email||"").trim().toLowerCase()===identifier.toLowerCase() ||
@@ -1321,33 +1484,215 @@ function loginUser(){
   return false;
 }
 
-
 function getOwnerAccount(){
   try{return JSON.parse(localStorage.getItem("schoolHubOwner")||"null");}catch(e){return null;}
 }
-function openOwnerRegistration(){document.getElementById("ownerRegistrationModal")?.style.setProperty("display","flex");}
-function closeOwnerRegistration(){document.getElementById("ownerRegistrationModal")?.style.setProperty("display","none");}
+function openOwnerRegistration(){
+  document.getElementById("ownerRegistrationModal")?.style.setProperty("display","flex");
+}
+function closeOwnerRegistration(){
+  document.getElementById("ownerRegistrationModal")?.style.setProperty("display","none");
+}
+function closeOwnerOtp(){
+  document.getElementById("ownerOtpModal")?.style.setProperty("display","none");
+  // Do not delete the stored account. Clear only the temporary OTP sessions.
+  window.schoolHubOwnerPending=null;
+  window.schoolHubOwnerLoginOtp=null;
+}
+
+function makeOtp(){
+  return String(Math.floor(100000+Math.random()*900000));
+}
+
 function registerOwner(){
-  const name=(document.getElementById("ownerRegName")?.value||"").trim();
   const mobile=(document.getElementById("ownerRegMobile")?.value||"").trim();
-  const email=(document.getElementById("ownerRegEmail")?.value||"").trim();
-  const loginId=(document.getElementById("ownerRegId")?.value||"").trim();
+  const email=(document.getElementById("ownerRegEmail")?.value||"").trim().toLowerCase();
   const password=document.getElementById("ownerRegPassword")?.value||"";
   const confirm=document.getElementById("ownerRegConfirm")?.value||"";
-  if(!name||!mobile||!email||!loginId||!password||!confirm){alert("Please fill all owner registration fields.");return;}
+
+  if(!/^[6-9]\d{9}$/.test(mobile)){alert("Valid 10 digit Indian mobile number enter karein.");return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert("Valid Gmail/email ID enter karein.");return;}
   if(password.length<6){alert("Password must be at least 6 characters.");return;}
   if(password!==confirm){alert("Password and Confirm Password do not match.");return;}
-  const existing=getOwnerAccount();
-  if(existing){alert("SchoolHub Owner is already registered. Login karke Settings se details change karein.");closeOwnerRegistration();return;}
-  const accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");
-  if(Array.isArray(accounts)&&accounts.some(a=>String(a.loginId||"").toLowerCase()===loginId.toLowerCase())){alert("This User ID is already used by a school.");return;}
-  const owner={id:"OWNER"+Date.now().toString(36).toUpperCase(),name,mobile,email,loginId,password,createdAt:new Date().toISOString()};
-  localStorage.setItem("schoolHubOwner",JSON.stringify(owner));
+  if(getOwnerAccount()){alert("SchoolHub Owner already registered hai. Owner login use karein.");closeOwnerRegistration();return;}
+
+  const mobileOtp=makeOtp();
+  const emailOtp=makeOtp();
+
+  // Pending account is NOT activated until both OTPs are verified.
+  window.schoolHubOwnerPending={
+    id:"OWNER"+Date.now().toString(36).toUpperCase(),
+    mobile,email,password,
+    mobileOtp,emailOtp,
+    mobileVerified:false,emailVerified:false,
+    createdAt:new Date().toISOString()
+  };
+
   closeOwnerRegistration();
-  ["ownerRegName","ownerRegMobile","ownerRegEmail","ownerRegId","ownerRegPassword","ownerRegConfirm"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
-  document.getElementById("loginRole").value="owner";updateLoginRoleFields();
-  document.getElementById("loginEmail").value=loginId;document.getElementById("loginPassword").value=password;
-  alert("SchoolHub Owner Registered Successfully. Ab Login karein.");
+  document.getElementById("ownerMobileOtp").value="";
+  document.getElementById("ownerEmailOtp").value="";
+  updateOwnerOtpBadges();
+  document.getElementById("ownerOtpInfo").innerHTML=
+    "Demo/browser version OTP: <b>Mobile OTP "+mobileOtp+"</b> &nbsp; | &nbsp; <b>Gmail OTP "+emailOtp+
+    "</b><br>Production me yahi OTP SMS aur Gmail provider ke through bhejna hoga.";
+  document.getElementById("ownerOtpModal").style.display="flex";
+}
+
+function updateOwnerOtpBadges(){
+  const p=window.schoolHubOwnerPending;
+  const mb=document.getElementById("ownerMobileVerifyBadge");
+  const eb=document.getElementById("ownerEmailVerifyBadge");
+  if(!p)return;
+  if(mb)mb.textContent=p.mobileVerified?"📱 Mobile: Verified":"📱 Mobile: Pending";
+  if(eb)eb.textContent=p.emailVerified?"✉️ Gmail: Verified":"✉️ Gmail: Pending";
+  if(mb)mb.classList.toggle("ok",!!p.mobileVerified);
+  if(eb)eb.classList.toggle("ok",!!p.emailVerified);
+  const complete=document.getElementById("ownerCompleteBtn");
+  if(complete)complete.disabled=!(p.mobileVerified&&p.emailVerified);
+}
+
+function verifyOwnerMobileOtp(){
+  const p=window.schoolHubOwnerPending;
+  const l=window.schoolHubOwnerLoginOtp;
+  const otp=(document.getElementById("ownerMobileOtp")?.value||"").trim();
+  if(p){
+    if(otp===p.mobileOtp){p.mobileVerified=true;updateOwnerOtpBadges();alert("Mobile OTP verified.");}
+    else alert("Invalid Mobile OTP.");
+    return;
+  }
+  if(l){
+    if(otp===l.mobileOtp){l.mobileVerified=true;updateOwnerLoginOtpBadges();alert("Mobile OTP verified.");}
+    else alert("Invalid Mobile OTP.");
+    return;
+  }
+  alert("OTP session expire ho gayi.");
+}
+function verifyOwnerEmailOtp(){
+  const p=window.schoolHubOwnerPending;
+  const l=window.schoolHubOwnerLoginOtp;
+  const otp=(document.getElementById("ownerEmailOtp")?.value||"").trim();
+  if(p){
+    if(otp===p.emailOtp){p.emailVerified=true;updateOwnerOtpBadges();alert("Gmail OTP verified.");}
+    else alert("Invalid Gmail OTP.");
+    return;
+  }
+  if(l){
+    if(otp===l.emailOtp){l.emailVerified=true;updateOwnerLoginOtpBadges();alert("Gmail OTP verified.");}
+    else alert("Invalid Gmail OTP.");
+    return;
+  }
+  alert("OTP session expire ho gayi.");
+}
+function resendOwnerOtps(){
+  const p=window.schoolHubOwnerPending;
+  const l=window.schoolHubOwnerLoginOtp;
+  if(!p&&!l){alert("OTP session expire ho gayi.");return;}
+
+  const target=p||l;
+  target.mobileOtp=makeOtp();
+  target.emailOtp=makeOtp();
+  target.mobileVerified=false;
+  target.emailVerified=false;
+
+  document.getElementById("ownerMobileOtp").value="";
+  document.getElementById("ownerEmailOtp").value="";
+
+  if(p){
+    updateOwnerOtpBadges();
+  }else{
+    updateOwnerLoginOtpBadges();
+  }
+  document.getElementById("ownerOtpInfo").innerHTML=
+    "New Demo OTP: <b>Mobile "+target.mobileOtp+"</b> | <b>Gmail "+target.emailOtp+
+    "</b><br>Production me SMS/Gmail API se OTP deliver karein.";
+}
+function completeOwnerVerification(){
+  const p=window.schoolHubOwnerPending;
+  const l=window.schoolHubOwnerLoginOtp;
+
+  if(p){
+    if(!p.mobileVerified||!p.emailVerified){alert("Mobile aur Gmail dono OTP verify karna zaroori hai.");return;}
+    const owner={
+      id:p.id,
+      name:"SchoolHub Owner",
+      mobile:p.mobile,
+      email:p.email,
+      loginId:p.email,
+      password:p.password,
+      mobileVerified:true,
+      emailVerified:true,
+      createdAt:p.createdAt
+    };
+    localStorage.setItem("schoolHubOwner",JSON.stringify(owner));
+    window.schoolHubOwnerPending=null;
+    closeOwnerOtp();
+    document.getElementById("loginRole").value="owner";
+    document.getElementById("loginEmail").value=owner.email;
+    document.getElementById("loginPassword").value="";
+    selectLoginRole("owner");
+    alert("Owner Registration + Mobile OTP + Gmail OTP verification complete. Ab Owner login karein.");
+    return;
+  }
+
+  if(l){
+    if(!l.mobileVerified||!l.emailVerified){alert("Mobile aur Gmail dono OTP verify karna zaroori hai.");return;}
+    const owner=getOwnerAccount();
+    if(!owner||String(owner.id)!==String(l.ownerId)){alert("Owner session invalid hai.");return;}
+    window.schoolHubOwnerLoginOtp=null;
+    closeOwnerOtp();
+    openOwnerDashboard();
+    return;
+  }
+
+  alert("OTP session expire ho gayi.");
+}
+
+function startOwnerLoginOtp(owner){
+  if(!owner || !owner.id){alert("Owner account not found.");return;}
+
+  const mobileOtp=makeOtp();
+  const emailOtp=makeOtp();
+
+  // Separate login OTP session. Registration OTP state is cleared so
+  // old/stale OTP values cannot block Owner login.
+  window.schoolHubOwnerPending=null;
+  window.schoolHubOwnerLoginOtp={
+    ownerId:String(owner.id),
+    mobileOtp:String(mobileOtp),
+    emailOtp:String(emailOtp),
+    mobileVerified:false,
+    emailVerified:false
+  };
+
+  const mobileInput=document.getElementById("ownerMobileOtp");
+  const emailInput=document.getElementById("ownerEmailOtp");
+  if(mobileInput)mobileInput.value="";
+  if(emailInput)emailInput.value="";
+
+  updateOwnerLoginOtpBadges();
+
+  const info=document.getElementById("ownerOtpInfo");
+  if(info){
+    info.innerHTML=
+      "Owner Login OTP (Demo): <b>Mobile "+mobileOtp+"</b> | <b>Gmail "+emailOtp+
+      "</b><br><b>Dono OTP verify karne ke baad Complete Registration / Login button dabayein.</b>"+
+      "<br>Production me SMS/Gmail API se OTP bhejna hoga.";
+  }
+
+  const modal=document.getElementById("ownerOtpModal");
+  if(modal)modal.style.display="flex";
+}
+function updateOwnerLoginOtpBadges(){
+  const p=window.schoolHubOwnerLoginOtp;
+  const mb=document.getElementById("ownerMobileVerifyBadge");
+  const eb=document.getElementById("ownerEmailVerifyBadge");
+  const complete=document.getElementById("ownerCompleteBtn");
+  if(!p)return;
+  if(mb)mb.textContent=p.mobileVerified?"📱 Mobile: Verified":"📱 Mobile: Pending";
+  if(eb)eb.textContent=p.emailVerified?"✉️ Gmail: Verified":"✉️ Gmail: Pending";
+  if(mb)mb.classList.toggle("ok",!!p.mobileVerified);
+  if(eb)eb.classList.toggle("ok",!!p.emailVerified);
+  if(complete)complete.disabled=!(p.mobileVerified&&p.emailVerified);
 }
 function ownerAccounts(){let a=[];try{a=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");}catch(e){}return Array.isArray(a)?a:[];}
 function ownerSchoolList(){return ownerAccounts().slice().sort((a,b)=>String(a.schoolName||"").localeCompare(String(b.schoolName||""),undefined,{sensitivity:"base"}));}
