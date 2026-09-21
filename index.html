@@ -614,6 +614,42 @@ SchoolHub
   </div>
 </div>
 
+<!-- SCHOOL ADMIN LOGIN OTP -->
+<div class="modal-bg" id="schoolOtpModal">
+<div class="modal" style="max-width:560px">
+<div class="modal-header">
+<h2>Verify School Login</h2>
+<button class="close-btn" onclick="closeSchoolOtp()">×</button>
+</div>
+<div class="owner-verify-badge">
+  <span id="schoolMobileVerifyBadge">📱 Mobile: Pending</span>
+  <span id="schoolEmailVerifyBadge">✉️ Gmail: Pending</span>
+</div>
+<p id="schoolOtpAccountInfo" style="color:#667085;font-size:13px;margin-bottom:15px"></p>
+
+<div class="form-group">
+<label>Mobile OTP</label>
+<input id="schoolMobileOtp" inputmode="numeric" maxlength="6" placeholder="Enter mobile OTP">
+</div>
+<button class="btn btn-outline" style="margin-top:0" onclick="verifySchoolMobileOtp()">Verify Mobile OTP</button>
+
+<div class="form-group" style="margin-top:18px">
+<label>Gmail OTP</label>
+<input id="schoolEmailOtp" inputmode="numeric" maxlength="6" placeholder="Enter Gmail OTP">
+</div>
+<button class="btn btn-outline" style="margin-top:0" onclick="verifySchoolEmailOtp()">Verify Gmail OTP</button>
+
+<div class="otp-note" id="schoolOtpInfo">
+Demo/browser version: generated OTP yahan dikhega. Real SMS/Gmail delivery ke liye backend SMS + email provider connect karna hoga.
+</div>
+
+<button class="btn btn-primary" id="schoolCompleteBtn" style="margin-top:15px" onclick="completeSchoolLoginOtp()" disabled>
+Verify & Login
+</button>
+<button class="btn btn-outline" onclick="resendSchoolOtps()">Resend OTP</button>
+</div>
+</div>
+
 <!-- REGISTER -->
 <div class="modal-bg" id="registerModal">
 <div class="modal">
@@ -662,7 +698,7 @@ SchoolHub
 </div>
 
 <!-- SCHOOLHUB OWNER PANEL (legacy container) -->
-<div class="modal-bg" id="ownerPanelModal" style="display:none"></div>
+<div class="modal-bg" id="ownerPanelModal" style="display:none!important"></div>
 
 <!-- STUDENT MODAL -->
 <div class="modal-bg" id="studentModal">
@@ -1404,6 +1440,124 @@ function findSchoolAccount(identifier,password){
   })||null;
 }
 
+/* SCHOOL LOGIN OTP */
+function startSchoolLoginOtp(account){
+  if(!account)return;
+  const mobileOtp=makeOtp();
+  const emailOtp=makeOtp();
+  window.schoolHubSchoolLoginOtp={
+    schoolId:String(account.id),
+    mobileOtp,
+    emailOtp,
+    mobileVerified:false,
+    emailVerified:false
+  };
+
+  const mobile=document.getElementById("schoolMobileOtp");
+  const email=document.getElementById("schoolEmailOtp");
+  if(mobile)mobile.value="";
+  if(email)email.value="";
+
+  const info=document.getElementById("schoolOtpAccountInfo");
+  if(info)info.innerHTML="<b>"+escapeHtml(account.schoolName||"School")+"</b><br>Registered mobile: "+maskOtpMobile(account.mobile)+"<br>Registered Gmail: "+maskOtpEmail(account.email);
+
+  updateSchoolLoginOtpBadges();
+
+  const otpInfo=document.getElementById("schoolOtpInfo");
+  if(otpInfo)otpInfo.innerHTML=
+    "Login OTP (Demo): <b>Mobile "+mobileOtp+"</b> | <b>Gmail "+emailOtp+
+    "</b><br><b>Mobile ya Gmail me se kisi ek OTP ko verify karke login karein.</b><br>Production me SMS/Gmail API se OTP deliver karna hoga.";
+
+  const modal=document.getElementById("schoolOtpModal");
+  if(modal)modal.style.display="flex";
+}
+
+function updateSchoolLoginOtpBadges(){
+  const st=window.schoolHubSchoolLoginOtp;
+  if(!st)return;
+  const mb=document.getElementById("schoolMobileVerifyBadge");
+  const eb=document.getElementById("schoolEmailVerifyBadge");
+  const btn=document.getElementById("schoolCompleteBtn");
+  if(mb){
+    mb.textContent=st.mobileVerified?"📱 Mobile: Verified":"📱 Mobile: Pending";
+    mb.classList.toggle("ok",!!st.mobileVerified);
+  }
+  if(eb){
+    eb.textContent=st.emailVerified?"✉️ Gmail: Verified":"✉️ Gmail: Pending";
+    eb.classList.toggle("ok",!!st.emailVerified);
+  }
+  if(btn)btn.disabled=!(st.mobileVerified||st.emailVerified);
+}
+
+function verifySchoolMobileOtp(){
+  const st=window.schoolHubSchoolLoginOtp;
+  const value=(document.getElementById("schoolMobileOtp")?.value||"").trim();
+  if(!st){alert("OTP session expire ho gayi. Login dobara karein.");return;}
+  if(value!==String(st.mobileOtp)){alert("Invalid Mobile OTP.");return;}
+  st.mobileVerified=true;
+  updateSchoolLoginOtpBadges();
+  alert("Mobile OTP verified.");
+}
+
+function verifySchoolEmailOtp(){
+  const st=window.schoolHubSchoolLoginOtp;
+  const value=(document.getElementById("schoolEmailOtp")?.value||"").trim();
+  if(!st){alert("OTP session expire ho gayi. Login dobara karein.");return;}
+  if(value!==String(st.emailOtp)){alert("Invalid Gmail OTP.");return;}
+  st.emailVerified=true;
+  updateSchoolLoginOtpBadges();
+  alert("Gmail OTP verified.");
+}
+
+function completeSchoolLoginOtp(){
+  const st=window.schoolHubSchoolLoginOtp;
+  if(!st||(!st.mobileVerified&&!st.emailVerified)){
+    alert("Mobile ya Gmail me se kisi ek OTP ko verify karna zaroori hai.");
+    return;
+  }
+
+  const accounts=ownerAccounts();
+  const account=accounts.find(a=>String(a.id)===String(st.schoolId));
+  if(!account){
+    alert("School account nahi mila. Owner se school details check karein.");
+    closeSchoolOtp();
+    return;
+  }
+  if(account.hold){
+    alert("This school login is currently on hold by SchoolHub Owner.");
+    closeSchoolOtp();
+    return;
+  }
+
+  /* Active school ID is assigned ONLY after both OTPs are verified.
+     This prevents another school's data from becoming active prematurely. */
+  setActiveSchoolAccount(account);
+  window.schoolHubSchoolLoginOtp=null;
+  const modal=document.getElementById("schoolOtpModal");
+  if(modal)modal.style.display="none";
+  openApplication(account.schoolName,"School Administrator");
+}
+
+function closeSchoolOtp(){
+  const modal=document.getElementById("schoolOtpModal");
+  if(modal)modal.style.display="none";
+  window.schoolHubSchoolLoginOtp=null;
+}
+
+function resendSchoolOtps(){
+  const st=window.schoolHubSchoolLoginOtp;
+  if(!st){
+    alert("Login OTP session expire ho gayi. Login dobara karein.");
+    return;
+  }
+  const account=ownerAccounts().find(a=>String(a.id)===String(st.schoolId));
+  if(!account){
+    alert("School account nahi mila.");
+    return;
+  }
+  startSchoolLoginOtp(account);
+}
+
 function loginUser(){
   try {
     const role=document.getElementById("loginRole")?.value||"school_admin";
@@ -1463,8 +1617,8 @@ function loginUser(){
     const account=findSchoolAccount(identifier,password);
     if(account){
       if(account.hold){alert("This school login is currently on hold by SchoolHub Owner.");return false;}
-      setActiveSchoolAccount(account);
-      openApplication(account.schoolName,"School Administrator");
+      /* Do not activate the school or open the dashboard until both OTPs are verified. */
+      startSchoolLoginOtp(account);
       return false;
     }
 
@@ -1697,6 +1851,9 @@ function updateOwnerLoginOtpBadges(){
 function ownerAccounts(){let a=[];try{a=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");}catch(e){}return Array.isArray(a)?a:[];}
 function ownerSchoolList(){return ownerAccounts().slice().sort((a,b)=>String(a.schoolName||"").localeCompare(String(b.schoolName||""),undefined,{sensitivity:"base"}));}
 function openOwnerDashboard(){
+  /* Owner session must never inherit a previously logged-in school's data context. */
+  localStorage.removeItem("schoolHubActiveSchoolId");
+  ["schoolName","schoolEmail","schoolMobile","schoolCity","schoolPassword"].forEach(k=>localStorage.removeItem(k));
   window.schoolHubRole="owner";window.schoolHubTeacherId=null;window.schoolHubStudentId=null;
   document.getElementById("loginPage").style.display="none";document.getElementById("app").style.display="block";
   const sidebar=document.getElementById("sidebar");
@@ -1737,15 +1894,29 @@ function deleteSchoolAccount(id){const a=ownerAccounts().find(x=>String(x.id)===
 function toggleSchoolHold(id){const accounts=ownerAccounts(),i=accounts.findIndex(x=>String(x.id)===String(id));if(i<0)return;accounts[i].hold=!accounts[i].hold;localStorage.setItem('schoolAccounts',JSON.stringify(accounts));showOwnerSection('hold');alert(accounts[i].hold?'School login held.':'School login released.');}
 function renderOwnerSettings(){const o=getOwnerAccount()||{};document.getElementById('otherPage').innerHTML=ownerShell('⚙️ Owner Settings',`<p style="color:#667085;font-size:13px;margin-bottom:15px">Yahan sirf SchoolHub Owner ki apni details change hongi.</p><div class="form-grid"><div class="form-group"><label>Owner Name</label><input id="ownerSetName" value="${escapeHtml(o.name||'')}"></div><div class="form-group"><label>Mobile Number</label><input id="ownerSetMobile" value="${escapeHtml(o.mobile||'')}"></div><div class="form-group"><label>Gmail ID</label><input id="ownerSetEmail" type="email" value="${escapeHtml(o.email||'')}"></div><div class="form-group"><label>Change User ID</label><input id="ownerSetId" value="${escapeHtml(o.loginId||'')}"></div><div class="form-group"><label>Change Password</label><input id="ownerSetPassword" type="password" placeholder="Leave blank to keep current"></div><div class="form-group"><label>Confirm New Password</label><input id="ownerSetConfirm" type="password"></div></div><button class="btn btn-primary" onclick="saveOwnerSettings()">Save Owner Settings</button>`);}
 function saveOwnerSettings(){const o=getOwnerAccount();if(!o)return;const name=document.getElementById('ownerSetName').value.trim(),mobile=document.getElementById('ownerSetMobile').value.trim(),email=document.getElementById('ownerSetEmail').value.trim(),loginId=document.getElementById('ownerSetId').value.trim(),pw=document.getElementById('ownerSetPassword').value,cp=document.getElementById('ownerSetConfirm').value;if(!name||!mobile||!email||!loginId){alert('Please fill all owner details.');return;}if(pw&&(pw.length<6||pw!==cp)){alert('New password must be at least 6 characters and match confirm password.');return;}o.name=name;o.mobile=mobile;o.email=email;o.loginId=loginId;if(pw)o.password=pw;localStorage.setItem('schoolHubOwner',JSON.stringify(o));document.getElementById('topUser').innerText=name;alert('Owner settings updated successfully.');}
-function logoutOwnerAccount(){window.schoolHubRole='admin';document.getElementById('app').style.display='none';document.getElementById('loginPage').style.display='flex';document.getElementById('loginRole').value='school_admin';document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';updateLoginRoleFields();}
+function logoutOwnerAccount(){
+  localStorage.removeItem("schoolHubActiveSchoolId");
+  ["schoolName","schoolEmail","schoolMobile","schoolCity","schoolPassword"].forEach(k=>localStorage.removeItem(k));
+  window.schoolHubRole="admin";
+  window.schoolHubSchoolLoginOtp=null;
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginPage").style.display="flex";
+  document.getElementById("loginRole").value="school_admin";
+  document.getElementById("loginEmail").value="";
+  document.getElementById("loginPassword").value="";
+  updateLoginRoleFields();
+}
 
 function setActiveSchoolAccount(account){
-  localStorage.setItem("schoolHubActiveSchoolId",String(account.id));
+  if(!account||!account.id)return;
+  const id=String(account.id);
+  localStorage.setItem("schoolHubActiveSchoolId",id);
   localStorage.setItem("schoolName",account.schoolName||"");
   localStorage.setItem("schoolEmail",account.email||"");
   localStorage.setItem("schoolMobile",account.mobile||"");
   localStorage.setItem("schoolCity",account.city||"");
   localStorage.setItem("schoolPassword",account.password||"");
+  /* Do not copy another school's scoped data. */
 }
 function getActiveSchoolId(){return String(localStorage.getItem("schoolHubActiveSchoolId")||"").trim();}
 function schoolScopedKey(key){const id=getActiveSchoolId();return id?"schoolData_"+id+"_"+key:key;}
@@ -1787,24 +1958,84 @@ function getCurrentTeacher(){if(window.schoolHubRole!=="teacher")return null;con
 function teacherAssignedClass(){const t=getCurrentTeacher();if(!t)return null;const c=Number(t.classNo??t.teachingClass??t.class);return Number.isFinite(c)&&c>=1&&c<=12?c:null;}
 function teacherCanAccessClass(classNo){return window.schoolHubRole!=="teacher"||Number(teacherAssignedClass())===Number(classNo);}
 function requireTeacherClassAccess(classNo){if(teacherCanAccessClass(classNo))return true;alert("Aap sirf apni assigned class ki Attendance aur Result manage kar sakte hain.");return false;}
-function logoutUser(){document.getElementById("app").style.display="none";document.getElementById("loginPage").style.display="flex";window.schoolHubRole="admin";window.schoolHubTeacherId=null;window.schoolHubStudentId=null;updateLoginRoleFields();}
+function logoutUser(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginPage").style.display="flex";
+  localStorage.removeItem("schoolHubActiveSchoolId");
+  ["schoolName","schoolEmail","schoolMobile","schoolCity","schoolPassword"].forEach(k=>localStorage.removeItem(k));
+  window.schoolHubRole="admin";
+  window.schoolHubTeacherId=null;
+  window.schoolHubStudentId=null;
+  window.schoolHubSchoolLoginOtp=null;
+  updateLoginRoleFields();
+}
 function openRegister(){if(document.getElementById("loginRole")?.value!=="owner" && !document.getElementById("ownerPanelModal")?.style.display.includes("flex")){alert("Only SchoolHub Owner can register a school.");return;}document.getElementById("registerModal").style.display="flex";}
-function closeRegister(){document.getElementById("registerModal").style.display="none";if(document.getElementById("ownerPanelModal"))document.getElementById("ownerPanelModal").style.display="flex";}
+function closeRegister(){
+  const modal=document.getElementById("registerModal");
+  if(modal)modal.style.display="none";
+  const legacy=document.getElementById("ownerPanelModal");
+  if(legacy)legacy.style.display="none";
+  if(window.schoolHubRole==="owner"){
+    try{showOwnerSection("dashboard");}catch(e){console.error("Owner dashboard restore error:",e);}
+  }
+}
 function registerSchool(){
-  let school=document.getElementById("regSchoolName").value.trim(),principal=document.getElementById("regPrincipalName").value.trim(),mobile=document.getElementById("regSchoolMobile").value.trim(),email=document.getElementById("regSchoolEmail").value.trim(),city=document.getElementById("regSchoolCity").value.trim(),loginId=document.getElementById("regSchoolId").value.trim(),password=document.getElementById("regSchoolPassword").value;
-  if(!school||!principal||!mobile||!email||!city||!loginId){alert("Please fill all fields");return;}
-  if(password.length<6){alert("Password must be at least 6 characters");return;}
-  let accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");if(!Array.isArray(accounts))accounts=[];
-  const exists=accounts.some(a=>String(a.loginId||"").trim().toLowerCase()===loginId.toLowerCase()||String(a.email||"").trim().toLowerCase()===email.toLowerCase()||String(a.mobile||"").trim()===mobile);
-  if(exists){alert("School Login ID / Email / Mobile already registered.");return;}
-  const id="SCH"+Date.now().toString(36).toUpperCase();
-  const account={id,schoolName:school,principalName:principal,loginId,email,mobile,city,password,createdAt:new Date().toISOString()};
-  accounts.push(account);localStorage.setItem("schoolAccounts",JSON.stringify(accounts));
-  // If old demo/local data exists, preserve it for the first registered school only.
-  if(accounts.length===1)migrateLegacySchoolData(id);
+  if(window.schoolHubRole!=="owner" && document.getElementById("loginRole")?.value!=="owner"){
+    alert("Only SchoolHub Owner can register a school.");
+    return;
+  }
+
+  const school=document.getElementById("regSchoolName")?.value.trim()||"";
+  const principal=document.getElementById("regPrincipalName")?.value.trim()||"";
+  const mobile=document.getElementById("regSchoolMobile")?.value.trim()||"";
+  const email=(document.getElementById("regSchoolEmail")?.value.trim()||"").toLowerCase();
+  const city=document.getElementById("regSchoolCity")?.value.trim()||"";
+  const loginId=document.getElementById("regSchoolId")?.value.trim()||"";
+  const password=document.getElementById("regSchoolPassword")?.value||"";
+
+  if(!school||!principal||!mobile||!email||!city||!loginId||!password){
+    alert("Please fill all school registration fields.");
+    return;
+  }
+  if(password.length<6){
+    alert("Password must be at least 6 characters.");
+    return;
+  }
+
+  let accounts=[];
+  try{accounts=JSON.parse(localStorage.getItem("schoolAccounts")||"[]");}catch(e){}
+  if(!Array.isArray(accounts))accounts=[];
+
+  const normMobile=mobile.replace(/\D/g,"");
+  const exists=accounts.some(a=>{
+    const aId=String(a.loginId||"").trim().toLowerCase();
+    const aEmail=String(a.email||"").trim().toLowerCase();
+    const aMobile=String(a.mobile||"").replace(/\D/g,"");
+    return aId===loginId.toLowerCase() || aEmail===email || (normMobile && aMobile===normMobile);
+  });
+  if(exists){
+    alert("School Login ID / Email / Mobile already registered. Dusri details use karein.");
+    return;
+  }
+
+  const id="SCH"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase();
+  const account={
+    id,schoolName:school,principalName:principal,loginId,email,mobile,city,password,
+    hold:false,mobileVerified:false,emailVerified:false,createdAt:new Date().toISOString()
+  };
+
+  accounts.push(account);
+  localStorage.setItem("schoolAccounts",JSON.stringify(accounts));
+
+  /* Only the first school may receive legacy unscoped demo data.
+     Newly registered schools start with a completely separate empty data store. */
+  if(accounts.length===1) migrateLegacySchoolData(id);
+
   closeRegister();
-  ["regSchoolName","regPrincipalName","regSchoolMobile","regSchoolEmail","regSchoolCity","regSchoolId","regSchoolPassword"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
-  alert("School Registered Successfully!\nLogin ID: "+loginId+"\nPassword: "+password);
+  ["regSchoolName","regPrincipalName","regSchoolMobile","regSchoolEmail","regSchoolCity","regSchoolId","regSchoolPassword"]
+    .forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+
+  alert("School Registered Successfully!\n\nSchool: "+school+"\nLogin ID: "+loginId+"\nPassword: "+password+"\n\nSchool login ke time Mobile OTP ya Gmail OTP me se koi ek verify honge.");
 }
 
 /* DEMO STUDENTS */
