@@ -358,6 +358,11 @@ th{background:#fafbfd;color:#667085}
     <input id="loginEmail" placeholder="Enter school login ID / email / mobile" autocomplete="username">
   </div>
 
+  <div class="form-group" id="studentLoginNameGroup" style="display:none">
+    <label>Student Name</label>
+    <input id="studentLoginName" placeholder="Enter registered student name" autocomplete="name">
+  </div>
+
   <div class="form-group" id="loginPasswordGroup">
     <label>Password</label>
     <input id="loginPassword" type="password" placeholder="Enter password" autocomplete="current-password">
@@ -897,6 +902,11 @@ Verify & Login
 </div>
 
 <div class="form-group">
+<label>Gmail ID</label>
+<input id="teacherEmail" type="email" placeholder="teacher@gmail.com" autocomplete="email">
+</div>
+
+<div class="form-group">
 <label>Qualification</label>
 <input id="teacherQualification" placeholder="B.Ed / M.Sc / M.A etc.">
 </div>
@@ -1391,9 +1401,11 @@ function updateLoginRoleFields(){
   const loginBtn=document.getElementById("mainLoginBtn");
   const label=document.getElementById("loginIdentifierLabel");
 
-  if(p)p.style.display=studentMode?"none":"block";
-  if(c)c.style.display=studentMode?"block":"none";
+  if(p)p.style.display="block";
+  if(c)c.style.display="none";
   if(r)r.style.display=studentMode?"block":"none";
+  const studentNameWrap=document.getElementById("studentLoginNameGroup");
+  if(studentNameWrap)studentNameWrap.style.display=studentMode?"block":"none";
 
   const ownerExists=!!getOwnerAccount();
   if(reg)reg.style.display=(!ownerMode && !studentMode && !teacherMode)?"block":"none";
@@ -1401,12 +1413,12 @@ function updateLoginRoleFields(){
   if(ownerNote)ownerNote.style.display=ownerMode?"block":"none";
 
   if(label){
-    label.innerText=studentMode?"Registered Mobile / Aadhaar":
+    label.innerText=studentMode?"Registered Mobile Number":
       (ownerMode?"Owner Email / Mobile":
       (teacherMode?"Teacher Mobile / Email / ID":"School Login ID / Email / Mobile"));
   }
   if(e){
-    e.placeholder=studentMode?"Enter registered mobile or Aadhaar":
+    e.placeholder=studentMode?"Enter registered mobile number":
       (ownerMode?"Enter registered Gmail or mobile":
       (teacherMode?"Enter teacher mobile, email or ID":"Enter school login ID / email / mobile"));
   }
@@ -1422,7 +1434,7 @@ function updateLoginRoleFields(){
     }else if(teacherMode){
       help.innerHTML="<strong>Teacher Login</strong><br>Teacher ko school administrator dwara diya gaya mobile/email/ID aur password use karna hai.";
     }else if(studentMode){
-      help.innerHTML="<strong>Student Login</strong><br>Registered mobile/Aadhaar, class aur roll number enter karein.";
+      help.innerHTML="<strong>Student Login</strong><br>Registered mobile number, student name aur roll number enter karein.";
     }else{
       help.innerHTML="<strong>School Login</strong><br>School ki Login ID aur Password sirf SchoolHub Owner register karke dega.";
     }
@@ -1558,6 +1570,76 @@ function resendSchoolOtps(){
   startSchoolLoginOtp(account);
 }
 
+function normalizeLoginMobile(v){
+  return String(v||"").replace(/\D/g,"");
+}
+
+function getTeachersForSchoolId(schoolId){
+  const id=String(schoolId||"").trim();
+  if(!id)return [];
+  try{
+    const raw=localStorage.getItem("schoolData_"+id+"_schoolTeachers");
+    const arr=raw?JSON.parse(raw):[];
+    return Array.isArray(arr)?arr:[];
+  }catch(e){return [];}
+}
+
+function getStudentsForSchoolId(schoolId){
+  const id=String(schoolId||"").trim();
+  if(!id)return [];
+  try{
+    const raw=localStorage.getItem("schoolData_"+id+"_schoolStudents");
+    const arr=raw?JSON.parse(raw):[];
+    return Array.isArray(arr)?arr:[];
+  }catch(e){return [];}
+}
+
+function findTeacherLoginAccount(identifier,password){
+  const id=String(identifier||"").trim();
+  const idLower=id.toLowerCase();
+  const mobile=normalizeLoginMobile(id);
+  const accounts=ownerAccounts();
+  for(const school of accounts){
+    if(school.hold)continue;
+    const teachers=getTeachersForSchoolId(school.id);
+    const teacher=teachers.find(t=>{
+      const teacherId=String(t.teacherId||"").trim().toLowerCase();
+      const email=String(t.email||"").trim().toLowerCase();
+      const tm=normalizeLoginMobile(t.mobile);
+      const matched=(teacherId&&teacherId===idLower)||(email&&email===idLower)||(mobile&&tm&&mobile===tm);
+      return matched && String(t.password||"")===String(password||"");
+    });
+    if(teacher)return {school,teacher};
+  }
+  return null;
+}
+
+function findStudentLoginAccount(mobile,name,roll){
+  const m=normalizeLoginMobile(mobile);
+  const n=String(name||"").trim().toLowerCase().replace(/\s+/g," ");
+  const r=String(roll||"").trim();
+  if(!m||!n||!r)return null;
+  const accounts=ownerAccounts();
+  for(const school of accounts){
+    if(school.hold)continue;
+    const students=getStudentsForSchoolId(school.id);
+    const student=students.find(st=>{
+      const sm=normalizeLoginMobile(st.mobile);
+      const sn=String(st.name||"").trim().toLowerCase().replace(/\s+/g," ");
+      const sr=String(st.roll??st.rollNo??st.rollNumber??"").trim();
+      return sm===m && sn===n && sr===r;
+    });
+    if(student)return {school,student};
+  }
+  return null;
+}
+
+function activateSchoolForPortal(school){
+  if(!school)return false;
+  setActiveSchoolAccount(school);
+  return true;
+}
+
 function loginUser(){
   try {
     const role=document.getElementById("loginRole")?.value||"school_admin";
@@ -1601,13 +1683,21 @@ function loginUser(){
     }
 
     if(role==="student"||role==="parent"){
-      const classNo=document.getElementById("studentLoginClass")?.value||"";
-      const roll=document.getElementById("studentLoginRoll")?.value||"";
-      if(!identifier||!classNo||!roll){ alert("Registered Mobile / Aadhaar, Class aur Roll Number enter karein."); return false; }
-      const student=findStudentForPortal(identifier,classNo,roll);
-      if(!student){ alert("Student login details match nahi hui. Mobile/Aadhaar, Class aur Roll Number check karein."); return false; }
-      const schoolName=localStorage.getItem("schoolName")||"ABC Public School";
-      openApplication(schoolName,role==="parent"?"Parent - "+(student.name||"Student"):"Student - "+(student.name||"Student"),null,student.id,role);
+      const studentName=(document.getElementById("studentLoginName")?.value||"").trim();
+      const roll=(document.getElementById("studentLoginRoll")?.value||"").trim();
+      if(!identifier||!studentName||!roll){
+        alert("Registered Mobile Number, Student Name aur Roll Number enter karein.");
+        return false;
+      }
+      const found=findStudentLoginAccount(identifier,studentName,roll);
+      if(!found){
+        alert("Student login details match nahi hui. Registered Mobile Number, Name aur Roll Number check karein.");
+        return false;
+      }
+      activateSchoolForPortal(found.school);
+      openApplication(found.school.schoolName||"ABC Public School",
+        role==="parent"?"Parent - "+(found.student.name||"Student"):"Student - "+(found.student.name||"Student"),
+        null,found.student.id,role);
       return false;
     }
 
@@ -1622,14 +1712,10 @@ function loginUser(){
       return false;
     }
 
-    const teacher=getTeachers().find(t=>
-       (String(t.teacherId||"").trim().toLowerCase()===identifier.toLowerCase() ||
-        String(t.email||"").trim().toLowerCase()===identifier.toLowerCase() ||
-        String(t.mobile||"").trim()===identifier) &&
-       String(t.password||"")===password
-    );
-    if(teacher){
-      openApplication(localStorage.getItem("schoolName")||"ABC Public School","Teacher - "+(teacher.name||"Teacher"),teacher.id);
+    const teacherFound=findTeacherLoginAccount(identifier,password);
+    if(teacherFound){
+      activateSchoolForPortal(teacherFound.school);
+      openApplication(teacherFound.school.schoolName||"ABC Public School","Teacher - "+(teacherFound.teacher.name||"Teacher"),teacherFound.teacher.id);
       return false;
     }
 
@@ -4451,6 +4537,7 @@ function openTeacherModal(id=null){
   document.getElementById("teacherModalTitle").innerText=t?"Edit Teacher":"Add Teacher";
   document.getElementById("teacherName").value=t?.name||"";
   document.getElementById("teacherMobile").value=t?.mobile||"";
+  document.getElementById("teacherEmail").value=t?.email||"";
   document.getElementById("teacherQualification").value=t?.qualification||"";
   document.getElementById("teacherClass").value=t?.classNo||"";
 
@@ -4572,6 +4659,7 @@ async function saveTeacher(){
   if(window.schoolHubRole!=="admin"){alert("Only School Admin can add or edit teacher data.");return;}
   let name=document.getElementById("teacherName").value.trim();
   let mobile=document.getElementById("teacherMobile").value.trim();
+  let email=(document.getElementById("teacherEmail")?.value||"").trim().toLowerCase();
   let qualification=document.getElementById("teacherQualification").value.trim();
   let classNo=document.getElementById("teacherClass").value;
   let section=document.getElementById("teacherSection").value;
@@ -4594,7 +4682,7 @@ async function saveTeacher(){
     let t=teachers.find(x=>Number(x.id)===Number(editingTeacherId));
     if(t){
       Object.assign(t,{
-        name,mobile,qualification,classNo,section,subjects,
+        name,mobile,email,qualification,classNo,section,subjects,
         subject:subjects[0]||"",
         documents:teacherDocumentsData
       });
@@ -4613,6 +4701,7 @@ async function saveTeacher(){
       id:Date.now(),
       name,
       mobile,
+      email,
       qualification,
       classNo,
       section,
