@@ -2206,9 +2206,11 @@ Number(s.classNo)===Number(classNo)&&s.stream===stream
 }
 
 function getStudentPaid(id){
-return getFees()
-.filter(x=>Number(x.studentId)===Number(id))
-.reduce((a,x)=>a+Number(x.amount||0),0);
+  const student=getStudents().find(x=>Number(x.id)===Number(id));
+  const cycle=Number(student?.feeCycle||0);
+  return getFees()
+    .filter(x=>Number(x.studentId)===Number(id) && Number(x.feeCycle||0)===cycle)
+    .reduce((a,x)=>a+Number(x.amount||0),0);
 }
 
 function getStudentPayments(id){
@@ -3624,6 +3626,7 @@ if(type==="exams"){
       <div style="overflow:auto;margin-top:7px"><table style="width:100%;font-size:12px;border-collapse:collapse"><thead><tr><th style="text-align:left">Subject</th><th>Marks</th><th>MM</th></tr></thead><tbody>${(r.subjects||[]).map(x=>{const q=normalizeExamSubject(x);return `<tr><td>${escapeHtml(q.name)}</td><td style="text-align:center">${getSubjectObtained(q)}</td><td style="text-align:center">${getSubjectMax(q)}</td></tr>`}).join("")}</tbody></table></div>
       <div style="margin-top:7px;font-weight:bold">Total: ${getExamObtained(r)} / ${getExamTotal(r)} • ${getExamPercentage(r).toFixed(1)}%</div>
       <div style="margin-top:7px;color:#667085;font-size:11px">${r.declaredForStudents?"✅ Declared to Students":"🔒 Not declared"}</div>
+      <div style="margin-top:7px"><button class="delete-btn" onclick="deleteExam(${r.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete This Result</button></div>
     </div>`).join("");
     const controls=final?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">
       <button class="small-btn" onclick="promoteStudentToNextClass(${st.id})">🎓 Promote / Pass to Next Class</button>
@@ -3653,6 +3656,8 @@ if(type==="exams"){
     <div style="padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #edf0f4">
       <button type="button" class="small-btn" onclick="promotePassedStudents(${classNo},'${stream||""}','${section||""}')">🎓 Promote / Pass to Next Class</button>
       <button type="button" class="small-btn" onclick="declareFinalResultsForClass(${classNo},'${stream||""}','${section||""}')">📢 Declare Result for Students</button>
+      <button type="button" class="small-btn" style="background:#15803d" onclick="showPromotedStudents(${classNo},'${stream||""}','${section||""}')">🎓 Promoted / Pass Students</button>
+      <button type="button" class="small-btn" style="background:#dc2626" onclick="showDeletedResults(${classNo},'${stream||""}','${section||""}')">🗑️ Delete Result / Restore</button>
     </div>
 
     <div class="result-excel-tools">
@@ -5073,13 +5078,15 @@ return;
 
 let fees=getFees();
 
+const feeStudent=getStudents().find(x=>Number(x.id)===Number(window.feeStudentId));
 let savedPayment={
 id:Date.now(),
 studentId:Number(window.feeStudentId),
 amount,
 date,
 mode:document.getElementById("feeMode").value,
-receipt:document.getElementById("feeReceipt").value.trim()
+receipt:document.getElementById("feeReceipt").value.trim(),
+feeCycle:Number(feeStudent?.feeCycle||0)
 };
 
 fees.push(savedPayment);
@@ -5717,7 +5724,20 @@ function closeExamModal(){
 
 function deleteExam(id,classNo,stream,section){
   if(!requireTeacherClassAccess(classNo))return;
-  if(!confirm("Delete this result?"))return;
+  const exam=getExams().find(x=>Number(x.id)===Number(id));
+  if(!exam)return;
+  if(!confirm("Delete this result? It will be stored in Deleted Results and can be restored later."))return;
+  const deleted=getData("schoolDeletedResults");
+  deleted.push({
+    id:Date.now()+Math.floor(Math.random()*1000),
+    deletedAt:new Date().toISOString(),
+    sourceClass:Number(classNo),
+    stream:stream||"", section:section||"",
+    studentId:Number(exam.studentId),
+    studentName:getStudents().find(x=>Number(x.id)===Number(exam.studentId))?.name||"",
+    result:{...exam}
+  });
+  setData("schoolDeletedResults",deleted);
   saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
   openStudentsData("exams",classNo,stream,section);
 }
@@ -5760,7 +5780,18 @@ function promoteStudentToNextClass(studentId){
   if(!confirm(st.name+" ko Class "+(Number(st.classNo)+1)+" me promote karein?"))return;
   const students=getStudents(); const i=students.findIndex(x=>Number(x.id)===Number(studentId));
   if(i<0)return;
-  students[i]={...students[i],previousClass:students[i].classNo,classNo:Number(students[i].classNo)+1,promoted:true,promotionDate:today(),promotionSession:students[i].session||"2026-27"};
+  const oldClass=Number(students[i].classNo);
+  const nextClass=oldClass+1;
+  const promotionHistory=getData("schoolPromotedStudents");
+  promotionHistory.push({
+    id:Date.now()+Math.floor(Math.random()*1000), studentId:Number(students[i].id),
+    studentName:students[i].name||"", father:students[i].father||"", roll:students[i].roll||"",
+    sourceClass:oldClass, nextClass, stream:students[i].stream||"", section:students[i].section||"",
+    promotedAt:new Date().toISOString(), finalResultId:Number(final.id),
+    studentSnapshot:{...students[i]}
+  });
+  setData("schoolPromotedStudents",promotionHistory);
+  students[i]={...students[i],previousClass:oldClass,classNo:nextClass,promoted:true,promotionDate:today(),promotionSession:students[i].session||"2026-27",feeCycle:Number(students[i].feeCycle||0)+1};
   setData("schoolStudents",students); alert("Student next class me promote ho gaya.");
   openStudentsData("exams",Number(st.classNo),st.stream||"",st.section||"");
 }
@@ -5772,9 +5803,36 @@ function promotePassedStudents(classNo,stream,section){
   if(!passed.length){alert("Koi PASS student nahi mila.");return;}
   if(!confirm(passed.length+" PASS students ko Class "+(Number(classNo)+1)+" me promote karein?"))return;
   const all=getStudents(),ids=new Set(passed.map(s=>Number(s.id)));
-  all.forEach((s,i)=>{if(ids.has(Number(s.id)))all[i]={...s,previousClass:s.classNo,classNo:Number(s.classNo)+1,promoted:true,promotionDate:today(),promotionSession:s.session||"2026-27"};});
+  const promotionHistory=getData("schoolPromotedStudents");
+  all.forEach((s,i)=>{if(ids.has(Number(s.id))){
+    const oldClass=Number(s.classNo), nextClass=oldClass+1;
+    promotionHistory.push({id:Date.now()+i+Math.floor(Math.random()*1000),studentId:Number(s.id),studentName:s.name||"",father:s.father||"",roll:s.roll||"",sourceClass:oldClass,nextClass,stream:s.stream||"",section:s.section||"",promotedAt:new Date().toISOString(),finalResultId:Number(getFinalResultForStudent(s.id)?.id||0),studentSnapshot:{...s}});
+    all[i]={...s,previousClass:oldClass,classNo:nextClass,promoted:true,promotionDate:today(),promotionSession:s.session||"2026-27",feeCycle:Number(s.feeCycle||0)+1};
+  }});
+  setData("schoolPromotedStudents",promotionHistory);
   setData("schoolStudents",all); alert(passed.length+" PASS students next class me promote ho gaye.");
   openStudentsData("exams",classNo,stream,section);
+}
+
+function showPromotedStudents(classNo,stream,section){
+  const rows=getData("schoolPromotedStudents").filter(x=>Number(x.sourceClass)===Number(classNo)&&(!stream||x.stream===stream)&&(!section||String(x.section||"").toLowerCase()===String(section||"").toLowerCase()));
+  const body=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x.studentName)}</td><td>${escapeHtml(x.father||"-")}</td><td>${escapeHtml(x.roll||"-")}</td><td>Class ${x.sourceClass}</td><td>Class ${x.nextClass}</td><td>${formatDate(String(x.promotedAt||"").slice(0,10))}</td></tr>`).join(""): `<tr><td colspan="7"><div class="empty">Is class se abhi koi PASS student promote nahi hua.</div></td></tr>`;
+  const html=`<button class="back-btn" onclick="openStudentsData('exams',${Number(classNo)},'${stream||""}','${section||""}')">← Back to Result</button><div class="card"><div class="card-header"><div><h3>🎓 Promoted / Pass Students - Class ${classNo}</h3><p style="color:#777;font-size:12px">Sirf isi class se next class me promote kiye gaye students.</p></div><span class="badge green">${rows.length} Promoted</span></div><div class="table-container"><table><thead><tr><th>S.No.</th><th>Student</th><th>Father</th><th>Roll</th><th>From</th><th>To</th><th>Date</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
+  document.getElementById("otherPage").innerHTML=html;
+}
+function showDeletedResults(classNo,stream,section){
+  const rows=getData("schoolDeletedResults").filter(x=>Number(x.sourceClass)===Number(classNo)&&(!stream||x.stream===stream)&&(!section||String(x.section||"").toLowerCase()===String(section||"").toLowerCase()));
+  const body=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x.studentName||"-")}</td><td>${escapeHtml(x.result?.examName||"Result")}</td><td>${formatDate(x.result?.examDate||"")}</td><td>${formatDate(String(x.deletedAt||"").slice(0,10))}</td><td><button class="edit-btn" onclick="restoreDeletedResult(${x.id},${classNo},'${stream||""}','${section||""}')">♻️ Restore</button></td></tr>`).join(""): `<tr><td colspan="6"><div class="empty">Deleted Results empty.</div></td></tr>`;
+  const html=`<button class="back-btn" onclick="openStudentsData('exams',${Number(classNo)},'${stream||""}','${section||""}')">← Back to Result</button><div class="card"><div class="card-header"><div><h3>🗑️ Deleted Results</h3><p style="color:#777;font-size:12px">Deleted results yahan permanently remove nahi hote. Restore kiye ja sakte hain.</p></div><span class="badge red">${rows.length} Deleted</span></div><div class="table-container"><table><thead><tr><th>S.No.</th><th>Student</th><th>Result</th><th>Result Date</th><th>Deleted Date</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
+  document.getElementById("otherPage").innerHTML=html;
+}
+function restoreDeletedResult(archiveId,classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  const rows=getData("schoolDeletedResults"); const item=rows.find(x=>Number(x.id)===Number(archiveId)); if(!item)return;
+  if(!confirm("Is deleted result ko restore karein?"))return;
+  const exams=getExams(); const restored={...item.result,id:Date.now(),restoredAt:new Date().toISOString()};
+  exams.push(restored); saveExams(exams); setData("schoolDeletedResults",rows.filter(x=>Number(x.id)!==Number(archiveId)));
+  showDeletedResults(classNo,stream,section);
 }
 
 /* RESULT EXCEL */
