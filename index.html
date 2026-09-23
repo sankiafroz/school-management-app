@@ -3653,89 +3653,114 @@ if(type==="exams"){
     return String(a.name||"").localeCompare(String(b.name||""));
   });
 
-  // Each student shows an Add Result button followed immediately by that student's
-  // previous result parts. Final Result combines the complete final result.
+  // Result register: show every saved result with every subject's marks.
   const resultParts=["unit_test","half_yearly","yearly","exam","final"];
   const resultLabel={unit_test:"Unit Test",half_yearly:"Half Yearly",yearly:"Yearly",exam:"Exam",final:"Final Result"};
   const resultRows=sorted.map((st,i)=>{
-    const allResults=getExamResultsForStudent(st.id).sort((a,b)=>String(a.examDate||"").localeCompare(String(b.examDate||"")));
-    const byType={};
+    const allResults=getExamResultsForStudent(st.id).sort((a,b)=>String(a.examDate||"").localeCompare(String(b.examDate||"")) || Number(a.id||0)-Number(b.id||0));
+    const groups={};
+    resultParts.forEach(t=>groups[t]=allResults.filter(e=>String(e.resultType||"").toLowerCase()===t));
+    // Keep records whose exam name clearly identifies the stage, even if older data has a generic resultType.
     allResults.forEach(e=>{
-      const key=String(e.resultType||"").toLowerCase();
-      if(!byType[key] || String(e.examDate||"")>=String(byType[key].examDate||"")) byType[key]=e;
+      const n=String(e.examName||"").toLowerCase();
+      let t=String(e.resultType||"").toLowerCase();
+      if(!resultParts.includes(t)){
+        if(n.includes("half")) t="half_yearly";
+        else if(n.includes("year")||n.includes("annual")) t="yearly";
+        else if(n.includes("final")) t="final";
+        else if(n.includes("unit")) t="unit_test";
+      }
+      if(resultParts.includes(t) && !groups[t].some(x=>Number(x.id)===Number(e.id))) groups[t].push(e);
     });
-    const final=allResults.filter(isFinalResultRecord).slice(-1)[0]||null;
+
     const partHtml=resultParts.map(type=>{
-      const e=byType[type];
-      if(!e)return `<div class="result-part pending"><b>${resultLabel[type]}</b><span>PENDING</span></div>`;
-      const pct=getExamPercentage(e);
-      const status=type==="final"?(pct>=33?"PASS":"FAIL"):(pct>=33?"PASS":"");
-      return `<div class="result-part"><b>${resultLabel[type]}</b><span>${escapeHtml(String(e.examName||""))} · ${escapeHtml(String(e.examDate||""))}</span><strong>${escapeHtml(String(getExamObtained(e)))} / ${escapeHtml(String(getExamTotal(e)))} · ${pct.toFixed(1)}%</strong>${status?`<em>${status}</em>`:""}</div>`;
+      const list=groups[type]||[];
+      if(!list.length) return `<div class="result-part pending"><b>${resultLabel[type]}</b><span>PENDING</span></div>`;
+      return `<div class="result-part" style="display:block">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">
+          <b>${resultLabel[type]}</b><span>${list.length} result${list.length>1?'s':''}</span>
+        </div>
+        ${list.map(e=>{
+          const pct=getExamPercentage(e), status=type==="final"?(pct>=33?"PASS":"FAIL"):(pct>=33?"PASS":"");
+          const subjectHtml=(e.subjects||[]).map(x=>{
+            const n=normalizeExamSubject(x);
+            return `<span style="display:inline-block;margin:3px 5px 0 0;padding:4px 7px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;font-size:11px"><b>${escapeHtml(n.name)}</b>: ${escapeHtml(String(getSubjectObtained(n)))} / ${escapeHtml(String(getSubjectMax(n)))}</span>`;
+          }).join("") || `<span style="font-size:11px;color:#94a3b8">No subject marks</span>`;
+          return `<div style="margin-top:7px;padding:7px 9px;border:1px solid #edf0f4;border-radius:8px;background:#fff">
+            <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>${escapeHtml(String(e.examName||resultLabel[type]))}</strong><span style="font-size:11px;color:#64748b">${escapeHtml(String(e.examDate||""))} · ${getExamObtained(e)} / ${getExamTotal(e)} · ${pct.toFixed(1)}% ${status?`· ${status}`:""}</span></div>
+            <div style="margin-top:4px">${subjectHtml}</div>
+          </div>`;
+        }).join("")}
+      </div>`;
     }).join("");
+
+    const final=allResults.filter(isFinalResultRecord).slice(-1)[0]||null;
     let combined="";
     if(final){
-      const subjects=(final.subjects||[]).map(x=>{const n=normalizeExamSubject(x);return `${escapeHtml(n.name)}: ${escapeHtml(String(getSubjectObtained(n)))} / ${escapeHtml(String(getSubjectMax(n)))}`;}).join(" · ");
+      const subjects=(final.subjects||[]).map(x=>{const n=normalizeExamSubject(x); return `<span style="display:inline-block;margin:3px 5px 0 0;padding:4px 7px;background:#fff;border:1px solid #bfdbfe;border-radius:6px"><b>${escapeHtml(n.name)}</b>: ${escapeHtml(String(getSubjectObtained(n)))} / ${escapeHtml(String(getSubjectMax(n)))}</span>`;}).join("");
       combined=`<div class="final-combined"><b>FINAL COMBINED RESULT</b><div>${subjects||"Final Result saved"}</div></div>`;
     }
     const promotion=st.promoted?"PROMOTED":(st.previousClass?"PROMOTED":"—");
     const status=final?(getExamPercentage(final)>=33?"PASS":"FAIL"):(allResults.length?"RESULT IN PROGRESS":"PENDING");
-    return `<tr>
-      <td>${i+1}</td>
-      <td>
-        <div style="font-weight:800;margin-bottom:7px">${escapeHtml(st.name)}</div>
-        <button type="button" class="small-btn" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">➕ Add Result</button>
-      </td>
-      <td>${escapeHtml(st.roll??i+1)}</td>
-      <td><div class="result-parts">${partHtml}${combined}</div></td>
-      <td style="text-align:center;font-weight:800">${status}</td>
-      <td style="text-align:center;font-weight:800">${promotion}</td>
-    </tr>`;
+    return `<tr><td>${i+1}</td><td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button></td><td>${escapeHtml(st.roll??i+1)}</td><td><div class="result-parts">${partHtml}${combined}</div></td><td style="text-align:center;font-weight:800">${status}</td><td style="text-align:center;font-weight:800">${promotion}</td></tr>`;
   }).join("");
 
   let html=`<button class="back-btn" onclick="${back}">← Back</button>
   <div class="card">
     <div class="card-header">
       <div>
-        <h3>${title} - Result</h3>
-        <p style="color:#777;font-size:12px;margin-top:4px">Student-wise result register. Add Result ke turant niche Unit Test, Half Yearly, Yearly aur Final Result dikhte hain.</p>
+        <div>
+          <h3>${title} - Result</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
+        </div>
+        <button type="button" class="small-btn" onclick="openPromotionPanel(${classNo},'${stream||""}','${section||""}')">🎓 Promote / Pass</button>
+      </div>
+
+    <div id="finalPromotionPanel" class="card" style="margin:15px 0;background:#f8faff;border:1px solid #dbe7ff">
+      <div class="card-header" style="background:#f8faff">
+        <div>
+          <h3>🎓 Final Result & Promotion</h3>
+          <p style="color:#667085;font-size:12px;margin-top:4px">Final/Yearly result ke baad PASS students ko next class me promote karein.</p>
+        </div>
+        <button type="button" class="small-btn" onclick="openPromotionPanel(${classNo},'${stream||""}','${section||""}')">🎓 Promote / Pass</button>
+      </div>
+      <div style="padding:12px 18px;color:#667085;font-size:12px">
+        Sirf PASS students promote honge. Class ${classNo} ke students ko Class ${classNo+1} me bheja jayega.
       </div>
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
-      <button type="button" class="small-btn" onclick="downloadResultExcelTemplate(${classNo},'${stream||""}','${section||""}')">📊 Download Excel Sheet</button>
-      <button type="button" class="small-btn" onclick="downloadAllStudentsResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Result</button>
+      <button type="button" class="small-btn" onclick="downloadAllStudentsResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Students Result</button>
       <button type="button" class="small-btn" onclick="downloadPendingResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Pending Result</button>
-      <button type="button" class="small-btn" onclick="openPromotionPanel(${classNo},'${stream||""}','${section||""}')">🎓 Promote to Next Class</button>
     </div>
 
     <div class="result-excel-tools">
       <strong>📊 Add Result Excel Sheet</strong>
-      <p style="font-size:12px;color:#667085;margin:5px 0 10px">Excel Sheet download karke marks fill karein aur upload karein. Upload ke baad matching students ke results save/update honge.</p>
+      <p style="font-size:12px;color:#667085;margin:5px 0 10px">
+        Pehle Excel Performa download karein, marks fill karein aur upload karein. Upload ke baad sabhi matching students ke results automatic save/update honge.
+      </p>
       <div class="tool-row">
+        <button type="button" class="small-btn" onclick="downloadResultExcelTemplate(${classNo},'${stream||""}','${section||""}')">⬇️ Download Excel Performa</button>
         <input id="resultExcelUpload" type="file" accept=".xlsx,.xls,.csv" onchange="uploadResultExcel(event,${classNo},'${stream||""}','${section||""}')">
       </div>
       <div id="resultExcelStatus" style="font-size:12px;color:#667085;margin-top:8px"></div>
     </div>
 
-    <div id="finalPromotionPanel" class="card" style="margin:15px 0;background:#f8faff;border:1px solid #dbe7ff">
-      <div class="card-header" style="background:#f8faff">
-        <div>
-          <h3>🎓 Promote to Next Class</h3>
-          <p style="color:#667085;font-size:12px;margin-top:4px">Sirf Final Result complete aur PASS students ko next class me promote karein.</p>
-        </div>
-      </div>
-    </div>
-
     <div class="table-container">
-      <table class="result-register-table" style="min-width:${Math.max(900,760)}px">
-        <thead><tr>
-          <th>S.No.</th><th>Student / Add Result</th><th>Roll Number</th><th>Previous Results</th><th>Status</th><th>Promotion</th>
-        </tr></thead>
-        <tbody>${resultRows||`<tr><td colspan="6"><div class="empty">No Students Found</div></td></tr>`}</tbody>
+      <table class="result-register-table" style="min-width:${Math.max(850,480+subjectNames.length*125)}px">
+        <thead>
+          <tr>
+            <th>S.No.</th><th>Student Name</th><th>Roll Number</th>
+            ${subjectNames.map(s=>`<th style="text-align:center">${escapeHtml(s)}<br><small style="font-weight:normal">Obtained / MM</small></th>`).join("")}
+            <th style="text-align:center">Total</th>
+            <th style="text-align:center">%</th><th style="text-align:center">Status</th><th style="text-align:center">Promotion</th>
+          </tr>
+        </thead>
+        <tbody>${resultRows||`<tr><td colspan="${subjectNames.length+5}"><div class="empty">No Students Found</div></td></tr>`}</tbody>
       </table>
     </div>
     <div style="padding:12px 18px;color:#667085;font-size:12px">
-      <b>Result order:</b> Unit Test → Half Yearly → Yearly → Final Result. Final Result banne tak student promote nahi hoga.
+      <b>Note:</b> Jis student ka result abhi nahi hai, uske marks <b>—</b> dikhenge. Student name par click karke direct result banaya ja sakta hai.
     </div>
   </div>`;
   document.getElementById("otherPage").innerHTML=html;
@@ -5981,10 +6006,33 @@ function resultExcelNumber(v, fallback=0){
 }
 
 function downloadAllStudentsResultData(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return; const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999)); if(!students.length){alert("No students found in this class.");return;}
-  const rows=[["Roll Number","Student Name","Class","Section","Result Type","Result Name","Result Date","Total Marks","Obtained Marks","Percentage","Status","Promotion"]];
-  students.forEach(st=>{const results=getExamResultsForStudent(st.id); if(!results.length) rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"","PENDING","","","","","","PENDING RESULT",st.promoted?"PROMOTED":""]); else results.forEach(e=>{const pct=getExamPercentage(e); const status=isFinalResultRecord(e)?(pct>=33?"PASS":"FAIL"):(pct>=33?"PASS":""); rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"",e.resultType||"",e.examName||"",e.examDate||"",getExamTotal(e),getExamObtained(e),pct.toFixed(1)+"%",status,st.promoted?"PROMOTED":""]);});});
-  const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n"); downloadFile("Class_"+classNo+"_All_Students_Result.csv",csv);
+  if(!requireTeacherClassAccess(classNo))return;
+  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+  if(!students.length){alert("No students found in this class.");return;}
+
+  const rows=[["Roll Number","Student Name","Class","Section","Result Type","Result Name","Result Date","Subject","MM","Obtained","Percentage","Status","Promotion"]];
+  students.forEach(st=>{
+    const results=getExamResultsForStudent(st.id).sort((a,b)=>String(a.examDate||"").localeCompare(String(b.examDate||"")) || Number(a.id||0)-Number(b.id||0));
+    if(!results.length){
+      rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"","PENDING","","","","","","","PENDING RESULT",st.promoted?"PROMOTED":""]);
+      return;
+    }
+    results.forEach(e=>{
+      const pct=getExamPercentage(e);
+      const status=isFinalResultRecord(e)?(pct>=33?"PASS":"FAIL"):(pct>=33?"PASS":"");
+      const subjects=e.subjects||[];
+      if(!subjects.length){
+        rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"",e.resultType||"",e.examName||"",e.examDate||"","","","",pct.toFixed(1)+"%",status,st.promoted?"PROMOTED":""]);
+      }else{
+        subjects.forEach(x=>{
+          const n=normalizeExamSubject(x);
+          rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"",e.resultType||"",e.examName||"",e.examDate||"",n.name,getSubjectMax(n),getSubjectObtained(n),pct.toFixed(1)+"%",status,st.promoted?"PROMOTED":""]);
+        });
+      }
+    });
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  downloadFile("Class_"+classNo+"_All_Students_Result_Subject_Wise.csv",csv);
 }
 function downloadPendingResultData(classNo,stream,section){
   if(!requireTeacherClassAccess(classNo))return; const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())&&!getFinalResultForStudent(s.id)).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999)); if(!students.length){alert("Koi pending final result student nahi hai.");return;} const rows=[["Roll Number","Student Name","Class","Section","Result Status","Promotion"]]; students.forEach(st=>rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"","PENDING FINAL RESULT",st.promoted?"PROMOTED":""])); const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n"); downloadFile("Class_"+classNo+"_Pending_Final_Result.csv",csv);
