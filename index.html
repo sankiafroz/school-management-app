@@ -2037,7 +2037,7 @@ function getCurrentPortalStudent(){if(window.schoolHubRole!=="student"&&window.s
 function isStudentPortal(){return window.schoolHubRole==="student"||window.schoolHubRole==="parent";}
 function updateRoleMenuVisibility(){
   const isTeacher=window.schoolHubRole==="teacher",isPortal=isStudentPortal();
-  document.querySelectorAll(".menu li").forEach(li=>{const action=String(li.getAttribute("onclick")||""),adminOnly=action.includes("showPage('teachers'")||action.includes("showPage('teacherLogin'");const portalAllowed=action.includes("showPage('dashboard'")||action.includes("showPage('homework'")||action.includes("showPage('attendance'")||action.includes("showPage('exams'")||action.includes("showPage('notices'")||action.includes("logoutUser");if(isPortal)li.style.display=portalAllowed?"":"none";else li.style.display=(isTeacher&&adminOnly)?"none":"";});
+  document.querySelectorAll(".menu li").forEach(li=>{const action=String(li.getAttribute("onclick")||""),adminOnly=action.includes("showPage('teachers'")||action.includes("showPage('teacherLogin'");const portalAllowed=action.includes("showPage('dashboard'")||action.includes("showPage('homework'")||action.includes("showPage('attendance'")||action.includes("showPage('exams'")||action.includes("showPage('timetable'")||action.includes("showPage('notices'")||action.includes("logoutUser");if(isPortal)li.style.display=portalAllowed?"":"none";else li.style.display=(isTeacher&&adminOnly)?"none":"";});
 }
 function getCurrentTeacher(){if(window.schoolHubRole!=="teacher")return null;const id=Number(window.schoolHubTeacherId||0);return (Array.isArray(getTeachers())?getTeachers():[]).find(t=>Number(t.id)===id)||null;}
 function teacherAssignedClass(){const t=getCurrentTeacher();if(!t)return null;const c=Number(t.classNo??t.teachingClass??t.class);return Number.isFinite(c)&&c>=1&&c<=12?c:null;}
@@ -2336,21 +2336,7 @@ function portalHomeworkForStudent(student){
 }
 
 function portalResultsForStudent(studentId){
-  return getExamResultsForStudent(studentId).filter(r=>r.declared===true).sort((a,b)=>String(b.examDate||"").localeCompare(String(a.examDate||"")));
-}
-function isFinalResult(e){
-  const n=String(e?.examName||"").toLowerCase();
-  return n.includes("annual")||n.includes("yearly")||n.includes("final");
-}
-function declareResultForStudents(resultId){
-  const data=getExams();
-  const i=data.findIndex(x=>Number(x.id)===Number(resultId));
-  if(i<0)return;
-  data[i].declared=true;
-  data[i].declaredAt=today();
-  saveExams(data);
-  alert("Result declared. Student apne login se result dekh sakta hai.");
-  openStudentsData("exams",window.examClassNo||data[i].classNo||1,window.examStream||"",window.examSection||"");
+  return getExamResultsForStudent(studentId).filter(r=>r.declaredForStudents===true).sort((a,b)=>String(b.examDate||"").localeCompare(String(a.examDate||"")));
 }
 
 function showStudentPortalDashboard(){
@@ -2418,7 +2404,7 @@ function showStudentPortalDashboard(){
     <div class="student-portal-grid">
       <div class="student-portal-card"><h3>💰 Fee Paid</h3><div class="student-portal-stat">${portalMoney(paid)}</div><div class="student-portal-muted">Total Fee: ${portalMoney(total)}</div></div>
       <div class="student-portal-card"><h3>⏳ Fee Pending</h3><div class="student-portal-stat" style="color:#b77900">${portalMoney(pending)}</div><div class="student-portal-muted">Current pending amount</div></div>
-      <div class="student-portal-card"><h3>📅 Attendance</h3><div class="student-portal-stat">${attendance.reduce((n,[m,c])=>n+c.P,0)} P</div><div class="student-portal-muted">Month-wise attendance available below</div><button class="small-btn" style="margin-top:8px" onclick="showStudentPortalAttendance()">🕐 My Class Timetable</button></div>
+      <div class="student-portal-card"><h3>📅 Attendance</h3><div class="student-portal-stat">${attendance.reduce((n,[m,c])=>n+c.P,0)} P</div><div class="student-portal-muted">Month-wise attendance available below</div></div>
       <div class="student-portal-card"><h3>📝 Results</h3><div class="student-portal-stat">${results.length}</div><div class="student-portal-muted">Result records available</div></div>
     </div>
     ${imageHtml}
@@ -2466,16 +2452,10 @@ function showStudentPortalAttendance(){
   document.getElementById("dashboardPage").style.display="none";
   document.getElementById("otherPage").style.display="block";
   document.getElementById("pageTitle").innerText="Attendance";
-  const tt=getClassTimetable(student.classNo);
-  const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const ttHtml=tt.map((r,i)=>`<tr><td><b>${escapeHtml(r.period??i+1)}</b></td><td>${escapeHtml(r.time||"")}</td>${days.map((d,j)=>`<td>${escapeHtml((r.days||[])[j]||"-")}</td>`).join("")}</tr>`).join("");
   document.getElementById("otherPage").innerHTML=`
     <button class="back-btn" onclick="showStudentPortalDashboard()">← Dashboard</button>
     <div class="card"><div class="card-header"><h3>📅 My Month-wise Attendance</h3><span class="badge blue">Class ${student.classNo}</span></div>
       ${records.length?records.map(([m,c])=>`<div class="student-month-row"><strong>${m}</strong><div class="student-status-counts"><span class="student-status-pill">P ${c.P}</span><span class="student-status-pill">A ${c.A}</span><span class="student-status-pill">L ${c.L}</span><span class="student-status-pill">H ${c.H}</span><span class="student-status-pill">S ${c.S}</span></div></div>`).join(""):`<div class="empty">No attendance records available.</div>`}
-    </div>
-    <div class="card" style="margin-top:16px"><div class="card-header"><h3>🕐 My Class Timetable</h3><span class="badge blue">Class ${student.classNo}</span></div>
-      <div class="table-container"><table style="min-width:950px"><thead><tr><th>Period</th><th>Time</th>${days.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>${ttHtml||`<tr><td colspan="8">No timetable available.</td></tr>`}</tbody></table></div>
     </div>`;
 }
 
@@ -2785,21 +2765,6 @@ function openAttendanceClass(classNo){
   renderAttendanceRegister();
 }
 
-function openAttendanceTimetable(classNo){
-  if(!requireTeacherClassAccess(classNo))return;
-  window.timetableSelectedClass=Number(classNo)||1;
-  document.getElementById("pageTitle").innerText="Class Timetable";
-  const other=document.getElementById("otherPage");
-  if(other) other.innerHTML=getAttendanceTimetablePage(Number(classNo));
-}
-function getAttendanceTimetablePage(classNo){
-  const tt=getClassTimetable(classNo);
-  return `<button class="back-btn" onclick="renderAttendanceRegister()">← Back to Attendance</button>
-  <div class="card"><div class="card-header"><div><h3>🕐 Class ${classNo} Timetable</h3><p style="color:#777;font-size:12px;margin-top:4px">Is class ka timetable yahin se edit karein.</p></div></div>
-  <div style="padding:18px"><div class="table-container"><table id="classTimetableTable" style="min-width:1100px"><thead><tr><th>Period</th><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th><th>Action</th></tr></thead><tbody>${tt.map((r,i)=>timetableRowHtml(r,i)).join("")}</tbody></table></div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px"><button type="button" class="small-btn" onclick="return addClassTimetableRow(event)">＋ Add Period</button><button type="button" class="btn btn-primary" onclick="saveClassTimetable();openAttendanceTimetable(${classNo})">Save Class Timetable</button></div></div></div>`;
-}
-
 function renderAttendanceRegister(){
   let classNo=Number(window.attendanceRegisterClass);
   let date=window.attendanceRegisterDate||today();
@@ -2814,7 +2779,6 @@ function renderAttendanceRegister(){
         <p style="color:#777;font-size:12px;margin-top:4px">${students.length} Students</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-<button class="small-btn" style="background:#7c3aed" onclick="openAttendanceTimetable(${classNo})">🕐 Class Timetable</button>
 <button class="small-btn" onclick="markAllPresent(${classNo})">🟢 Mark All Present</button>
 <button class="small-btn" style="background:#64748b" onclick="openHolidayModal(${classNo})">🔵 Mark Holiday</button>
 <button class="small-btn" style="background:#475569" onclick="markAllSunday(${classNo})">📅 Mark All Sunday</button>
@@ -3643,23 +3607,38 @@ if(type==="exams"){
   if(!subjectNames.length) subjectNames.push(...getResultExcelSubjects());
 
   const resultRows=sorted.map((st,i)=>{
-    const e=latestResults.get(Number(st.id));
+    const results=getExamResultsForStudent(st.id);
+    const latest=results.length?results[results.length-1]:null;
+    const final=results.find(isFinalResult);
     const subjectCells=subjectNames.map(sub=>{
-      const found=(e?.subjects||[]).find(x=>String(x?.name||"").trim().toLowerCase()===sub.toLowerCase());
+      const found=(latest?.subjects||[]).find(x=>String(x?.name||"").trim().toLowerCase()===sub.toLowerCase());
       if(!found)return `<td style="text-align:center;color:#98a2b3">—</td>`;
       const n=normalizeExamSubject(found);
       return `<td style="text-align:center;font-weight:700">${escapeHtml(String(getSubjectObtained(n)))} / ${escapeHtml(String(getSubjectMax(n)))}</td>`;
     }).join("");
-    const total=e?getExamTotal(e):0;
-    const obtained=e?getExamObtained(e):0;
-    const pct=e?getExamPercentage(e):0;
+    const total=latest?getExamTotal(latest):0;
+    const obtained=latest?getExamObtained(latest):0;
+    const pct=latest?getExamPercentage(latest):0;
+    const history=results.map(r=>`<div style="border:1px solid #e5eaf1;border-radius:10px;padding:10px;margin-top:8px;background:#fff">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><strong>${escapeHtml(r.examName||"Result")}</strong><span class="badge blue">${formatDate(r.examDate||"")}</span></div>
+      <div style="overflow:auto;margin-top:7px"><table style="width:100%;font-size:12px;border-collapse:collapse"><thead><tr><th style="text-align:left">Subject</th><th>Marks</th><th>MM</th></tr></thead><tbody>${(r.subjects||[]).map(x=>{const q=normalizeExamSubject(x);return `<tr><td>${escapeHtml(q.name)}</td><td style="text-align:center">${getSubjectObtained(q)}</td><td style="text-align:center">${getSubjectMax(q)}</td></tr>`}).join("")}</tbody></table></div>
+      <div style="margin-top:7px;font-weight:bold">Total: ${getExamObtained(r)} / ${getExamTotal(r)} • ${getExamPercentage(r).toFixed(1)}%</div>
+      <div style="margin-top:7px;color:#667085;font-size:11px">${r.declaredForStudents?"✅ Declared to Students":"🔒 Not declared"}</div>
+    </div>`).join("");
+    const controls=final?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">
+      <button class="small-btn" onclick="promoteStudentToNextClass(${st.id})">🎓 Promote / Pass to Next Class</button>
+      <button class="small-btn" onclick="declareStudentResult(${st.id})">📢 Declare Result for Students</button>
+    </div>`:"";
     return `<tr>
       <td>${i+1}</td>
-      <td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button></td>
+      <td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button>
+        <button type="button" class="small-btn" style="margin-top:5px" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button>
+        ${results.length?`<details style="margin-top:7px"><summary style="cursor:pointer;color:#1769ff;font-weight:700">View all results (${results.length})</summary>${history}</details>`:""}
+        ${controls}</td>
       <td>${escapeHtml(st.roll??i+1)}</td>
       ${subjectCells}
-      <td style="text-align:center;font-weight:800">${e?escapeHtml(String(obtained))+" / "+escapeHtml(String(total)):"—"}</td>
-      <td style="text-align:center;font-weight:800">${e?pct.toFixed(1)+"%":"—"}</td>
+      <td style="text-align:center;font-weight:800">${latest?escapeHtml(String(obtained))+" / "+escapeHtml(String(total)):"—"}</td>
+      <td style="text-align:center;font-weight:800">${latest?pct.toFixed(1)+"%":"—"}</td>
     </tr>`;
   }).join("");
 
@@ -3670,6 +3649,10 @@ if(type==="exams"){
         <h3>${title} - Result</h3>
         <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
       </div>
+    </div>
+    <div style="padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #edf0f4">
+      <button type="button" class="small-btn" onclick="promotePassedStudents(${classNo},'${stream||""}','${section||""}')">🎓 Promote / Pass to Next Class</button>
+      <button type="button" class="small-btn" onclick="declareFinalResultsForClass(${classNo},'${stream||""}','${section||""}')">📢 Declare Result for Students</button>
     </div>
 
     <div class="result-excel-tools">
@@ -3819,10 +3802,7 @@ if(!students.length){
 return `<div class="empty"><h3>No Students Found</h3></div>`;
 }
 
-let finalResults=(type==="exams")?students.flatMap(st=>getExamResultsForStudent(st.id)).filter(isFinalResult):[];
-let finalResultId=finalResults.length?finalResults[finalResults.length-1].id:null;
-let promotionBar=(type==="exams"&&finalResultId)?`<div class="card" style="margin-bottom:12px;padding:12px"><button class="btn btn-primary" onclick="openPromotionPanel(${classNo},'${stream||""}','${section||""}',${finalResultId})">🎓 Promote / Pass Students</button></div>`:"";
-let html=promotionBar+`<div class="table-container"><table><thead><tr>`;
+let html=`<div class="table-container"><table><thead><tr>`;
 
 if(type==="students"){
 
@@ -4047,15 +4027,10 @@ if(type==="exams"){
       <div style="margin-top:8px;display:flex;gap:6px">
         <button class="edit-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}',${e.id})">✏️ Edit</button>
         <button class="delete-btn" onclick="deleteExam(${e.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete</button>
-        ${isFinalResult(e)?(e.declared?`<span class="badge green">✓ Result Declared</span>`:`<button class="small-btn" style="background:#0f766e" onclick="declareResultForStudents(${e.id})">📢 Declare Result for Students</button>`):""}
       </div>
     </div>`;
 
-    const resultHistory=results.length>1?`<div style="margin-top:10px"><strong>Previous Results</strong>${results.slice(0,-1).reverse().map(oldR=>{
-  const oldCols=getResultColumns(oldR); const oldSubjects=(oldR.subjects||[]).map(x=>{const n=normalizeExamSubject(x);return `<tr><td>${escapeHtml(n.name)}</td>${oldCols.map(c=>`<td style="text-align:center">${escapeHtml(String(getSubjectColumnValue(n,c)))}</td>`).join("")}</tr>`}).join("");
-  return `<details style="margin-top:6px"><summary><b>${escapeHtml(oldR.examName||"Result")}</b> - ${formatDate(oldR.examDate||"")}</summary><div class="table-container"><table><thead><tr><th>Subject</th>${oldCols.map(c=>`<th>${escapeHtml(c.name)}</th>`).join("")}</tr></thead><tbody>${oldSubjects}</tbody></table></div></details>`;
-}).join("")}</div>`:"";
-html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td style="min-width:560px">${resultHtml}${resultHistory}</td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add / Update Result</button></td></tr>`;
+    html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td style="min-width:560px">${resultHtml}</td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add / Update Result</button></td></tr>`;
   }else{
     html+=`<tr><td><strong>${escapeHtml(s.name)}</strong></td><td>${escapeHtml(s.father)}</td><td><span class="badge yellow">Result Not Added</span></td><td><button class="small-btn" onclick="openExamModal(${s.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button></td></tr>`;
   }
@@ -4088,26 +4063,6 @@ students.sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
 }
 document.getElementById("studentTableArea").innerHTML=
 buildStudentTable(type,classNo,stream,section,students);
-}
-
-function openPromotionPanel(classNo,stream,section,resultId){
-  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||s.section===section));
-  const finalMap=new Map();
-  students.forEach(st=>{const rs=getExamResultsForStudent(st.id).filter(isFinalResult); const r=rs[rs.length-1]; if(r)finalMap.set(st.id,r);});
-  const passStudents=students.filter(st=>{const r=finalMap.get(st.id); return r&&getExamPercentage(r)>=33;});
-  const box=document.createElement("div"); box.className="modal"; box.style.display="flex"; box.id="promotionModal";
-  box.innerHTML=`<div class="modal-content" style="max-width:900px"><div class="modal-header"><h3>🎓 Promote Students</h3><button class="close-btn" onclick="document.getElementById('promotionModal')?.remove()">×</button></div><div style="padding:16px"><p><b>PASS Students: ${passStudents.length}</b> / ${students.length}</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0"><button class="btn btn-primary" onclick="promoteAllPassed(${classNo},'${stream||""}','${section||""}')">✅ Pass All Students</button></div><div class="table-container"><table><thead><tr><th>Roll</th><th>Student</th><th>Result</th><th>Action</th></tr></thead><tbody>${students.map(st=>{const r=finalMap.get(st.id);const pass=!!r&&getExamPercentage(r)>=33;return `<tr><td>${escapeHtml(st.roll||"")}</td><td>${escapeHtml(st.name||"")}</td><td>${r?`${getExamPercentage(r).toFixed(1)}% ${pass?"PASS":"FAIL"}`:"No Final Result"}</td><td>${pass?`<button class="small-btn" onclick="promoteOneStudent(${st.id},${classNo},'${stream||""}','${section||""}')">Promote</button>`:`<span class="badge red">Not Eligible</span>`}</td></tr>`}).join("")}</tbody></table></div></div></div>`;
-  document.body.appendChild(box);
-}
-function promoteOneStudent(studentId,classNo,stream,section){
-  const data=getStudents(); const i=data.findIndex(s=>Number(s.id)===Number(studentId)); if(i<0)return;
-  const oldClass=Number(data[i].classNo); if(oldClass>=12){alert("Class 12 ko next class me promote nahi kiya ja sakta.");return;}
-  data[i].previousClass=oldClass; data[i].classNo=oldClass+1; data[i].promoted=true; data[i].promotionDate=today(); saveStudents(data); alert(`${data[i].name} promoted to Class ${data[i].classNo}.`); openPromotionPanel(classNo,stream,section,null);
-}
-function promoteAllPassed(classNo,stream,section){
-  const data=getStudents(); let count=0;
-  data.forEach(s=>{if(Number(s.classNo)!==Number(classNo)|| (stream&&s.stream!==stream)||(section&&s.section!==section)||Number(s.classNo)>=12)return; const rs=getExamResultsForStudent(s.id).filter(isFinalResult); const r=rs[rs.length-1]; if(r&&getExamPercentage(r)>=33){s.previousClass=Number(s.classNo);s.classNo=Number(s.classNo)+1;s.promoted=true;s.promotionDate=today();count++;}});
-  saveStudents(data); alert(`${count} PASS students promoted successfully.`); document.getElementById("promotionModal")?.remove(); openStudentsData("exams",classNo,stream,section);
 }
 
 /* SESSION HELPERS */
@@ -5585,7 +5540,8 @@ function openExamModal(studentId,classNo,stream,section,examId){
   else{nameSel.value="";customWrap.style.display="none";customInput.value="";}
 
   document.getElementById("examDate").value=e?.examDate||today();
-  renderSubjectRows();
+  const previousResults=getExamResultsForStudent(studentId).filter(x=>!e || Number(x.id)!==Number(e.id));
+  renderSubjectRows(previousResults);
   document.getElementById("examModal").style.display="flex";
 }
 
@@ -5740,8 +5696,7 @@ function saveExam(){
     studentId:Number(window.examStudentId),
     session,examName,examDate,resultType,
     columns:resultColumns.map(c=>({id:c.id,name:c.name,max:Number(c.max)||0})),
-    subjects:clean,
-    declared:editingExamId?(data.find(x=>Number(x.id)===Number(editingExamId))?.declared===true):false
+    subjects:clean
   };
 
   let i=editingExamId?data.findIndex(x=>Number(x.id)===Number(editingExamId)):-1;
@@ -5767,6 +5722,60 @@ function deleteExam(id,classNo,stream,section){
   openStudentsData("exams",classNo,stream,section);
 }
 
+
+/* FINAL RESULT / DECLARATION / PROMOTION */
+function isFinalResult(e){
+  const n=String(e?.examName||e?.name||"").toLowerCase().trim();
+  return n.includes("annual")||n.includes("yearly")||n.includes("final result")||String(e?.resultType||"").toLowerCase()==="final";
+}
+function getFinalResultForStudent(studentId){
+  return getExamResultsForStudent(studentId).filter(isFinalResult).slice(-1)[0]||null;
+}
+function declareStudentResult(studentId){
+  const final=getFinalResultForStudent(studentId);
+  if(!final){alert("Pehle Yearly / Annual / Final Result add karein.");return;}
+  final.declaredForStudents=true; final.declaredAt=new Date().toISOString();
+  const data=getExams(),i=data.findIndex(x=>Number(x.id)===Number(final.id));
+  if(i>=0){data[i]=final;saveExams(data);}
+  alert("Result student login ke liye declare kar diya gaya hai.");
+  openStudentsData("exams",window.examClassNo||0,window.examStream||"",window.examSection||"");
+}
+function declareFinalResultsForClass(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").toLowerCase()===String(section||"").toLowerCase()));
+  const data=getExams(); let count=0;
+  students.forEach(st=>{
+    const final=getFinalResultForStudent(st.id); if(!final)return;
+    const i=data.findIndex(x=>Number(x.id)===Number(final.id));
+    if(i>=0){data[i]={...data[i],declaredForStudents:true,declaredAt:new Date().toISOString()};count++;}
+  });
+  saveExams(data); alert(count+" students ke final results declare kar diye gaye.");
+  openStudentsData("exams",classNo,stream,section);
+}
+function promoteStudentToNextClass(studentId){
+  const st=getStudents().find(x=>Number(x.id)===Number(studentId)); if(!st)return;
+  const final=getFinalResultForStudent(studentId); if(!final){alert("Final/Annual result available nahi hai.");return;}
+  const pct=getExamPercentage(final); if(pct<33){alert("Student PASS nahi hai, isliye promote nahi kiya ja sakta.");return;}
+  if(Number(st.classNo)>=12){alert("Class 12 ke baad next class available nahi hai.");return;}
+  if(!confirm(st.name+" ko Class "+(Number(st.classNo)+1)+" me promote karein?"))return;
+  const students=getStudents(); const i=students.findIndex(x=>Number(x.id)===Number(studentId));
+  if(i<0)return;
+  students[i]={...students[i],previousClass:students[i].classNo,classNo:Number(students[i].classNo)+1,promoted:true,promotionDate:today(),promotionSession:students[i].session||"2026-27"};
+  setData("schoolStudents",students); alert("Student next class me promote ho gaya.");
+  openStudentsData("exams",Number(st.classNo),st.stream||"",st.section||"");
+}
+function promotePassedStudents(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  if(Number(classNo)>=12){alert("Class 12 ke baad next class available nahi hai.");return;}
+  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").toLowerCase()===String(section||"").toLowerCase()));
+  const passed=students.filter(st=>{const f=getFinalResultForStudent(st.id);return f&&getExamPercentage(f)>=33;});
+  if(!passed.length){alert("Koi PASS student nahi mila.");return;}
+  if(!confirm(passed.length+" PASS students ko Class "+(Number(classNo)+1)+" me promote karein?"))return;
+  const all=getStudents(),ids=new Set(passed.map(s=>Number(s.id)));
+  all.forEach((s,i)=>{if(ids.has(Number(s.id)))all[i]={...s,previousClass:s.classNo,classNo:Number(s.classNo)+1,promoted:true,promotionDate:today(),promotionSession:s.session||"2026-27"};});
+  setData("schoolStudents",all); alert(passed.length+" PASS students next class me promote ho gaye.");
+  openStudentsData("exams",classNo,stream,section);
+}
 
 /* RESULT EXCEL */
 function getResultExcelSubjects(classNo,stream,section){
