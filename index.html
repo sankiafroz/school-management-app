@@ -1238,6 +1238,28 @@ function saveAttendance(x){setData("schoolAttendance",x)}
 
 function getExams(){return getData("schoolExams")}
 function saveExams(x){setData("schoolExams",x)}
+function getDeletedStudents(){return getData("schoolDeletedStudents")}
+function saveDeletedStudents(x){setData("schoolDeletedStudents",x)}
+function getDeletedFees(){return getData("schoolDeletedFees")}
+function saveDeletedFees(x){setData("schoolDeletedFees",x)}
+
+function renumberClassStudents(classNo,stream,section){
+  const all=getStudents();
+  const filtered=all.filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||String(s.stream||"")===String(stream))&&(!section||String(s.section||"")===String(section)));
+  filtered.sort((a,b)=>{const ra=Number(a.roll),rb=Number(b.roll); if(Number.isFinite(ra)&&Number.isFinite(rb)&&ra!==rb)return ra-rb; return String(a.name||"").localeCompare(String(b.name||""));});
+  filtered.forEach((st,i)=>st.roll=String(i+1));
+  saveStudents(all);
+}
+
+function nextFeeReceiptNumber(){
+  let max=0;
+  [...getFees(),...getDeletedFees()].forEach(p=>{
+    const m=String(p.receipt||"").match(/(?:REC[- ]?)?(\d+)$/i);
+    if(m)max=Math.max(max,Number(m[1]));
+  });
+  return "REC-"+String(max+1).padStart(4,"0");
+}
+
 
 function getHomework(){return getData("schoolHomework")}
 function saveHomework(x){setData("schoolHomework",x)}
@@ -3525,6 +3547,7 @@ let html=`
 <p style="color:#777;font-size:12px;margin-top:4px">All Students Profiles</p>
 </div>
 <button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>
+<button class="small-btn" style="background:#dc2626" onclick="showDeletedStudents(${classNo},'${stream||""}','${section||""}')">🗑️ Delete / Restore Students</button>
 </div>
 
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
@@ -3807,7 +3830,7 @@ if(!students.length){
 return `<div class="empty"><h3>No Students Found</h3></div>`;
 }
 
-let html=`<div class="table-container"><table><thead><tr>`;
+let html=(type==="fees"?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button type="button" class="small-btn" style="background:#dc2626" onclick="showDeletedFees(${classNo},'${stream||""}','${section||""}')">🗑️ Deleted Fee Slips / Restore</button></div>`:"")+`<div class="table-container"><table><thead><tr>`;
 
 if(type==="students"){
 
@@ -4351,29 +4374,50 @@ document.getElementById("studentModal").style.display="flex";
 }
 
 function deleteStudent(id){
-
-let s=getStudents().find(x=>Number(x.id)===Number(id));
-if(!s)return;
-if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){
-  alert("Teacher sirf apni assigned class ke students ko delete kar sakta hai.");
-  return;
+  let all=getStudents();
+  let s=all.find(x=>Number(x.id)===Number(id));
+  if(!s)return;
+  if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){alert("Teacher sirf apni assigned class ke students ko delete kar sakta hai.");return;}
+  if(!confirm("Delete "+s.name+"? Student aur uske related records restore ke liye safe rahenge."))return;
+  const deleted=getDeletedStudents();
+  deleted.push({
+    archiveId:Date.now()+Math.floor(Math.random()*100000),
+    deletedAt:new Date().toISOString(),
+    student:JSON.parse(JSON.stringify(s)),
+    fees:getFees().filter(x=>Number(x.studentId)===Number(id)),
+    attendance:getAttendance().filter(x=>Number(x.studentId)===Number(id)),
+    exams:getExams().filter(x=>Number(x.studentId)===Number(id))
+  });
+  saveDeletedStudents(deleted);
+  saveStudents(all.filter(x=>Number(x.id)!==Number(id)));
+  saveFees(getFees().filter(x=>Number(x.studentId)!==Number(id)));
+  saveAttendance(getAttendance().filter(x=>Number(x.studentId)!==Number(id)));
+  saveExams(getExams().filter(x=>Number(x.studentId)!==Number(id)));
+  renumberClassStudents(s.classNo,s.stream,s.section);
+  updateDashboard();
+  openStudentsData(window.currentStudentType||"students",window.currentClassNo||s.classNo,window.currentStream||"",window.currentSection||"");
 }
 
-if(!confirm("Delete "+s.name+" and all related records?"))return;
+function showDeletedStudents(classNo,stream,section){
+  const rows=getDeletedStudents().filter(a=>Number(a.student.classNo)===Number(classNo)&&(!stream||String(a.student.stream||"")===String(stream))&&(!section||String(a.student.section||"")===String(section)));
+  const html=`<button class="back-btn" onclick="openStudentsData('students',${classNo},'${stream||""}','${section||""}')">← Back</button>
+  <div class="card"><div class="card-header"><div><h3>🗑️ Deleted / Restore Students - Class ${classNo}</h3><p style="color:#777;font-size:12px">Deleted students permanently delete nahi hue. Restore karne par sabse last serial/roll par aayenge.</p></div></div>
+  <div style="padding:18px">${rows.length?rows.map(a=>`<div style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><b>${escapeHtml(a.student.name)}</b><br>Father: ${escapeHtml(a.student.father||"-")} • Old Roll: ${escapeHtml(a.student.roll||"-")}<br><small>Deleted: ${formatDate(String(a.deletedAt||"").slice(0,10))}</small></div><button class="small-btn" style="background:#15803d" onclick="restoreDeletedStudent(${a.archiveId},${classNo},'${stream||""}','${section||""}')">♻️ Restore Student</button></div>`).join(""):`<div class="empty"><h3>No Deleted Students</h3></div>`}</div></div>`;
+  document.getElementById("otherPage").innerHTML=html;
+}
 
-saveStudents(getStudents().filter(x=>Number(x.id)!==Number(id)));
-saveFees(getFees().filter(x=>Number(x.studentId)!==Number(id)));
-saveAttendance(getAttendance().filter(x=>Number(x.studentId)!==Number(id)));
-saveExams(getExams().filter(x=>Number(x.studentId)!==Number(id)));
-
-updateDashboard();
-
-openStudentsData(
-window.currentStudentType||"students",
-window.currentClassNo||s.classNo,
-window.currentStream||"",
-window.currentSection||""
-);
+function restoreDeletedStudent(archiveId,classNo,stream,section){
+  const deleted=getDeletedStudents();
+  const item=deleted.find(a=>Number(a.archiveId)===Number(archiveId)); if(!item)return;
+  if(!confirm("Restore "+item.student.name+"? Student last me new serial/roll ke saath aayega."))return;
+  const student={...item.student,roll:""};
+  const students=getStudents(); students.push(student); saveStudents(students);
+  saveFees(getFees().concat(item.fees||[]));
+  saveAttendance(getAttendance().concat(item.attendance||[]));
+  saveExams(getExams().concat(item.exams||[]));
+  saveDeletedStudents(deleted.filter(a=>Number(a.archiveId)!==Number(archiveId)));
+  renumberClassStudents(classNo,student.stream||stream||"",student.section||section||"");
+  updateDashboard(); openStudentsData("students",classNo,stream,section);
 }
 
 function closeStudentModal(){
@@ -5059,7 +5103,7 @@ document.getElementById("feeStudentName").value=s.name;
 document.getElementById("feeAmount").value="";
 document.getElementById("feeDate").value=today();
 document.getElementById("feeMode").value="Cash";
-document.getElementById("feeReceipt").value="";
+document.getElementById("feeReceipt").value=nextFeeReceiptNumber();
 
 document.getElementById("feeModal").style.display="flex";
 }
@@ -5085,7 +5129,7 @@ studentId:Number(window.feeStudentId),
 amount,
 date,
 mode:document.getElementById("feeMode").value,
-receipt:document.getElementById("feeReceipt").value.trim(),
+receipt:(document.getElementById("feeReceipt").value.trim()||nextFeeReceiptNumber()),
 feeCycle:Number(feeStudent?.feeCycle||0)
 };
 
@@ -5196,15 +5240,27 @@ win.document.close();
 }
 
 function deleteFee(id,classNo,stream,section){
+  if(window.schoolHubRole==="teacher"){alert("Teacher fee payment delete nahi kar sakta.");return;}
+  const fees=getFees(); const payment=fees.find(x=>Number(x.id)===Number(id)); if(!payment)return;
+  if(!confirm("Delete this fee slip? Ye restore ke liye isi class me save rahegi."))return;
+  const student=getStudents().find(s=>Number(s.id)===Number(payment.studentId));
+  const deleted=getDeletedFees();
+  deleted.push({archiveId:Date.now()+Math.floor(Math.random()*100000),deletedAt:new Date().toISOString(),classNo:Number(student?.classNo??classNo),stream:student?.stream||stream||"",section:student?.section||section||"",payment:JSON.parse(JSON.stringify(payment))});
+  saveDeletedFees(deleted); saveFees(fees.filter(x=>Number(x.id)!==Number(id)));
+  updateDashboard(); openStudentsData("fees",classNo,stream,section);
+}
 
-if(window.schoolHubRole==="teacher"){alert("Teacher fee payment delete nahi kar sakta.");return;}
+function showDeletedFees(classNo,stream,section){
+  const rows=getDeletedFees().filter(a=>Number(a.classNo)===Number(classNo)&&(!stream||String(a.stream||"")===String(stream))&&(!section||String(a.section||"")===String(section)));
+  const html=`<button class="back-btn" onclick="openStudentsData('fees',${classNo},'${stream||""}','${section||""}')">← Back</button><div class="card"><div class="card-header"><div><h3>🗑️ Deleted Fee Slips - Class ${classNo}</h3><p style="color:#777;font-size:12px">Deleted slips yahan safe rahengi aur restore ki ja sakti hain.</p></div></div><div style="padding:18px">${rows.length?rows.map(a=>{const p=a.payment; const st=getStudents().find(x=>Number(x.id)===Number(p.studentId)); return `<div style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><b>${escapeHtml(st?.name||"Student")}</b> • ₹${Number(p.amount||0).toLocaleString("en-IN")}<br>Receipt: ${escapeHtml(p.receipt||"-")} • ${formatDate(p.date||"")}</div><button class="small-btn" style="background:#15803d" onclick="restoreDeletedFee(${a.archiveId},${classNo},'${stream||""}','${section||""}')">♻️ Restore Slip</button></div>`}).join(""):`<div class="empty"><h3>No Deleted Fee Slips</h3></div>`}</div></div>`;
+  document.getElementById("otherPage").innerHTML=html;
+}
 
-if(!confirm("Delete this payment?"))return;
-
-saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
-
-updateDashboard();
-openStudentsData("fees",classNo,stream,section);
+function restoreDeletedFee(archiveId,classNo,stream,section){
+  const deleted=getDeletedFees(); const item=deleted.find(a=>Number(a.archiveId)===Number(archiveId)); if(!item)return;
+  if(!confirm("Restore this fee slip?"))return;
+  saveFees(getFees().concat(item.payment)); saveDeletedFees(deleted.filter(a=>Number(a.archiveId)!==Number(archiveId)));
+  updateDashboard(); openStudentsData("fees",classNo,stream,section);
 }
 
 function closeFeeModal(){
