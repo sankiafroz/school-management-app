@@ -296,6 +296,30 @@ th{background:#fafbfd;color:#667085}
 .owner-filter{display:grid;grid-template-columns:1fr 220px;gap:10px;margin-bottom:15px}
 .owner-badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:bold}.owner-active{background:#e6f8ed;color:#15803d}.owner-hold{background:#fff5d9;color:#b77900}
 @media(max-width:700px){.owner-filter{grid-template-columns:1fr}}
+
+/* SMART DASHBOARD CHART + CLICKABLE REPORT CARDS */
+.dashboard-smart-chart{background:#fff;border:1px solid #e5eaf1;border-radius:17px;padding:18px;margin-bottom:20px;box-shadow:0 3px 12px #00000008}
+.dashboard-smart-chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.dashboard-smart-chart-head h3{font-size:17px}
+.dashboard-smart-chart-date{font-size:12px;color:#667085}
+.smart-chart-body{display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:center}
+.smart-donut{width:165px;height:165px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;position:relative;background:conic-gradient(#15803d 0deg,#15803d 120deg,#dc2626 120deg,#dc2626 240deg,#b77900 240deg,#b77900 360deg)}
+.smart-donut:after{content:"";position:absolute;width:108px;height:108px;border-radius:50%;background:#fff}
+.smart-donut-center{position:relative;z-index:2;text-align:center}
+.smart-donut-center strong{display:block;font-size:26px}
+.smart-donut-center span{font-size:11px;color:#667085}
+.smart-chart-rows{display:flex;flex-direction:column;gap:12px}
+.smart-chart-row{display:grid;grid-template-columns:105px 1fr 52px;align-items:center;gap:9px;font-size:13px}
+.smart-chart-label{font-weight:700}
+.smart-chart-bar{height:13px;background:#edf0f4;border-radius:20px;overflow:hidden}
+.smart-chart-fill{height:100%;border-radius:20px}
+.smart-chart-fill.present{background:#15803d}.smart-chart-fill.absent{background:#dc2626}.smart-chart-fill.leave{background:#b77900}
+.smart-chart-count{text-align:right;font-weight:800}
+.report-click-card{cursor:pointer;transition:.15s}
+.report-click-card:hover{transform:translateY(-2px);box-shadow:0 7px 20px #00000012;border-color:#cddcff}
+.download-tools{display:flex;gap:8px;flex-wrap:wrap}
+.download-tools .small-btn{white-space:nowrap}
+@media(max-width:700px){.smart-chart-body{grid-template-columns:1fr}.smart-donut{width:145px;height:145px}.smart-chart-row{grid-template-columns:85px 1fr 45px}}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -468,6 +492,7 @@ SchoolHub
   <span id="dashboardNoticeText">Click to view all notices</span>
   <span style="margin-left:auto;font-size:12px;flex:none">View All →</span>
 </div>
+<div id="dashboardSmartAttendanceChart" class="dashboard-smart-chart"></div>
 <div class="card">
   <div class="card-header">
     <div>
@@ -2335,6 +2360,206 @@ homework:"Homework"
 }[type]||type;
 }
 
+
+/* DOWNLOAD / REPORT HELPERS */
+function downloadRowsAsExcel(rows,filename,sheetName){
+  rows=Array.isArray(rows)?rows:[];
+  if(!rows.length){alert("No data available to download.");return;}
+  const headers=[];
+  rows.forEach(r=>Object.keys(r||{}).forEach(k=>{if(!headers.includes(k))headers.push(k);}));
+  const data=[headers,...rows.map(r=>headers.map(k=>{
+    const v=r?.[k];
+    if(v===null||v===undefined)return "";
+    if(typeof v==="object")return JSON.stringify(v);
+    return v;
+  }))];
+  if(window.XLSX){
+    const ws=XLSX.utils.aoa_to_sheet(data);
+    ws["!cols"]=headers.map(h=>({wch:Math.min(45,Math.max(12,String(h).length+3))}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,(sheetName||"Data").slice(0,31));
+    XLSX.writeFile(wb,filename.replace(/\.(csv|xlsx)$/i,"")+".xlsx");
+    return;
+  }
+  const csv=data.map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=filename.replace(/\.xlsx$/i,"")+".csv";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function excelSafeRecord(obj,skip=[]){
+  const out={};
+  Object.keys(obj||{}).forEach(k=>{
+    if(skip.includes(k))return;
+    const v=obj[k];
+    if(typeof v==="function")return;
+    if(Array.isArray(v))out[k]=v.map(x=>typeof x==="object"?JSON.stringify(x):x).join(" | ");
+    else if(v&&typeof v==="object")out[k]=JSON.stringify(v);
+    else out[k]=v??"";
+  });
+  return out;
+}
+function classFilteredStudents(classNo,stream,section){
+  return getStudents().filter(s=>
+    Number(s.classNo)===Number(classNo)&&
+    (!stream||s.stream===stream)&&
+    (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
+  );
+}
+function downloadClassStudentsData(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  const students=classFilteredStudents(classNo,stream,section);
+  const rows=students.map(s=>{
+    const r=excelSafeRecord(s,["photo"]);
+    r["Photo Saved"]=s.photo?"Yes":"No";
+    r["Paid Fee"]=getStudentPaid(s.id);
+    r["Pending Fee"]=Math.max(0,Number(s.fee||0)-getStudentPaid(s.id));
+    return r;
+  });
+  downloadRowsAsExcel(rows,`Class_${classNo}_All_Students.xlsx`,"Students");
+}
+function downloadAllTeacherData(){
+  const teachers=Array.isArray(getTeachers())?getTeachers():[];
+  const rows=teachers.map(t=>{
+    const r=excelSafeRecord(t,["photo","documents"]);
+    r["Photo Saved"]=t.photo?"Yes":"No";
+    r["Documents Count"]=Array.isArray(t.documents)?t.documents.length:0;
+    r["Document Names"]=Array.isArray(t.documents)?t.documents.map(d=>d?.name||"").filter(Boolean).join(" | "):"";
+    return r;
+  });
+  downloadRowsAsExcel(rows,"All_Teacher_Data.xlsx","Teachers");
+}
+function buildFeeExportRows(classNo,stream,section,pendingOnly=false){
+  return classFilteredStudents(classNo,stream,section).map(s=>{
+    const total=Number(s.fee||0),paid=getStudentPaid(s.id),pending=Math.max(0,total-paid);
+    if(pendingOnly&&pending<=0)return null;
+    return {
+      "Student ID":s.id??"",
+      "Roll Number":s.roll??"",
+      "Student Name":s.name??"",
+      "Father Name":s.father??"",
+      "Class":s.classNo??"",
+      "Section":s.section??"",
+      "Stream":s.stream??"",
+      "Mobile":s.mobile??"",
+      "Total Fee":total,
+      "Paid Fee":paid,
+      "Pending Fee":pending,
+      "Payment Count":getStudentPayments(s.id).length,
+      "Payment History":getStudentPayments(s.id).map(p=>`${p.amount||0} | ${p.date||""} | ${p.mode||""} | ${p.receipt||""}`).join(" || ")
+    };
+  }).filter(Boolean);
+}
+function downloadClassFeesData(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  downloadRowsAsExcel(buildFeeExportRows(classNo,stream,section,false),`Class_${classNo}_All_Fees.xlsx`,"Fees");
+}
+function downloadClassPendingFeesData(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  downloadRowsAsExcel(buildFeeExportRows(classNo,stream,section,true),`Class_${classNo}_Pending_Fees.xlsx`,"Pending Fees");
+}
+function downloadClassResultsData(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  const students=classFilteredStudents(classNo,stream,section);
+  const rows=[];
+  students.forEach(s=>{
+    const exams=getExamResultsForStudent(s.id);
+    exams.forEach(e=>{
+      rows.push({
+        "Student ID":s.id??"",
+        "Roll Number":s.roll??"",
+        "Student Name":s.name??"",
+        "Father Name":s.father??"",
+        "Class":s.classNo??"",
+        "Section":s.section??"",
+        "Stream":s.stream??"",
+        "Session":e.session||"",
+        "Result Type":e.resultType||"",
+        "Exam Name":e.examName||"",
+        "Exam Date":e.examDate||"",
+        "Total Marks":getExamTotal(e),
+        "Obtained Marks":getExamObtained(e),
+        "Percentage":Number(getExamPercentage(e)||0).toFixed(2)+"%",
+        "Status":getExamPercentage(e)>=33?"PASS":"FAIL",
+        "Subjects":(e.subjects||[]).map(sub=>{
+          const n=normalizeExamSubject(sub);
+          return `${n.name}: ${getSubjectObtained(n)}/${getSubjectMax(n)}`;
+        }).join(" | ")
+      });
+    });
+  });
+  downloadRowsAsExcel(rows,`Class_${classNo}_All_Result_Data.xlsx`,"Results");
+}
+function openReportList(type){
+  const students=getStudents();
+  const records=getAttendance().filter(a=>a.date===today());
+  let filtered=students.slice(), title="Report";
+  if(type==="present"){filtered=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Present"));title="Today — Present Students";}
+  else if(type==="absent"){filtered=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Absent"));title="Today — Absent Students";}
+  else if(type==="leave"){filtered=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Leave"));title="Today — Leave Students";}
+  else if(type==="paid"){filtered=students.filter(s=>getStudentPaid(s.id)>0);title="Fee Paid Students";}
+  else if(type==="pending"){filtered=students.filter(s=>Math.max(0,Number(s.fee||0)-getStudentPaid(s.id))>0);title="Pending Fee Students";}
+  else if(type==="resultUpdated"){filtered=students.filter(s=>!!getExamForStudent(s.id));title="Result Updated Students";}
+  else if(type==="resultPending"){filtered=students.filter(s=>!getExamForStudent(s.id));title="Pending Result Students";}
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText=title;
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="showPage('reports')">← Back to Reports</button>
+    <div class="card">
+      <div class="card-header"><div><h3>${escapeHtml(title)}</h3><p style="color:#777;font-size:12px;margin-top:4px">${filtered.length} Students</p></div></div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>#</th><th>Student Name</th><th>Roll</th><th>Class</th><th>Section</th><th>Father Name</th><th>Mobile</th><th>Fee Pending</th><th>Latest Result</th></tr></thead>
+          <tbody>${filtered.length?filtered.map((s,i)=>{
+            const e=getExamForStudent(s.id);
+            return `<tr>
+              <td>${i+1}</td><td><strong>${escapeHtml(s.name||"-")}</strong></td><td>${escapeHtml(s.roll??i+1)}</td>
+              <td>Class ${escapeHtml(s.classNo??"-")}</td><td>${escapeHtml(s.section||"-")}</td>
+              <td>${escapeHtml(s.father||"-")}</td><td>${escapeHtml(s.mobile||"-")}</td>
+              <td class="fee-pending">₹${Math.max(0,Number(s.fee||0)-getStudentPaid(s.id)).toLocaleString("en-IN")}</td>
+              <td>${e?`${escapeHtml(e.examName||"Result")} • ${Number(getExamPercentage(e)||0).toFixed(1)}%`:"Pending"}</td>
+            </tr>`;
+          }).join(""):`<tr><td colspan="9"><div class="empty">No students found.</div></td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* SMART DASHBOARD ATTENDANCE CHART */
+function renderDashboardSmartAttendanceChart(){
+  const box=document.getElementById("dashboardSmartAttendanceChart");
+  if(!box)return;
+  const students=getStudents();
+  const records=getAttendance().filter(a=>a.date===today());
+  const present=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Present")).length;
+  const absent=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Absent")).length;
+  const leave=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Leave")).length;
+  const total=students.length;
+  const marked=present+absent+leave;
+  const pPct=marked?present/marked*100:0;
+  const aPct=marked?absent/marked*100:0;
+  const lPct=marked?leave/marked*100:0;
+  const pDeg=pPct*3.6, aDeg=pDeg+aPct*3.6;
+  const donut=marked?`conic-gradient(#15803d 0deg ${pDeg}deg,#dc2626 ${pDeg}deg ${aDeg}deg,#b77900 ${aDeg}deg 360deg)`:"conic-gradient(#e5e7eb 0deg 360deg)";
+  box.innerHTML=`
+    <div class="dashboard-smart-chart-head">
+      <h3>📈 Today's Smart Attendance</h3>
+      <span class="dashboard-smart-chart-date">${formatDate(today())}</span>
+    </div>
+    <div class="smart-chart-body">
+      <div class="smart-donut" style="background:${donut}">
+        <div class="smart-donut-center"><strong>${total}</strong><span>Total Students</span></div>
+      </div>
+      <div class="smart-chart-rows">
+        <div class="smart-chart-row"><span class="smart-chart-label">🟢 Present</span><div class="smart-chart-bar"><div class="smart-chart-fill present" style="width:${marked?pPct:0}%"></div></div><span class="smart-chart-count">${present}</span></div>
+        <div class="smart-chart-row"><span class="smart-chart-label">🔴 Absent</span><div class="smart-chart-bar"><div class="smart-chart-fill absent" style="width:${marked?aPct:0}%"></div></div><span class="smart-chart-count">${absent}</span></div>
+        <div class="smart-chart-row"><span class="smart-chart-label">🟡 Leave</span><div class="smart-chart-bar"><div class="smart-chart-fill leave" style="width:${marked?lPct:0}%"></div></div><span class="smart-chart-count">${leave}</span></div>
+      </div>
+    </div>`;
+}
 /* PAGE */
 
 function toggleSidebar(){
@@ -3569,7 +3794,10 @@ let html=`
 <h3>${title}</h3>
 <p style="color:#777;font-size:12px;margin-top:4px">All Students Profiles</p>
 </div>
+<div class="download-tools">
+<button class="small-btn" onclick="downloadClassStudentsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Students</button>
 <button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>
+</div>
 </div>
 
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
@@ -3681,6 +3909,9 @@ if(type==="exams"){
         <h3>${title} - Result</h3>
         <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
       </div>
+      <div class="download-tools">
+        <button class="small-btn" onclick="downloadClassResultsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Result Data</button>
+      </div>
     </div>
 
     <div class="result-excel-tools">
@@ -3724,6 +3955,10 @@ let html=`
 <h3>${title}</h3>
 <p style="color:#777;font-size:12px;margin-top:4px">${getTypeTitle(type)} Details</p>
 </div>
+${type==="fees"?`<div class="download-tools">
+<button class="small-btn" onclick="downloadClassFeesData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Fees</button>
+<button class="small-btn" style="background:#b77900" onclick="downloadClassPendingFeesData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Pending Fees</button>
+</div>`:""}
 </div>
 
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
@@ -4854,7 +5089,10 @@ function renderTeacherPage(){
           <h3>👨‍🏫 Teacher Profiles</h3>
           <p style="color:#777;font-size:12px;margin-top:4px">${teachers.length} Teacher${teachers.length===1?'':'s'}</p>
         </div>
-        <button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
+        <div class="download-tools">
+<button class="small-btn" onclick="downloadAllTeacherData()">⬇️ Download All Teacher Data</button>
+<button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
+</div>
       </div>
       <div class="search-box">
         <input id="teacherSearch" placeholder="🔍 Search teacher, mobile, qualification or subject..." oninput="filterTeachers()">
@@ -6481,6 +6719,10 @@ homeworkImageData=[];
 
 function getOtherPage(page){
 
+if(page==="timetable"){
+  return `<div class="card"><div class="empty"><h3>Timetable</h3><p>Timetable module is disabled from the menu.</p></div></div>`;
+}
+
 if(page==="teachers"){
 return `<div class="card"><div class="empty"><h3>Teachers</h3><p>Click Teachers in the menu to view teacher profiles.</p></div></div>`;
 }
@@ -6737,34 +6979,56 @@ function deleteNotice(index){
 if(page==="reports"){
 
 let students=getStudents();
+let attendance=getAttendance();
+let todayDate=today();
+let todayRecords=attendance.filter(a=>a.date===todayDate);
+let presentStudents=students.filter(s=>todayRecords.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Present"));
+let absentStudents=students.filter(s=>todayRecords.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Absent"));
+let leaveStudents=students.filter(s=>todayRecords.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Leave"));
+let paidStudents=students.filter(s=>getStudentPaid(s.id)>0);
+let pendingStudents=students.filter(s=>Math.max(0,Number(s.fee||0)-getStudentPaid(s.id))>0);
+let resultUpdatedStudents=students.filter(s=>!!getExamForStudent(s.id));
+let pendingResultStudents=students.filter(s=>!getExamForStudent(s.id));
 let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
 let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
-let results=students.map(s=>getExamForStudent(s.id)).filter(Boolean);
-let pass=results.filter(e=>getExamPercentage(e)>=33).length;
+
+const reportCard=(label,value,type,action)=>`
+<div class="stat-card report-click-card ${type}" onclick="${action}">
+  <div class="stat-number">${value}</div>
+  <div class="stat-label">${label}</div>
+</div>`;
 
 return `
-<div class="stats">
-
-<div class="stat-card">
-<div class="stat-number">${students.length}</div>
-<div class="stat-label">Students</div>
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3>📊 Smart Reports</h3>
+      <p style="color:#777;font-size:12px;margin-top:4px">Har report card clickable hai — details dekhne ke liye card par click karein.</p>
+    </div>
+  </div>
+  <div class="stats" style="padding:18px;margin-bottom:0">
+    ${reportCard("Total Students",students.length,"blue","openReportList('all')")}
+    ${reportCard("Present Students",presentStudents.length,"green","openReportList('present')")}
+    ${reportCard("Absent Students",absentStudents.length,"red","openReportList('absent')")}
+    ${reportCard("Leave Students",leaveStudents.length,"yellow","openReportList('leave')")}
+    ${reportCard("Total Fees Paid",portalMoney(paid),"green","openReportList('paid')")}
+    ${reportCard("Pending Fees Students",pendingStudents.length,"yellow","openReportList('pending')")}
+    ${reportCard("Result Update Students",resultUpdatedStudents.length,"blue","openReportList('resultUpdated')")}
+    ${reportCard("Pending Result Students",pendingResultStudents.length,"red","openReportList('resultPending')")}
+  </div>
 </div>
 
-<div class="stat-card">
-<div class="stat-number">${total?Math.round(paid/total*100):0}%</div>
-<div class="stat-label">Fee Collection</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">${results.length}</div>
-<div class="stat-label">Results Added</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">${results.length?Math.round(pass/results.length*100):0}%</div>
-<div class="stat-label">Pass Percentage</div>
-</div>
-
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3>💰 Fee Summary</h3>
+      <p style="color:#777;font-size:12px;margin-top:4px">Total Fee ₹${total.toLocaleString("en-IN")} • Paid ₹${paid.toLocaleString("en-IN")} • Pending ₹${Math.max(0,total-paid).toLocaleString("en-IN")}</p>
+    </div>
+  </div>
+  <div class="stats" style="padding:18px;margin-bottom:0">
+    ${reportCard("Paid Fee Students",paidStudents.length,"green","openReportList('paid')")}
+    ${reportCard("Pending Fee Students",pendingStudents.length,"yellow","openReportList('pending')")}
+  </div>
 </div>
 `;
 }
@@ -6928,6 +7192,7 @@ function updateDashboard(){
   renderDashboardClassCards();
   updateDashboardNotice();
   updateDashboardBranding();
+  renderDashboardSmartAttendanceChart();
 }
 function updateDashboardNotice(){
   const school=localStorage.getItem("schoolName")||document.getElementById("displaySchool")?.innerText||"ABC Public School";
