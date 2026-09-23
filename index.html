@@ -297,6 +297,19 @@ th{background:#fafbfd;color:#667085}
 .owner-badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:bold}.owner-active{background:#e6f8ed;color:#15803d}.owner-hold{background:#fff5d9;color:#b77900}
 @media(max-width:700px){.owner-filter{grid-template-columns:1fr}}
 .result-parts{display:flex;flex-direction:column;gap:6px;min-width:520px}.result-part{display:grid;grid-template-columns:100px 1fr auto auto;gap:8px;align-items:center;padding:7px 9px;border:1px solid #e5e7eb;border-radius:8px;background:#fff}.result-part.pending{background:#fafafa;color:#94a3b8}.result-part span{font-size:11px;color:#64748b}.result-part strong{font-size:12px}.result-part em{font-style:normal;font-size:11px;font-weight:800}.final-combined{padding:9px;border:2px solid #dbeafe;border-radius:9px;background:#eff6ff;font-size:12px}.final-combined b{display:block;margin-bottom:4px}
+
+/* DELETE / RESTORE - ADDED ONLY */
+.trash-card{background:#fff;border:1px solid #e5eaf1;border-radius:17px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.trash-card-info{display:flex;align-items:center;gap:10px}
+.trash-card-icon{width:38px;height:38px;border-radius:10px;background:#fff5d9;color:#b77900;display:flex;align-items:center;justify-content:center;font-size:20px}
+.trash-card-title{font-weight:800;font-size:15px}.trash-card-sub{font-size:11px;color:#667085;margin-top:3px}
+.trash-actions{display:flex;gap:8px;flex-wrap:wrap}
+.trash-btn{border:0;padding:9px 12px;border-radius:9px;font-weight:800;cursor:pointer}
+.trash-restore{background:#e6f8ed;color:#15803d}.trash-permanent{background:#feecec;color:#dc2626}
+.trash-modal-list{display:flex;flex-direction:column;gap:10px}
+.trash-item{border:1px solid #e5eaf1;border-radius:12px;padding:12px;background:#fafbfd}
+.trash-item-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.trash-item-name{font-weight:800}.trash-item-meta{font-size:11px;color:#667085;margin-top:4px}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -1244,6 +1257,91 @@ function saveAttendance(x){setData("schoolAttendance",x)}
 
 function getExams(){return getData("schoolExams")}
 function saveExams(x){setData("schoolExams",x)}
+function getDeletedRecords(){return getData("schoolDeletedRecords")}
+function saveDeletedRecords(x){setData("schoolDeletedRecords",Array.isArray(x)?x:[])}
+function addDeletedRecord(type,data){
+  const trash=getDeletedRecords();
+  trash.push({id:"TRASH_"+Date.now()+"_"+Math.floor(Math.random()*100000),type,deletedAt:new Date().toISOString(),data});
+  saveDeletedRecords(trash);
+}
+function getDeletedByType(type){return getDeletedRecords().filter(x=>x.type===type);}
+function deletedTypeLabel(type){return {student:"Student",teacher:"Teacher",fee:"Fee Slip",result:"Result"}[type]||type;}
+function openDeletedRecords(type){
+  const items=getDeletedByType(type);
+  document.getElementById("deletedRecordsModal")?.remove();
+  document.body.insertAdjacentHTML("beforeend",`
+    <div class="modal-bg" id="deletedRecordsModal" style="display:flex">
+      <div class="modal" style="max-width:760px">
+        <div class="modal-header">
+          <h2>🗑️ Deleted ${escapeHtml(deletedTypeLabel(type))} Records</h2>
+          <button class="close-btn" onclick="document.getElementById('deletedRecordsModal').remove()">×</button>
+        </div>
+        <div class="trash-modal-list">
+          ${items.length?items.map(x=>{
+            const d=x.data||{};
+            let name=type==="student"?d.student?.name:(type==="teacher"?d.name:(type==="fee"?`₹${Number(d.payment?.amount||0).toLocaleString("en-IN")} - ${d.studentName||"Fee Payment"}`:(d.studentName||d.result?.examName||"Result")));
+            let meta=type==="student"?`Class ${d.student?.classNo||"-"}${d.student?.section?" • Section "+d.student.section:""}`
+              :(type==="teacher"?`Mobile: ${d.mobile||"-"} • Class: ${d.classNo||"Not Assigned"}`
+              :(type==="fee"?`Date: ${formatDate(d.payment?.date)} • Receipt: ${d.payment?.receipt||"-"}`
+              :`Exam: ${d.result?.examName||"-"} • Date: ${formatDate(d.result?.examDate)}`));
+            return `<div class="trash-item">
+              <div class="trash-item-head">
+                <div><div class="trash-item-name">${escapeHtml(String(name||"Deleted Record"))}</div><div class="trash-item-meta">${escapeHtml(String(meta))}</div></div>
+                <div class="trash-actions">
+                  <button class="trash-btn trash-restore" onclick="restoreDeletedRecord('${String(x.id)}')">↩️ Restore</button>
+                  <button class="trash-btn trash-permanent" onclick="permanentDeleteRecord('${String(x.id)}')">🗑️ Permanent Delete</button>
+                </div>
+              </div>
+            </div>`;
+          }).join(""):`<div class="empty">No deleted ${escapeHtml(deletedTypeLabel(type))} records.</div>`}
+        </div>
+      </div>
+    </div>`);
+}
+function restoreDeletedRecord(trashId){
+  const trash=getDeletedRecords(),i=trash.findIndex(x=>String(x.id)===String(trashId));
+  if(i<0)return;
+  const item=trash[i],d=item.data||{};
+  if(item.type==="student"){
+    if(d.student) saveStudents([...getStudents(),d.student]);
+    if(Array.isArray(d.fees)) saveFees([...getFees(),...d.fees]);
+    if(Array.isArray(d.attendance)) saveAttendance([...getAttendance(),...d.attendance]);
+    if(Array.isArray(d.exams)) saveExams([...getExams(),...d.exams]);
+  }else if(item.type==="teacher"){
+    saveTeachers([...getTeachers(),d]);
+  }else if(item.type==="fee"){
+    if(d.payment) saveFees([...getFees(),d.payment]);
+  }else if(item.type==="result"){
+    if(d.result) saveExams([...getExams(),d.result]);
+  }
+  trash.splice(i,1); saveDeletedRecords(trash);
+  document.getElementById("deletedRecordsModal")?.remove();
+  if(item.type==="teacher") renderTeacherPage();
+  else if(window.currentStudentType) openStudentsData(window.currentStudentType,window.currentClassNo,window.currentStream,window.currentSection);
+  alert(deletedTypeLabel(item.type)+" restored successfully.");
+}
+function permanentDeleteRecord(trashId){
+  const trash=getDeletedRecords(),i=trash.findIndex(x=>String(x.id)===String(trashId));
+  if(i<0)return;
+  const item=trash[i];
+  if(!confirm("Permanent delete this "+deletedTypeLabel(item.type)+"? This cannot be restored."))return;
+  trash.splice(i,1); saveDeletedRecords(trash);
+  document.getElementById("deletedRecordsModal")?.remove();
+  if(item.type==="teacher") renderTeacherPage();
+  else if(window.currentStudentType) openStudentsData(window.currentStudentType,window.currentClassNo,window.currentStream,window.currentSection);
+  alert("Permanently deleted.");
+}
+function renderDeleteRestoreCard(type){
+  const count=getDeletedByType(type).length;
+  return `<div class="trash-card">
+    <div class="trash-card-info"><div class="trash-card-icon">🗑️</div><div><div class="trash-card-title">Delete / Restore</div><div class="trash-card-sub">${count} deleted ${deletedTypeLabel(type).toLowerCase()} record${count===1?"":"s"}</div></div></div>
+    <div class="trash-actions">
+      <button class="trash-btn trash-restore" onclick="openDeletedRecords('${type}')">↩️ Restore / View Deleted</button>
+      <button class="trash-btn trash-permanent" onclick="openDeletedRecords('${type}')">🗑️ Permanent Delete</button>
+    </div>
+  </div>`;
+}
+
 
 function getHomework(){return getData("schoolHomework")}
 function saveHomework(x){setData("schoolHomework",x)}
@@ -3574,6 +3672,7 @@ stream?
 if(type==="students"){
 
 let html=`
+${renderDeleteRestoreCard("student")}
 <button class="back-btn" onclick="${back}">← Back to Classes</button>
 
 <div class="card">
@@ -3709,7 +3808,7 @@ if(type==="exams"){
     </tr>`;
   }).join("");
 
-  let html=`<button class="back-btn" onclick="${back}">← Back</button>
+  let html=`${renderDeleteRestoreCard("result")}<button class="back-btn" onclick="${back}">← Back</button>
   <div class="card">
     <div class="card-header">
       <div>
@@ -3759,6 +3858,7 @@ if(type==="exams"){
   return;
 }
 let html=`
+${type==="fees"?renderDeleteRestoreCard("fee"):""}
 <button class="back-btn" onclick="${back}">← Back</button>
 
 <div class="card">
@@ -4417,31 +4517,24 @@ document.getElementById("studentModal").style.display="flex";
 }
 
 function deleteStudent(id){
-
 let s=getStudents().find(x=>Number(x.id)===Number(id));
 if(!s)return;
 if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){
   alert("Teacher sirf apni assigned class ke students ko delete kar sakta hai.");
   return;
 }
-
 if(!confirm("Delete "+s.name+" and all related records?"))return;
-
+const fees=getFees().filter(x=>Number(x.studentId)===Number(id));
+const attendance=getAttendance().filter(x=>Number(x.studentId)===Number(id));
+const exams=getExams().filter(x=>Number(x.studentId)===Number(id));
+addDeletedRecord("student",{student:s,fees,attendance,exams});
 saveStudents(getStudents().filter(x=>Number(x.id)!==Number(id)));
 saveFees(getFees().filter(x=>Number(x.studentId)!==Number(id)));
 saveAttendance(getAttendance().filter(x=>Number(x.studentId)!==Number(id)));
 saveExams(getExams().filter(x=>Number(x.studentId)!==Number(id)));
-
 updateDashboard();
-
-openStudentsData(
-window.currentStudentType||"students",
-window.currentClassNo||s.classNo,
-window.currentStream||"",
-window.currentSection||""
-);
+openStudentsData(window.currentStudentType||"students",window.currentClassNo||s.classNo,window.currentStream||"",window.currentSection||"");
 }
-
 function closeStudentModal(){
 document.getElementById("studentModal").style.display="none";
 editingStudentId=null;
@@ -4832,6 +4925,7 @@ function deleteTeacher(id){
   let t=getTeachers().find(x=>Number(x.id)===Number(id));
   if(!t)return;
   if(!confirm("Delete teacher "+t.name+"?"))return;
+  addDeletedRecord("teacher",t);
   saveTeachers(getTeachers().filter(x=>Number(x.id)!==Number(id)));
   showPage("teachers");
 }
@@ -4891,6 +4985,7 @@ function renderTeacherPage(){
   if(!area) return;
 
   area.innerHTML = `
+    ${renderDeleteRestoreCard("teacher")}
     <div class="card">
       <div class="card-header">
         <div>
@@ -5260,13 +5355,13 @@ win.document.close();
 }
 
 function deleteFee(id,classNo,stream,section){
-
 if(window.schoolHubRole==="teacher"){alert("Teacher fee payment delete nahi kar sakta.");return;}
-
+const payment=getFees().find(x=>Number(x.id)===Number(id));
+if(!payment)return;
 if(!confirm("Delete this payment?"))return;
-
+const st=getStudents().find(x=>Number(x.id)===Number(payment.studentId));
+addDeletedRecord("fee",{payment,studentName:st?.name||"Fee Payment"});
 saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
-
 updateDashboard();
 openStudentsData("fees",classNo,stream,section);
 }
@@ -5929,7 +6024,11 @@ function selectedPromotionSession(){
 
 function deleteExam(id,classNo,stream,section){
   if(!requireTeacherClassAccess(classNo))return;
+  const result=getExams().find(x=>Number(x.id)===Number(id));
+  if(!result)return;
   if(!confirm("Delete this result?"))return;
+  const st=getStudents().find(x=>Number(x.id)===Number(result.studentId));
+  addDeletedRecord("result",{result,studentName:st?.name||"Result"});
   saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
   openStudentsData("exams",classNo,stream,section);
 }
