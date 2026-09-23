@@ -397,6 +397,11 @@ th{background:#fafbfd;color:#667085}
     <strong>School Login</strong><br>
     School ki Login ID aur Password SchoolHub Owner register karke dega.
   </div>
+
+  <div id="ownerAboutLogin" style="margin-top:18px;padding:14px 16px;border:1px solid #e5eaf1;border-radius:12px;background:#f8fbff;text-align:left;display:none">
+    <div style="font-weight:800;color:#172033;margin-bottom:6px">ℹ️ About SchoolHub</div>
+    <div id="ownerAboutLoginText" style="font-size:13px;line-height:1.6;color:#667085;white-space:pre-wrap"></div>
+  </div>
 </div>
 </div><div class="app" id="app">
 
@@ -420,10 +425,12 @@ SchoolHub
 <li onclick="showPage('fees',this)">💰 Fees</li>
 <li onclick="showPage('exams',this)">📝 Exam / Result</li>
 <li onclick="showPage('homework',this)">📚 Homework</li>
+<li onclick="showPage('timetable',this)">🕐 Timetable</li>
 <li onclick="showPage('gallery',this)">🖼️ Gallery</li>
 <li onclick="showPage('notices',this)">📢 Notices</li>
 <li onclick="showPage('reports',this)">📊 Reports</li>
 <li onclick="showPage('settings',this)">⚙️ Settings</li>
+<li onclick="showPage('about',this)">ℹ️ About</li>
 <li class="logout" onclick="logoutUser()">🚪 Logout</li>
 </ul>
 </aside>
@@ -1238,28 +1245,6 @@ function saveAttendance(x){setData("schoolAttendance",x)}
 
 function getExams(){return getData("schoolExams")}
 function saveExams(x){setData("schoolExams",x)}
-function getDeletedStudents(){return getData("schoolDeletedStudents")}
-function saveDeletedStudents(x){setData("schoolDeletedStudents",x)}
-function getDeletedFees(){return getData("schoolDeletedFees")}
-function saveDeletedFees(x){setData("schoolDeletedFees",x)}
-
-function renumberClassStudents(classNo,stream,section){
-  const all=getStudents();
-  const filtered=all.filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||String(s.stream||"")===String(stream))&&(!section||String(s.section||"")===String(section)));
-  filtered.sort((a,b)=>{const ra=Number(a.roll),rb=Number(b.roll); if(Number.isFinite(ra)&&Number.isFinite(rb)&&ra!==rb)return ra-rb; return String(a.name||"").localeCompare(String(b.name||""));});
-  filtered.forEach((st,i)=>st.roll=String(i+1));
-  saveStudents(all);
-}
-
-function nextFeeReceiptNumber(){
-  let max=0;
-  [...getFees(),...getDeletedFees()].forEach(p=>{
-    const m=String(p.receipt||"").match(/(?:REC[- ]?)?(\d+)$/i);
-    if(m)max=Math.max(max,Number(m[1]));
-  });
-  return "REC-"+String(max+1).padStart(4,"0");
-}
-
 
 function getHomework(){return getData("schoolHomework")}
 function saveHomework(x){setData("schoolHomework",x)}
@@ -1972,6 +1957,7 @@ function openOwnerDashboard(){
     <li onclick="showOwnerSection('manage',this)">✏️ Edit / Delete School</li>
     <li onclick="showOwnerSection('hold',this)">🔒 Hold School ID / Password</li>
     <li onclick="showOwnerSection('schools',this)">🏫 Schools</li>
+    <li onclick="showOwnerSection('about',this)">ℹ️ About</li>
     <li onclick="showOwnerSection('settings',this)">⚙️ Settings</li>
     <li class="logout" onclick="logoutOwnerAccount()">🚪 Logout</li>
   </ul>`;
@@ -1988,17 +1974,49 @@ function renderOwnerDashboard(){
     <div class="owner-action-card" onclick="showOwnerSection('manage')"><div class="icon">✏️</div><h3>Edit & Delete School</h3><p>School details update ya delete karein.</p></div>
     <div class="owner-action-card" onclick="showOwnerSection('hold')"><div class="icon">🔒</div><h3>Hold School ID & Password</h3><p>School login ko temporarily hold/release karein.</p></div>
     <div class="owner-action-card" onclick="showOwnerSection('settings')"><div class="icon">⚙️</div><h3>Owner Settings</h3><p>Sirf apni ID, password, Gmail aur mobile change karein.</p></div>
+    <div class="owner-action-card" onclick="showOwnerSection('about')"><div class="icon">ℹ️</div><h3>Owner About</h3><p>Admin login page par dikhne wali information update karein.</p></div>
   </div>
   ${ownerSchoolDirectory(schools,cities)}`;
 }
 function ownerSchoolDirectory(schools,cities){return `<div class="card"><div class="card-header"><div><h3>🏫 Registered Schools</h3><p style="color:#667085;font-size:12px;margin-top:4px">School names alphabetically sorted hain.</p></div></div><div style="padding:18px"><div class="owner-filter"><input id="ownerSchoolSearch" placeholder="Search school name..." oninput="filterOwnerSchools()"><select id="ownerCityFilter" onchange="filterOwnerSchools()"><option value="">All Cities</option>${cities.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select></div><div id="ownerSchoolList" class="owner-school-grid">${ownerSchoolCards(schools)}</div></div></div>`;}
 function ownerSchoolCards(schools){if(!schools.length)return '<div class="empty" style="grid-column:1/-1">No school registered yet.</div>';return schools.map(a=>`<div class="owner-school-card" data-school-name="${escapeHtml(a.schoolName||"").toLowerCase()}" data-school-city="${escapeHtml(a.city||"")}"><h3>${escapeHtml(a.schoolName||"-")}</h3><div class="owner-school-meta">Principal: ${escapeHtml(a.principalName||"-" )}<br>City: ${escapeHtml(a.city||"-")}<br>Mobile: ${escapeHtml(a.mobile||"-")}<br>Gmail: ${escapeHtml(a.email||"-")}<br>Login ID: <b>${escapeHtml(a.loginId||"-")}</b><br>Status: <span class="owner-badge ${a.hold?'owner-hold':'owner-active'}">${a.hold?'ON HOLD':'ACTIVE'}</span></div><div class="owner-school-actions"><button class="edit-btn" onclick="editSchoolAccount('${String(a.id)}')">Edit</button><button class="delete-btn" onclick="deleteSchoolAccount('${String(a.id)}')">Delete</button><button class="small-btn" onclick="toggleSchoolHold('${String(a.id)}')">${a.hold?'Release':'Hold'} Login</button></div></div>`).join('');}
 function filterOwnerSchools(){const q=(document.getElementById('ownerSchoolSearch')?.value||'').trim().toLowerCase(),city=document.getElementById('ownerCityFilter')?.value||'';document.querySelectorAll('#ownerSchoolList .owner-school-card').forEach(card=>{const n=card.dataset.schoolName||'',c=card.dataset.schoolCity||'';card.style.display=(!q||n.includes(q))&&(!city||c===city)?'':'none';});}
-function showOwnerSection(section,element){if(window.schoolHubRole!=="owner")return;document.querySelectorAll('.menu li').forEach(x=>x.classList.remove('active'));if(element)element.classList.add('active');const other=document.getElementById('otherPage');document.getElementById('dashboardPage').style.display='none';other.style.display='block';document.getElementById('pageTitle').innerText=section==='dashboard'?'Dashboard':section==='manage'?'Edit / Delete School':section==='hold'?'Hold School Login':section==='schools'?'Schools':'Owner Settings';if(section==='dashboard'){other.innerHTML=renderOwnerDashboard();return;}if(section==='schools'){other.innerHTML=ownerShell('🏫 All Registered Schools',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='manage'){other.innerHTML=ownerShell('✏️ Edit / Delete School',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='hold'){other.innerHTML=ownerShell('🔒 Hold School ID & Password',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='settings'){renderOwnerSettings();}}
+function showOwnerSection(section,element){if(window.schoolHubRole!=="owner")return;document.querySelectorAll('.menu li').forEach(x=>x.classList.remove('active'));if(element)element.classList.add('active');const other=document.getElementById('otherPage');document.getElementById('dashboardPage').style.display='none';other.style.display='block';document.getElementById('pageTitle').innerText=section==='dashboard'?'Dashboard':section==='manage'?'Edit / Delete School':section==='hold'?'Hold School Login':section==='schools'?'Schools':section==='about'?'About':'Owner Settings';if(section==='dashboard'){other.innerHTML=renderOwnerDashboard();return;}if(section==='about'){other.innerHTML=renderOwnerAboutPage();return;}if(section==='schools'){other.innerHTML=ownerShell('🏫 All Registered Schools',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='manage'){other.innerHTML=ownerShell('✏️ Edit / Delete School',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='hold'){other.innerHTML=ownerShell('🔒 Hold School ID & Password',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='settings'){renderOwnerSettings();}}
 function editSchoolAccount(id){const a=ownerAccounts().find(x=>String(x.id)===String(id));if(!a)return;document.getElementById('ownerEditSchoolModal')?.remove();document.body.insertAdjacentHTML('beforeend',`<div class="modal-bg" id="ownerEditSchoolModal" style="display:flex"><div class="modal"><div class="modal-header"><h2>Edit School</h2><button class="close-btn" onclick="document.getElementById('ownerEditSchoolModal').remove()">×</button></div><div class="form-grid"><div class="form-group"><label>School Name</label><input id="editSchName" value="${escapeHtml(a.schoolName||'')}"></div><div class="form-group"><label>Principal Name</label><input id="editSchPrincipal" value="${escapeHtml(a.principalName||'')}"></div><div class="form-group"><label>Contact Number</label><input id="editSchMobile" value="${escapeHtml(a.mobile||'')}"></div><div class="form-group"><label>Gmail ID</label><input id="editSchEmail" value="${escapeHtml(a.email||'')}"></div><div class="form-group"><label>City</label><input id="editSchCity" value="${escapeHtml(a.city||'')}"></div><div class="form-group"><label>Login ID</label><input id="editSchLoginId" value="${escapeHtml(a.loginId||'')}"></div><div class="form-group"><label>Password</label><input id="editSchPassword" value="${escapeHtml(a.password||'')}"></div></div><button class="btn btn-primary" onclick="saveEditedSchool('${String(a.id)}')">Save Changes</button></div></div>`);}
 function saveEditedSchool(id){let accounts=ownerAccounts(),i=accounts.findIndex(x=>String(x.id)===String(id));if(i<0)return;const a=accounts[i];const school=document.getElementById('editSchName').value.trim(),principal=document.getElementById('editSchPrincipal').value.trim(),mobile=document.getElementById('editSchMobile').value.trim(),email=document.getElementById('editSchEmail').value.trim(),city=document.getElementById('editSchCity').value.trim(),loginId=document.getElementById('editSchLoginId').value.trim(),password=document.getElementById('editSchPassword').value;if(!school||!principal||!mobile||!email||!city||!loginId||!password){alert('Please fill all fields.');return;}const dup=accounts.some((x,idx)=>idx!==i&&(String(x.loginId||'').toLowerCase()===loginId.toLowerCase()||String(x.email||'').toLowerCase()===email.toLowerCase()||String(x.mobile||'')===mobile));if(dup){alert('Login ID / Email / Mobile already used by another school.');return;}Object.assign(a,{schoolName:school,principalName:principal,mobile,email,city,loginId,password});localStorage.setItem('schoolAccounts',JSON.stringify(accounts));document.getElementById('ownerEditSchoolModal').remove();showOwnerSection('manage');alert('School details updated successfully.');}
 function deleteSchoolAccount(id){const a=ownerAccounts().find(x=>String(x.id)===String(id));if(!a)return;if(!confirm('Delete '+(a.schoolName||'this school')+'? This will remove its login account and saved school data.'))return;const accounts=ownerAccounts().filter(x=>String(x.id)!==String(id));localStorage.setItem('schoolAccounts',JSON.stringify(accounts));if(getActiveSchoolId()===String(id)){localStorage.removeItem('schoolHubActiveSchoolId');}const prefix='schoolData_'+String(id)+'_';for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.indexOf(prefix)===0)localStorage.removeItem(k);}showOwnerSection('manage');alert('School deleted successfully.');}
 function toggleSchoolHold(id){const accounts=ownerAccounts(),i=accounts.findIndex(x=>String(x.id)===String(id));if(i<0)return;accounts[i].hold=!accounts[i].hold;localStorage.setItem('schoolAccounts',JSON.stringify(accounts));showOwnerSection('hold');alert(accounts[i].hold?'School login held.':'School login released.');}
+function getOwnerAbout(){return String(localStorage.getItem("schoolHubOwnerAbout")||"").trim();}
+function renderOwnerAboutLogin(){
+  const box=document.getElementById("ownerAboutLogin"),text=document.getElementById("ownerAboutLoginText");
+  const about=getOwnerAbout();
+  if(!box||!text)return;
+  box.style.display=about?"block":"none";
+  text.textContent=about;
+}
+function renderOwnerAboutPage(){
+  const about=getOwnerAbout();
+  return `<div class="card"><div class="card-header"><div><h3>ℹ️ About SchoolHub</h3><p style="color:#667085;font-size:12px;margin-top:4px">Owner ka About sirf School/Admin login page ke niche dikhai dega.</p></div></div><div style="padding:18px"><div class="form-group"><label>About / Information</label><textarea id="ownerAboutText" rows="8" placeholder="SchoolHub ke bare me information likhein..." style="width:100%;padding:12px;border:1px solid #dce2eb;border-radius:10px;resize:vertical">${escapeHtml(about)}</textarea></div><button class="btn btn-primary" onclick="saveOwnerAbout()">Save About</button></div></div>`;
+}
+function saveOwnerAbout(){
+  const value=(document.getElementById("ownerAboutText")?.value||"").trim();
+  localStorage.setItem("schoolHubOwnerAbout",value);
+  renderOwnerAboutLogin();
+  alert("Owner About updated successfully. Ab ye Admin login page par niche dikhai dega.");
+}
+function getAdminAbout(){return String(localStorage.getItem(schoolScopedKey("adminAbout"))||"").trim();}
+function renderAdminAboutPage(){
+  const about=getAdminAbout();
+  const canEdit=window.schoolHubRole==="admin";
+  return `<div class="card"><div class="card-header"><div><h3>🏫 About Our School</h3><p style="color:#667085;font-size:12px;margin-top:4px">${canEdit?"Yahan school ke bare me update likhein. Teacher aur Students ise dekh sakte hain.":"School Admin dwara diya gaya school information."}</p></div></div><div style="padding:18px">${canEdit?`<div class="form-group"><label>School About / Information</label><textarea id="adminAboutText" rows="10" placeholder="School ke bare me likhein..." style="width:100%;padding:12px;border:1px solid #dce2eb;border-radius:10px;resize:vertical">${escapeHtml(about)}</textarea></div><button class="btn btn-primary" onclick="saveAdminAbout()">Save About</button>`:`<div style="white-space:pre-wrap;line-height:1.7;color:#344054">${about?escapeHtml(about):"School Admin ne abhi About information add nahi ki hai."}</div>`}</div></div>`;
+}
+function saveAdminAbout(){
+  if(window.schoolHubRole!=="admin"){alert("Only School Admin can update About.");return;}
+  const value=(document.getElementById("adminAboutText")?.value||"").trim();
+  localStorage.setItem(schoolScopedKey("adminAbout"),value);
+  alert("School About updated successfully. Ab Teacher aur Students ise dekh sakte hain.");
+}
+
 function renderOwnerSettings(){const o=getOwnerAccount()||{};document.getElementById('otherPage').innerHTML=ownerShell('⚙️ Owner Settings',`<p style="color:#667085;font-size:13px;margin-bottom:15px">Yahan sirf SchoolHub Owner ki apni details change hongi.</p><div class="form-grid"><div class="form-group"><label>Owner Name</label><input id="ownerSetName" value="${escapeHtml(o.name||'')}"></div><div class="form-group"><label>Mobile Number</label><input id="ownerSetMobile" value="${escapeHtml(o.mobile||'')}"></div><div class="form-group"><label>Gmail ID</label><input id="ownerSetEmail" type="email" value="${escapeHtml(o.email||'')}"></div><div class="form-group"><label>Change User ID</label><input id="ownerSetId" value="${escapeHtml(o.loginId||'')}"></div><div class="form-group"><label>Change Password</label><input id="ownerSetPassword" type="password" placeholder="Leave blank to keep current"></div><div class="form-group"><label>Confirm New Password</label><input id="ownerSetConfirm" type="password"></div></div><button class="btn btn-primary" onclick="saveOwnerSettings()">Save Owner Settings</button>`);}
 function saveOwnerSettings(){const o=getOwnerAccount();if(!o)return;const name=document.getElementById('ownerSetName').value.trim(),mobile=document.getElementById('ownerSetMobile').value.trim(),email=document.getElementById('ownerSetEmail').value.trim(),loginId=document.getElementById('ownerSetId').value.trim(),pw=document.getElementById('ownerSetPassword').value,cp=document.getElementById('ownerSetConfirm').value;if(!name||!mobile||!email||!loginId){alert('Please fill all owner details.');return;}if(pw&&(pw.length<6||pw!==cp)){alert('New password must be at least 6 characters and match confirm password.');return;}o.name=name;o.mobile=mobile;o.email=email;o.loginId=loginId;if(pw)o.password=pw;localStorage.setItem('schoolHubOwner',JSON.stringify(o));document.getElementById('topUser').innerText=name;alert('Owner settings updated successfully.');}
 function logoutOwnerAccount(){
@@ -2059,7 +2077,7 @@ function getCurrentPortalStudent(){if(window.schoolHubRole!=="student"&&window.s
 function isStudentPortal(){return window.schoolHubRole==="student"||window.schoolHubRole==="parent";}
 function updateRoleMenuVisibility(){
   const isTeacher=window.schoolHubRole==="teacher",isPortal=isStudentPortal();
-  document.querySelectorAll(".menu li").forEach(li=>{const action=String(li.getAttribute("onclick")||""),adminOnly=action.includes("showPage('teachers'")||action.includes("showPage('teacherLogin'");const portalAllowed=action.includes("showPage('dashboard'")||action.includes("showPage('homework'")||action.includes("showPage('attendance'")||action.includes("showPage('exams'")||action.includes("showPage('timetable'")||action.includes("showPage('notices'")||action.includes("logoutUser");if(isPortal)li.style.display=portalAllowed?"":"none";else li.style.display=(isTeacher&&adminOnly)?"none":"";});
+  document.querySelectorAll(".menu li").forEach(li=>{const action=String(li.getAttribute("onclick")||""),adminOnly=action.includes("showPage('teachers'")||action.includes("showPage('teacherLogin'");const portalAllowed=action.includes("showPage('dashboard'")||action.includes("showPage('homework'")||action.includes("showPage('attendance'")||action.includes("showPage('exams'")||action.includes("showPage('timetable'")||action.includes("showPage('notices'")||action.includes("showPage('about'")||action.includes("logoutUser");if(isPortal)li.style.display=portalAllowed?"":"none";else li.style.display=(isTeacher&&adminOnly)?"none":"";});
 }
 function getCurrentTeacher(){if(window.schoolHubRole!=="teacher")return null;const id=Number(window.schoolHubTeacherId||0);return (Array.isArray(getTeachers())?getTeachers():[]).find(t=>Number(t.id)===id)||null;}
 function teacherAssignedClass(){const t=getCurrentTeacher();if(!t)return null;const c=Number(t.classNo??t.teachingClass??t.class);return Number.isFinite(c)&&c>=1&&c<=12?c:null;}
@@ -2228,11 +2246,9 @@ Number(s.classNo)===Number(classNo)&&s.stream===stream
 }
 
 function getStudentPaid(id){
-  const student=getStudents().find(x=>Number(x.id)===Number(id));
-  const cycle=Number(student?.feeCycle||0);
-  return getFees()
-    .filter(x=>Number(x.studentId)===Number(id) && Number(x.feeCycle||0)===cycle)
-    .reduce((a,x)=>a+Number(x.amount||0),0);
+return getFees()
+.filter(x=>Number(x.studentId)===Number(id))
+.reduce((a,x)=>a+Number(x.amount||0),0);
 }
 
 function getStudentPayments(id){
@@ -2360,7 +2376,7 @@ function portalHomeworkForStudent(student){
 }
 
 function portalResultsForStudent(studentId){
-  return getExamResultsForStudent(studentId).filter(r=>r.declaredForStudents===true).sort((a,b)=>String(b.examDate||"").localeCompare(String(a.examDate||"")));
+  return getExamResultsForStudent(studentId).sort((a,b)=>String(b.examDate||"").localeCompare(String(a.examDate||"")));
 }
 
 function showStudentPortalDashboard(){
@@ -2564,6 +2580,7 @@ if(isStudentPortal()){
   if(page==="exams"){showStudentPortalResults();return;}
   if(page==="timetable"){showStudentPortalTimetable();return;}
   if(page==="notices"){showStudentPortalNotices();return;}
+  if(page==="about"){document.getElementById("dashboardPage").style.display="none";document.getElementById("otherPage").style.display="block";document.getElementById("otherPage").innerHTML=renderAdminAboutPage();return;}
   if(page==="logout"){logoutUser();return;}
   return;
 }
@@ -2587,7 +2604,8 @@ timetable:"Timetable",
 gallery:"Gallery",
 notices:"Notices",
 reports:"Reports",
-settings:"Settings"
+settings:"Settings",
+about:"About"
 };
 
 document.getElementById("pageTitle").innerText=titles[page];
@@ -2610,6 +2628,11 @@ return;
 if(page==="homework"){
 openHomeworkClasses();
 return;
+}
+
+if(page==="about"){
+  document.getElementById("otherPage").innerHTML=renderAdminAboutPage();
+  return;
 }
 
 if(page==="gallery"){
@@ -3547,7 +3570,6 @@ let html=`
 <p style="color:#777;font-size:12px;margin-top:4px">All Students Profiles</p>
 </div>
 <button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>
-<button class="small-btn" style="background:#dc2626" onclick="showDeletedStudents(${classNo},'${stream||""}','${section||""}')">🗑️ Delete / Restore Students</button>
 </div>
 
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
@@ -3632,39 +3654,23 @@ if(type==="exams"){
   if(!subjectNames.length) subjectNames.push(...getResultExcelSubjects());
 
   const resultRows=sorted.map((st,i)=>{
-    const results=getExamResultsForStudent(st.id);
-    const latest=results.length?results[results.length-1]:null;
-    const final=results.find(isFinalResult);
+    const e=latestResults.get(Number(st.id));
     const subjectCells=subjectNames.map(sub=>{
-      const found=(latest?.subjects||[]).find(x=>String(x?.name||"").trim().toLowerCase()===sub.toLowerCase());
+      const found=(e?.subjects||[]).find(x=>String(x?.name||"").trim().toLowerCase()===sub.toLowerCase());
       if(!found)return `<td style="text-align:center;color:#98a2b3">—</td>`;
       const n=normalizeExamSubject(found);
       return `<td style="text-align:center;font-weight:700">${escapeHtml(String(getSubjectObtained(n)))} / ${escapeHtml(String(getSubjectMax(n)))}</td>`;
     }).join("");
-    const total=latest?getExamTotal(latest):0;
-    const obtained=latest?getExamObtained(latest):0;
-    const pct=latest?getExamPercentage(latest):0;
-    const history=results.map(r=>`<div style="border:1px solid #e5eaf1;border-radius:10px;padding:10px;margin-top:8px;background:#fff">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><strong>${escapeHtml(r.examName||"Result")}</strong><span class="badge blue">${formatDate(r.examDate||"")}</span></div>
-      <div style="overflow:auto;margin-top:7px"><table style="width:100%;font-size:12px;border-collapse:collapse"><thead><tr><th style="text-align:left">Subject</th><th>Marks</th><th>MM</th></tr></thead><tbody>${(r.subjects||[]).map(x=>{const q=normalizeExamSubject(x);return `<tr><td>${escapeHtml(q.name)}</td><td style="text-align:center">${getSubjectObtained(q)}</td><td style="text-align:center">${getSubjectMax(q)}</td></tr>`}).join("")}</tbody></table></div>
-      <div style="margin-top:7px;font-weight:bold">Total: ${getExamObtained(r)} / ${getExamTotal(r)} • ${getExamPercentage(r).toFixed(1)}%</div>
-      <div style="margin-top:7px;color:#667085;font-size:11px">${r.declaredForStudents?"✅ Declared to Students":"🔒 Not declared"}</div>
-      <div style="margin-top:7px"><button class="delete-btn" onclick="deleteExam(${r.id},${classNo},'${stream||""}','${section||""}')">🗑️ Delete This Result</button></div>
-    </div>`).join("");
-    const controls=final?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">
-      <button class="small-btn" onclick="promoteStudentToNextClass(${st.id})">🎓 Promote / Pass to Next Class</button>
-      <button class="small-btn" onclick="declareStudentResult(${st.id})">📢 Declare Result for Students</button>
-    </div>`:"";
+    const total=e?getExamTotal(e):0;
+    const obtained=e?getExamObtained(e):0;
+    const pct=e?getExamPercentage(e):0;
     return `<tr>
       <td>${i+1}</td>
-      <td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button>
-        <button type="button" class="small-btn" style="margin-top:5px" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">+ Add Result</button>
-        ${results.length?`<details style="margin-top:7px"><summary style="cursor:pointer;color:#1769ff;font-weight:700">View all results (${results.length})</summary>${history}</details>`:""}
-        ${controls}</td>
+      <td><button type="button" class="result-student-link" onclick="openExamModal(${st.id},${classNo},'${stream||""}','${section||""}')">${escapeHtml(st.name)}</button></td>
       <td>${escapeHtml(st.roll??i+1)}</td>
       ${subjectCells}
-      <td style="text-align:center;font-weight:800">${latest?escapeHtml(String(obtained))+" / "+escapeHtml(String(total)):"—"}</td>
-      <td style="text-align:center;font-weight:800">${latest?pct.toFixed(1)+"%":"—"}</td>
+      <td style="text-align:center;font-weight:800">${e?escapeHtml(String(obtained))+" / "+escapeHtml(String(total)):"—"}</td>
+      <td style="text-align:center;font-weight:800">${e?pct.toFixed(1)+"%":"—"}</td>
     </tr>`;
   }).join("");
 
@@ -3675,12 +3681,6 @@ if(type==="exams"){
         <h3>${title} - Result</h3>
         <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
       </div>
-    </div>
-    <div style="padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #edf0f4">
-      <button type="button" class="small-btn" onclick="promotePassedStudents(${classNo},'${stream||""}','${section||""}')">🎓 Promote / Pass to Next Class</button>
-      <button type="button" class="small-btn" onclick="declareFinalResultsForClass(${classNo},'${stream||""}','${section||""}')">📢 Declare Result for Students</button>
-      <button type="button" class="small-btn" style="background:#15803d" onclick="showPromotedStudents(${classNo},'${stream||""}','${section||""}')">🎓 Promoted / Pass Students</button>
-      <button type="button" class="small-btn" style="background:#dc2626" onclick="showDeletedResults(${classNo},'${stream||""}','${section||""}')">🗑️ Delete Result / Restore</button>
     </div>
 
     <div class="result-excel-tools">
@@ -3830,7 +3830,7 @@ if(!students.length){
 return `<div class="empty"><h3>No Students Found</h3></div>`;
 }
 
-let html=(type==="fees"?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button type="button" class="small-btn" style="background:#dc2626" onclick="showDeletedFees(${classNo},'${stream||""}','${section||""}')">🗑️ Deleted Fee Slips / Restore</button></div>`:"")+`<div class="table-container"><table><thead><tr>`;
+let html=`<div class="table-container"><table><thead><tr>`;
 
 if(type==="students"){
 
@@ -4374,50 +4374,29 @@ document.getElementById("studentModal").style.display="flex";
 }
 
 function deleteStudent(id){
-  let all=getStudents();
-  let s=all.find(x=>Number(x.id)===Number(id));
-  if(!s)return;
-  if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){alert("Teacher sirf apni assigned class ke students ko delete kar sakta hai.");return;}
-  if(!confirm("Delete "+s.name+"? Student aur uske related records restore ke liye safe rahenge."))return;
-  const deleted=getDeletedStudents();
-  deleted.push({
-    archiveId:Date.now()+Math.floor(Math.random()*100000),
-    deletedAt:new Date().toISOString(),
-    student:JSON.parse(JSON.stringify(s)),
-    fees:getFees().filter(x=>Number(x.studentId)===Number(id)),
-    attendance:getAttendance().filter(x=>Number(x.studentId)===Number(id)),
-    exams:getExams().filter(x=>Number(x.studentId)===Number(id))
-  });
-  saveDeletedStudents(deleted);
-  saveStudents(all.filter(x=>Number(x.id)!==Number(id)));
-  saveFees(getFees().filter(x=>Number(x.studentId)!==Number(id)));
-  saveAttendance(getAttendance().filter(x=>Number(x.studentId)!==Number(id)));
-  saveExams(getExams().filter(x=>Number(x.studentId)!==Number(id)));
-  renumberClassStudents(s.classNo,s.stream,s.section);
-  updateDashboard();
-  openStudentsData(window.currentStudentType||"students",window.currentClassNo||s.classNo,window.currentStream||"",window.currentSection||"");
+
+let s=getStudents().find(x=>Number(x.id)===Number(id));
+if(!s)return;
+if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){
+  alert("Teacher sirf apni assigned class ke students ko delete kar sakta hai.");
+  return;
 }
 
-function showDeletedStudents(classNo,stream,section){
-  const rows=getDeletedStudents().filter(a=>Number(a.student.classNo)===Number(classNo)&&(!stream||String(a.student.stream||"")===String(stream))&&(!section||String(a.student.section||"")===String(section)));
-  const html=`<button class="back-btn" onclick="openStudentsData('students',${classNo},'${stream||""}','${section||""}')">← Back</button>
-  <div class="card"><div class="card-header"><div><h3>🗑️ Deleted / Restore Students - Class ${classNo}</h3><p style="color:#777;font-size:12px">Deleted students permanently delete nahi hue. Restore karne par sabse last serial/roll par aayenge.</p></div></div>
-  <div style="padding:18px">${rows.length?rows.map(a=>`<div style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><b>${escapeHtml(a.student.name)}</b><br>Father: ${escapeHtml(a.student.father||"-")} • Old Roll: ${escapeHtml(a.student.roll||"-")}<br><small>Deleted: ${formatDate(String(a.deletedAt||"").slice(0,10))}</small></div><button class="small-btn" style="background:#15803d" onclick="restoreDeletedStudent(${a.archiveId},${classNo},'${stream||""}','${section||""}')">♻️ Restore Student</button></div>`).join(""):`<div class="empty"><h3>No Deleted Students</h3></div>`}</div></div>`;
-  document.getElementById("otherPage").innerHTML=html;
-}
+if(!confirm("Delete "+s.name+" and all related records?"))return;
 
-function restoreDeletedStudent(archiveId,classNo,stream,section){
-  const deleted=getDeletedStudents();
-  const item=deleted.find(a=>Number(a.archiveId)===Number(archiveId)); if(!item)return;
-  if(!confirm("Restore "+item.student.name+"? Student last me new serial/roll ke saath aayega."))return;
-  const student={...item.student,roll:""};
-  const students=getStudents(); students.push(student); saveStudents(students);
-  saveFees(getFees().concat(item.fees||[]));
-  saveAttendance(getAttendance().concat(item.attendance||[]));
-  saveExams(getExams().concat(item.exams||[]));
-  saveDeletedStudents(deleted.filter(a=>Number(a.archiveId)!==Number(archiveId)));
-  renumberClassStudents(classNo,student.stream||stream||"",student.section||section||"");
-  updateDashboard(); openStudentsData("students",classNo,stream,section);
+saveStudents(getStudents().filter(x=>Number(x.id)!==Number(id)));
+saveFees(getFees().filter(x=>Number(x.studentId)!==Number(id)));
+saveAttendance(getAttendance().filter(x=>Number(x.studentId)!==Number(id)));
+saveExams(getExams().filter(x=>Number(x.studentId)!==Number(id)));
+
+updateDashboard();
+
+openStudentsData(
+window.currentStudentType||"students",
+window.currentClassNo||s.classNo,
+window.currentStream||"",
+window.currentSection||""
+);
 }
 
 function closeStudentModal(){
@@ -5103,7 +5082,7 @@ document.getElementById("feeStudentName").value=s.name;
 document.getElementById("feeAmount").value="";
 document.getElementById("feeDate").value=today();
 document.getElementById("feeMode").value="Cash";
-document.getElementById("feeReceipt").value=nextFeeReceiptNumber();
+document.getElementById("feeReceipt").value="";
 
 document.getElementById("feeModal").style.display="flex";
 }
@@ -5122,15 +5101,13 @@ return;
 
 let fees=getFees();
 
-const feeStudent=getStudents().find(x=>Number(x.id)===Number(window.feeStudentId));
 let savedPayment={
 id:Date.now(),
 studentId:Number(window.feeStudentId),
 amount,
 date,
 mode:document.getElementById("feeMode").value,
-receipt:(document.getElementById("feeReceipt").value.trim()||nextFeeReceiptNumber()),
-feeCycle:Number(feeStudent?.feeCycle||0)
+receipt:document.getElementById("feeReceipt").value.trim()
 };
 
 fees.push(savedPayment);
@@ -5240,27 +5217,15 @@ win.document.close();
 }
 
 function deleteFee(id,classNo,stream,section){
-  if(window.schoolHubRole==="teacher"){alert("Teacher fee payment delete nahi kar sakta.");return;}
-  const fees=getFees(); const payment=fees.find(x=>Number(x.id)===Number(id)); if(!payment)return;
-  if(!confirm("Delete this fee slip? Ye restore ke liye isi class me save rahegi."))return;
-  const student=getStudents().find(s=>Number(s.id)===Number(payment.studentId));
-  const deleted=getDeletedFees();
-  deleted.push({archiveId:Date.now()+Math.floor(Math.random()*100000),deletedAt:new Date().toISOString(),classNo:Number(student?.classNo??classNo),stream:student?.stream||stream||"",section:student?.section||section||"",payment:JSON.parse(JSON.stringify(payment))});
-  saveDeletedFees(deleted); saveFees(fees.filter(x=>Number(x.id)!==Number(id)));
-  updateDashboard(); openStudentsData("fees",classNo,stream,section);
-}
 
-function showDeletedFees(classNo,stream,section){
-  const rows=getDeletedFees().filter(a=>Number(a.classNo)===Number(classNo)&&(!stream||String(a.stream||"")===String(stream))&&(!section||String(a.section||"")===String(section)));
-  const html=`<button class="back-btn" onclick="openStudentsData('fees',${classNo},'${stream||""}','${section||""}')">← Back</button><div class="card"><div class="card-header"><div><h3>🗑️ Deleted Fee Slips - Class ${classNo}</h3><p style="color:#777;font-size:12px">Deleted slips yahan safe rahengi aur restore ki ja sakti hain.</p></div></div><div style="padding:18px">${rows.length?rows.map(a=>{const p=a.payment; const st=getStudents().find(x=>Number(x.id)===Number(p.studentId)); return `<div style="border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><b>${escapeHtml(st?.name||"Student")}</b> • ₹${Number(p.amount||0).toLocaleString("en-IN")}<br>Receipt: ${escapeHtml(p.receipt||"-")} • ${formatDate(p.date||"")}</div><button class="small-btn" style="background:#15803d" onclick="restoreDeletedFee(${a.archiveId},${classNo},'${stream||""}','${section||""}')">♻️ Restore Slip</button></div>`}).join(""):`<div class="empty"><h3>No Deleted Fee Slips</h3></div>`}</div></div>`;
-  document.getElementById("otherPage").innerHTML=html;
-}
+if(window.schoolHubRole==="teacher"){alert("Teacher fee payment delete nahi kar sakta.");return;}
 
-function restoreDeletedFee(archiveId,classNo,stream,section){
-  const deleted=getDeletedFees(); const item=deleted.find(a=>Number(a.archiveId)===Number(archiveId)); if(!item)return;
-  if(!confirm("Restore this fee slip?"))return;
-  saveFees(getFees().concat(item.payment)); saveDeletedFees(deleted.filter(a=>Number(a.archiveId)!==Number(archiveId)));
-  updateDashboard(); openStudentsData("fees",classNo,stream,section);
+if(!confirm("Delete this payment?"))return;
+
+saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
+
+updateDashboard();
+openStudentsData("fees",classNo,stream,section);
 }
 
 function closeFeeModal(){
@@ -5603,8 +5568,7 @@ function openExamModal(studentId,classNo,stream,section,examId){
   else{nameSel.value="";customWrap.style.display="none";customInput.value="";}
 
   document.getElementById("examDate").value=e?.examDate||today();
-  const previousResults=getExamResultsForStudent(studentId).filter(x=>!e || Number(x.id)!==Number(e.id));
-  renderSubjectRows(previousResults);
+  renderSubjectRows();
   document.getElementById("examModal").style.display="flex";
 }
 
@@ -5780,116 +5744,11 @@ function closeExamModal(){
 
 function deleteExam(id,classNo,stream,section){
   if(!requireTeacherClassAccess(classNo))return;
-  const exam=getExams().find(x=>Number(x.id)===Number(id));
-  if(!exam)return;
-  if(!confirm("Delete this result? It will be stored in Deleted Results and can be restored later."))return;
-  const deleted=getData("schoolDeletedResults");
-  deleted.push({
-    id:Date.now()+Math.floor(Math.random()*1000),
-    deletedAt:new Date().toISOString(),
-    sourceClass:Number(classNo),
-    stream:stream||"", section:section||"",
-    studentId:Number(exam.studentId),
-    studentName:getStudents().find(x=>Number(x.id)===Number(exam.studentId))?.name||"",
-    result:{...exam}
-  });
-  setData("schoolDeletedResults",deleted);
+  if(!confirm("Delete this result?"))return;
   saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
   openStudentsData("exams",classNo,stream,section);
 }
 
-
-/* FINAL RESULT / DECLARATION / PROMOTION */
-function isFinalResult(e){
-  const n=String(e?.examName||e?.name||"").toLowerCase().trim();
-  return n.includes("annual")||n.includes("yearly")||n.includes("final result")||String(e?.resultType||"").toLowerCase()==="final";
-}
-function getFinalResultForStudent(studentId){
-  return getExamResultsForStudent(studentId).filter(isFinalResult).slice(-1)[0]||null;
-}
-function declareStudentResult(studentId){
-  const final=getFinalResultForStudent(studentId);
-  if(!final){alert("Pehle Yearly / Annual / Final Result add karein.");return;}
-  final.declaredForStudents=true; final.declaredAt=new Date().toISOString();
-  const data=getExams(),i=data.findIndex(x=>Number(x.id)===Number(final.id));
-  if(i>=0){data[i]=final;saveExams(data);}
-  alert("Result student login ke liye declare kar diya gaya hai.");
-  openStudentsData("exams",window.examClassNo||0,window.examStream||"",window.examSection||"");
-}
-function declareFinalResultsForClass(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").toLowerCase()===String(section||"").toLowerCase()));
-  const data=getExams(); let count=0;
-  students.forEach(st=>{
-    const final=getFinalResultForStudent(st.id); if(!final)return;
-    const i=data.findIndex(x=>Number(x.id)===Number(final.id));
-    if(i>=0){data[i]={...data[i],declaredForStudents:true,declaredAt:new Date().toISOString()};count++;}
-  });
-  saveExams(data); alert(count+" students ke final results declare kar diye gaye.");
-  openStudentsData("exams",classNo,stream,section);
-}
-function promoteStudentToNextClass(studentId){
-  const st=getStudents().find(x=>Number(x.id)===Number(studentId)); if(!st)return;
-  const final=getFinalResultForStudent(studentId); if(!final){alert("Final/Annual result available nahi hai.");return;}
-  const pct=getExamPercentage(final); if(pct<33){alert("Student PASS nahi hai, isliye promote nahi kiya ja sakta.");return;}
-  if(Number(st.classNo)>=12){alert("Class 12 ke baad next class available nahi hai.");return;}
-  if(!confirm(st.name+" ko Class "+(Number(st.classNo)+1)+" me promote karein?"))return;
-  const students=getStudents(); const i=students.findIndex(x=>Number(x.id)===Number(studentId));
-  if(i<0)return;
-  const oldClass=Number(students[i].classNo);
-  const nextClass=oldClass+1;
-  const promotionHistory=getData("schoolPromotedStudents");
-  promotionHistory.push({
-    id:Date.now()+Math.floor(Math.random()*1000), studentId:Number(students[i].id),
-    studentName:students[i].name||"", father:students[i].father||"", roll:students[i].roll||"",
-    sourceClass:oldClass, nextClass, stream:students[i].stream||"", section:students[i].section||"",
-    promotedAt:new Date().toISOString(), finalResultId:Number(final.id),
-    studentSnapshot:{...students[i]}
-  });
-  setData("schoolPromotedStudents",promotionHistory);
-  students[i]={...students[i],previousClass:oldClass,classNo:nextClass,promoted:true,promotionDate:today(),promotionSession:students[i].session||"2026-27",feeCycle:Number(students[i].feeCycle||0)+1};
-  setData("schoolStudents",students); alert("Student next class me promote ho gaya.");
-  openStudentsData("exams",Number(st.classNo),st.stream||"",st.section||"");
-}
-function promotePassedStudents(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  if(Number(classNo)>=12){alert("Class 12 ke baad next class available nahi hai.");return;}
-  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").toLowerCase()===String(section||"").toLowerCase()));
-  const passed=students.filter(st=>{const f=getFinalResultForStudent(st.id);return f&&getExamPercentage(f)>=33;});
-  if(!passed.length){alert("Koi PASS student nahi mila.");return;}
-  if(!confirm(passed.length+" PASS students ko Class "+(Number(classNo)+1)+" me promote karein?"))return;
-  const all=getStudents(),ids=new Set(passed.map(s=>Number(s.id)));
-  const promotionHistory=getData("schoolPromotedStudents");
-  all.forEach((s,i)=>{if(ids.has(Number(s.id))){
-    const oldClass=Number(s.classNo), nextClass=oldClass+1;
-    promotionHistory.push({id:Date.now()+i+Math.floor(Math.random()*1000),studentId:Number(s.id),studentName:s.name||"",father:s.father||"",roll:s.roll||"",sourceClass:oldClass,nextClass,stream:s.stream||"",section:s.section||"",promotedAt:new Date().toISOString(),finalResultId:Number(getFinalResultForStudent(s.id)?.id||0),studentSnapshot:{...s}});
-    all[i]={...s,previousClass:oldClass,classNo:nextClass,promoted:true,promotionDate:today(),promotionSession:s.session||"2026-27",feeCycle:Number(s.feeCycle||0)+1};
-  }});
-  setData("schoolPromotedStudents",promotionHistory);
-  setData("schoolStudents",all); alert(passed.length+" PASS students next class me promote ho gaye.");
-  openStudentsData("exams",classNo,stream,section);
-}
-
-function showPromotedStudents(classNo,stream,section){
-  const rows=getData("schoolPromotedStudents").filter(x=>Number(x.sourceClass)===Number(classNo)&&(!stream||x.stream===stream)&&(!section||String(x.section||"").toLowerCase()===String(section||"").toLowerCase()));
-  const body=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x.studentName)}</td><td>${escapeHtml(x.father||"-")}</td><td>${escapeHtml(x.roll||"-")}</td><td>Class ${x.sourceClass}</td><td>Class ${x.nextClass}</td><td>${formatDate(String(x.promotedAt||"").slice(0,10))}</td></tr>`).join(""): `<tr><td colspan="7"><div class="empty">Is class se abhi koi PASS student promote nahi hua.</div></td></tr>`;
-  const html=`<button class="back-btn" onclick="openStudentsData('exams',${Number(classNo)},'${stream||""}','${section||""}')">← Back to Result</button><div class="card"><div class="card-header"><div><h3>🎓 Promoted / Pass Students - Class ${classNo}</h3><p style="color:#777;font-size:12px">Sirf isi class se next class me promote kiye gaye students.</p></div><span class="badge green">${rows.length} Promoted</span></div><div class="table-container"><table><thead><tr><th>S.No.</th><th>Student</th><th>Father</th><th>Roll</th><th>From</th><th>To</th><th>Date</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
-  document.getElementById("otherPage").innerHTML=html;
-}
-function showDeletedResults(classNo,stream,section){
-  const rows=getData("schoolDeletedResults").filter(x=>Number(x.sourceClass)===Number(classNo)&&(!stream||x.stream===stream)&&(!section||String(x.section||"").toLowerCase()===String(section||"").toLowerCase()));
-  const body=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x.studentName||"-")}</td><td>${escapeHtml(x.result?.examName||"Result")}</td><td>${formatDate(x.result?.examDate||"")}</td><td>${formatDate(String(x.deletedAt||"").slice(0,10))}</td><td><button class="edit-btn" onclick="restoreDeletedResult(${x.id},${classNo},'${stream||""}','${section||""}')">♻️ Restore</button></td></tr>`).join(""): `<tr><td colspan="6"><div class="empty">Deleted Results empty.</div></td></tr>`;
-  const html=`<button class="back-btn" onclick="openStudentsData('exams',${Number(classNo)},'${stream||""}','${section||""}')">← Back to Result</button><div class="card"><div class="card-header"><div><h3>🗑️ Deleted Results</h3><p style="color:#777;font-size:12px">Deleted results yahan permanently remove nahi hote. Restore kiye ja sakte hain.</p></div><span class="badge red">${rows.length} Deleted</span></div><div class="table-container"><table><thead><tr><th>S.No.</th><th>Student</th><th>Result</th><th>Result Date</th><th>Deleted Date</th><th>Action</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
-  document.getElementById("otherPage").innerHTML=html;
-}
-function restoreDeletedResult(archiveId,classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  const rows=getData("schoolDeletedResults"); const item=rows.find(x=>Number(x.id)===Number(archiveId)); if(!item)return;
-  if(!confirm("Is deleted result ko restore karein?"))return;
-  const exams=getExams(); const restored={...item.result,id:Date.now(),restoredAt:new Date().toISOString()};
-  exams.push(restored); saveExams(exams); setData("schoolDeletedResults",rows.filter(x=>Number(x.id)!==Number(archiveId)));
-  showDeletedResults(classNo,stream,section);
-}
 
 /* RESULT EXCEL */
 function getResultExcelSubjects(classNo,stream,section){
@@ -7529,6 +7388,8 @@ function backToDashboard(){
   document.getElementById("otherPage").style.display="none";
   updateDashboard();
 }
+
+try{renderOwnerAboutLogin();}catch(e){console.error("Owner About render error:",e);}
 </script>
 </body>
 </html>
