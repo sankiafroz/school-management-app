@@ -296,30 +296,6 @@ th{background:#fafbfd;color:#667085}
 .owner-filter{display:grid;grid-template-columns:1fr 220px;gap:10px;margin-bottom:15px}
 .owner-badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:bold}.owner-active{background:#e6f8ed;color:#15803d}.owner-hold{background:#fff5d9;color:#b77900}
 @media(max-width:700px){.owner-filter{grid-template-columns:1fr}}
-
-/* SMART DASHBOARD CHART + CLICKABLE REPORT CARDS */
-.dashboard-smart-chart{background:#fff;border:1px solid #e5eaf1;border-radius:17px;padding:18px;margin-bottom:20px;box-shadow:0 3px 12px #00000008}
-.dashboard-smart-chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
-.dashboard-smart-chart-head h3{font-size:17px}
-.dashboard-smart-chart-date{font-size:12px;color:#667085}
-.smart-chart-body{display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:center}
-.smart-donut{width:165px;height:165px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;position:relative;background:conic-gradient(#15803d 0deg,#15803d 120deg,#dc2626 120deg,#dc2626 240deg,#b77900 240deg,#b77900 360deg)}
-.smart-donut:after{content:"";position:absolute;width:108px;height:108px;border-radius:50%;background:#fff}
-.smart-donut-center{position:relative;z-index:2;text-align:center}
-.smart-donut-center strong{display:block;font-size:26px}
-.smart-donut-center span{font-size:11px;color:#667085}
-.smart-chart-rows{display:flex;flex-direction:column;gap:12px}
-.smart-chart-row{display:grid;grid-template-columns:105px 1fr 52px;align-items:center;gap:9px;font-size:13px}
-.smart-chart-label{font-weight:700}
-.smart-chart-bar{height:13px;background:#edf0f4;border-radius:20px;overflow:hidden}
-.smart-chart-fill{height:100%;border-radius:20px}
-.smart-chart-fill.present{background:#15803d}.smart-chart-fill.absent{background:#dc2626}.smart-chart-fill.leave{background:#b77900}
-.smart-chart-count{text-align:right;font-weight:800}
-.report-click-card{cursor:pointer;transition:.15s}
-.report-click-card:hover{transform:translateY(-2px);box-shadow:0 7px 20px #00000012;border-color:#cddcff}
-.download-tools{display:flex;gap:8px;flex-wrap:wrap}
-.download-tools .small-btn{white-space:nowrap}
-@media(max-width:700px){.smart-chart-body{grid-template-columns:1fr}.smart-donut{width:145px;height:145px}.smart-chart-row{grid-template-columns:85px 1fr 45px}}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -421,11 +397,6 @@ th{background:#fafbfd;color:#667085}
     <strong>School Login</strong><br>
     School ki Login ID aur Password SchoolHub Owner register karke dega.
   </div>
-
-  <div id="ownerAboutLogin" style="margin-top:18px;padding:14px 16px;border:1px solid #e5eaf1;border-radius:12px;background:#f8fbff;text-align:left;display:none">
-    <div style="font-weight:800;color:#172033;margin-bottom:6px">ℹ️ About SchoolHub</div>
-    <div id="ownerAboutLoginText" style="font-size:13px;line-height:1.6;color:#667085;white-space:pre-wrap"></div>
-  </div>
 </div>
 </div><div class="app" id="app">
 
@@ -449,12 +420,10 @@ SchoolHub
 <li onclick="showPage('fees',this)">💰 Fees</li>
 <li onclick="showPage('exams',this)">📝 Exam / Result</li>
 <li onclick="showPage('homework',this)">📚 Homework</li>
-<li onclick="showPage('timetable',this)">🕐 Timetable</li>
 <li onclick="showPage('gallery',this)">🖼️ Gallery</li>
 <li onclick="showPage('notices',this)">📢 Notices</li>
 <li onclick="showPage('reports',this)">📊 Reports</li>
 <li onclick="showPage('settings',this)">⚙️ Settings</li>
-<li onclick="showPage('about',this)">ℹ️ About</li>
 <li class="logout" onclick="logoutUser()">🚪 Logout</li>
 </ul>
 </aside>
@@ -492,7 +461,6 @@ SchoolHub
   <span id="dashboardNoticeText">Click to view all notices</span>
   <span style="margin-left:auto;font-size:12px;flex:none">View All →</span>
 </div>
-<div id="dashboardSmartAttendanceChart" class="dashboard-smart-chart"></div>
 <div class="card">
   <div class="card-header">
     <div>
@@ -1107,7 +1075,10 @@ Verify & Login
 <label>Result Type *</label>
 <select id="examResultType" onchange="handleResultTypeChange()">
 <option value="unit_test">Unit Test</option>
+<option value="half_yearly">Half Yearly</option>
+<option value="yearly">Yearly</option>
 <option value="exam">Exam</option>
+<option value="final">Final Result</option>
 </select>
 </div>
 
@@ -1120,6 +1091,8 @@ Verify & Login
 <option value="Unit Test 3">Unit Test 3</option>
 <option value="Half Yearly Exam">Half Yearly Exam</option>
 <option value="Annual Exam">Annual Exam</option>
+<option value="Final Result">Final Result</option>
+<option value="Yearly Result">Yearly Result</option>
 <option value="__ADD_MORE__">+ Add Other Name</option>
 </select>
 <div id="examCustomNameWrap" style="display:none;margin-top:8px">
@@ -1982,7 +1955,6 @@ function openOwnerDashboard(){
     <li onclick="showOwnerSection('manage',this)">✏️ Edit / Delete School</li>
     <li onclick="showOwnerSection('hold',this)">🔒 Hold School ID / Password</li>
     <li onclick="showOwnerSection('schools',this)">🏫 Schools</li>
-    <li onclick="showOwnerSection('about',this)">ℹ️ About</li>
     <li onclick="showOwnerSection('settings',this)">⚙️ Settings</li>
     <li class="logout" onclick="logoutOwnerAccount()">🚪 Logout</li>
   </ul>`;
@@ -1999,49 +1971,17 @@ function renderOwnerDashboard(){
     <div class="owner-action-card" onclick="showOwnerSection('manage')"><div class="icon">✏️</div><h3>Edit & Delete School</h3><p>School details update ya delete karein.</p></div>
     <div class="owner-action-card" onclick="showOwnerSection('hold')"><div class="icon">🔒</div><h3>Hold School ID & Password</h3><p>School login ko temporarily hold/release karein.</p></div>
     <div class="owner-action-card" onclick="showOwnerSection('settings')"><div class="icon">⚙️</div><h3>Owner Settings</h3><p>Sirf apni ID, password, Gmail aur mobile change karein.</p></div>
-    <div class="owner-action-card" onclick="showOwnerSection('about')"><div class="icon">ℹ️</div><h3>Owner About</h3><p>Admin login page par dikhne wali information update karein.</p></div>
   </div>
   ${ownerSchoolDirectory(schools,cities)}`;
 }
 function ownerSchoolDirectory(schools,cities){return `<div class="card"><div class="card-header"><div><h3>🏫 Registered Schools</h3><p style="color:#667085;font-size:12px;margin-top:4px">School names alphabetically sorted hain.</p></div></div><div style="padding:18px"><div class="owner-filter"><input id="ownerSchoolSearch" placeholder="Search school name..." oninput="filterOwnerSchools()"><select id="ownerCityFilter" onchange="filterOwnerSchools()"><option value="">All Cities</option>${cities.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select></div><div id="ownerSchoolList" class="owner-school-grid">${ownerSchoolCards(schools)}</div></div></div>`;}
 function ownerSchoolCards(schools){if(!schools.length)return '<div class="empty" style="grid-column:1/-1">No school registered yet.</div>';return schools.map(a=>`<div class="owner-school-card" data-school-name="${escapeHtml(a.schoolName||"").toLowerCase()}" data-school-city="${escapeHtml(a.city||"")}"><h3>${escapeHtml(a.schoolName||"-")}</h3><div class="owner-school-meta">Principal: ${escapeHtml(a.principalName||"-" )}<br>City: ${escapeHtml(a.city||"-")}<br>Mobile: ${escapeHtml(a.mobile||"-")}<br>Gmail: ${escapeHtml(a.email||"-")}<br>Login ID: <b>${escapeHtml(a.loginId||"-")}</b><br>Status: <span class="owner-badge ${a.hold?'owner-hold':'owner-active'}">${a.hold?'ON HOLD':'ACTIVE'}</span></div><div class="owner-school-actions"><button class="edit-btn" onclick="editSchoolAccount('${String(a.id)}')">Edit</button><button class="delete-btn" onclick="deleteSchoolAccount('${String(a.id)}')">Delete</button><button class="small-btn" onclick="toggleSchoolHold('${String(a.id)}')">${a.hold?'Release':'Hold'} Login</button></div></div>`).join('');}
 function filterOwnerSchools(){const q=(document.getElementById('ownerSchoolSearch')?.value||'').trim().toLowerCase(),city=document.getElementById('ownerCityFilter')?.value||'';document.querySelectorAll('#ownerSchoolList .owner-school-card').forEach(card=>{const n=card.dataset.schoolName||'',c=card.dataset.schoolCity||'';card.style.display=(!q||n.includes(q))&&(!city||c===city)?'':'none';});}
-function showOwnerSection(section,element){if(window.schoolHubRole!=="owner")return;document.querySelectorAll('.menu li').forEach(x=>x.classList.remove('active'));if(element)element.classList.add('active');const other=document.getElementById('otherPage');document.getElementById('dashboardPage').style.display='none';other.style.display='block';document.getElementById('pageTitle').innerText=section==='dashboard'?'Dashboard':section==='manage'?'Edit / Delete School':section==='hold'?'Hold School Login':section==='schools'?'Schools':section==='about'?'About':'Owner Settings';if(section==='dashboard'){other.innerHTML=renderOwnerDashboard();return;}if(section==='about'){other.innerHTML=renderOwnerAboutPage();return;}if(section==='schools'){other.innerHTML=ownerShell('🏫 All Registered Schools',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='manage'){other.innerHTML=ownerShell('✏️ Edit / Delete School',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='hold'){other.innerHTML=ownerShell('🔒 Hold School ID & Password',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='settings'){renderOwnerSettings();}}
+function showOwnerSection(section,element){if(window.schoolHubRole!=="owner")return;document.querySelectorAll('.menu li').forEach(x=>x.classList.remove('active'));if(element)element.classList.add('active');const other=document.getElementById('otherPage');document.getElementById('dashboardPage').style.display='none';other.style.display='block';document.getElementById('pageTitle').innerText=section==='dashboard'?'Dashboard':section==='manage'?'Edit / Delete School':section==='hold'?'Hold School Login':section==='schools'?'Schools':'Owner Settings';if(section==='dashboard'){other.innerHTML=renderOwnerDashboard();return;}if(section==='schools'){other.innerHTML=ownerShell('🏫 All Registered Schools',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='manage'){other.innerHTML=ownerShell('✏️ Edit / Delete School',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='hold'){other.innerHTML=ownerShell('🔒 Hold School ID & Password',ownerSchoolDirectory(ownerSchoolList(),[...new Set(ownerSchoolList().map(a=>String(a.city||'').trim()).filter(Boolean))].sort()));return;}if(section==='settings'){renderOwnerSettings();}}
 function editSchoolAccount(id){const a=ownerAccounts().find(x=>String(x.id)===String(id));if(!a)return;document.getElementById('ownerEditSchoolModal')?.remove();document.body.insertAdjacentHTML('beforeend',`<div class="modal-bg" id="ownerEditSchoolModal" style="display:flex"><div class="modal"><div class="modal-header"><h2>Edit School</h2><button class="close-btn" onclick="document.getElementById('ownerEditSchoolModal').remove()">×</button></div><div class="form-grid"><div class="form-group"><label>School Name</label><input id="editSchName" value="${escapeHtml(a.schoolName||'')}"></div><div class="form-group"><label>Principal Name</label><input id="editSchPrincipal" value="${escapeHtml(a.principalName||'')}"></div><div class="form-group"><label>Contact Number</label><input id="editSchMobile" value="${escapeHtml(a.mobile||'')}"></div><div class="form-group"><label>Gmail ID</label><input id="editSchEmail" value="${escapeHtml(a.email||'')}"></div><div class="form-group"><label>City</label><input id="editSchCity" value="${escapeHtml(a.city||'')}"></div><div class="form-group"><label>Login ID</label><input id="editSchLoginId" value="${escapeHtml(a.loginId||'')}"></div><div class="form-group"><label>Password</label><input id="editSchPassword" value="${escapeHtml(a.password||'')}"></div></div><button class="btn btn-primary" onclick="saveEditedSchool('${String(a.id)}')">Save Changes</button></div></div>`);}
 function saveEditedSchool(id){let accounts=ownerAccounts(),i=accounts.findIndex(x=>String(x.id)===String(id));if(i<0)return;const a=accounts[i];const school=document.getElementById('editSchName').value.trim(),principal=document.getElementById('editSchPrincipal').value.trim(),mobile=document.getElementById('editSchMobile').value.trim(),email=document.getElementById('editSchEmail').value.trim(),city=document.getElementById('editSchCity').value.trim(),loginId=document.getElementById('editSchLoginId').value.trim(),password=document.getElementById('editSchPassword').value;if(!school||!principal||!mobile||!email||!city||!loginId||!password){alert('Please fill all fields.');return;}const dup=accounts.some((x,idx)=>idx!==i&&(String(x.loginId||'').toLowerCase()===loginId.toLowerCase()||String(x.email||'').toLowerCase()===email.toLowerCase()||String(x.mobile||'')===mobile));if(dup){alert('Login ID / Email / Mobile already used by another school.');return;}Object.assign(a,{schoolName:school,principalName:principal,mobile,email,city,loginId,password});localStorage.setItem('schoolAccounts',JSON.stringify(accounts));document.getElementById('ownerEditSchoolModal').remove();showOwnerSection('manage');alert('School details updated successfully.');}
 function deleteSchoolAccount(id){const a=ownerAccounts().find(x=>String(x.id)===String(id));if(!a)return;if(!confirm('Delete '+(a.schoolName||'this school')+'? This will remove its login account and saved school data.'))return;const accounts=ownerAccounts().filter(x=>String(x.id)!==String(id));localStorage.setItem('schoolAccounts',JSON.stringify(accounts));if(getActiveSchoolId()===String(id)){localStorage.removeItem('schoolHubActiveSchoolId');}const prefix='schoolData_'+String(id)+'_';for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.indexOf(prefix)===0)localStorage.removeItem(k);}showOwnerSection('manage');alert('School deleted successfully.');}
 function toggleSchoolHold(id){const accounts=ownerAccounts(),i=accounts.findIndex(x=>String(x.id)===String(id));if(i<0)return;accounts[i].hold=!accounts[i].hold;localStorage.setItem('schoolAccounts',JSON.stringify(accounts));showOwnerSection('hold');alert(accounts[i].hold?'School login held.':'School login released.');}
-function getOwnerAbout(){return String(localStorage.getItem("schoolHubOwnerAbout")||"").trim();}
-function renderOwnerAboutLogin(){
-  const box=document.getElementById("ownerAboutLogin"),text=document.getElementById("ownerAboutLoginText");
-  const about=getOwnerAbout();
-  if(!box||!text)return;
-  box.style.display=about?"block":"none";
-  text.textContent=about;
-}
-function renderOwnerAboutPage(){
-  const about=getOwnerAbout();
-  return `<div class="card"><div class="card-header"><div><h3>ℹ️ About SchoolHub</h3><p style="color:#667085;font-size:12px;margin-top:4px">Owner ka About sirf School/Admin login page ke niche dikhai dega.</p></div></div><div style="padding:18px"><div class="form-group"><label>About / Information</label><textarea id="ownerAboutText" rows="8" placeholder="SchoolHub ke bare me information likhein..." style="width:100%;padding:12px;border:1px solid #dce2eb;border-radius:10px;resize:vertical">${escapeHtml(about)}</textarea></div><button class="btn btn-primary" onclick="saveOwnerAbout()">Save About</button></div></div>`;
-}
-function saveOwnerAbout(){
-  const value=(document.getElementById("ownerAboutText")?.value||"").trim();
-  localStorage.setItem("schoolHubOwnerAbout",value);
-  renderOwnerAboutLogin();
-  alert("Owner About updated successfully. Ab ye Admin login page par niche dikhai dega.");
-}
-function getAdminAbout(){return String(localStorage.getItem(schoolScopedKey("adminAbout"))||"").trim();}
-function renderAdminAboutPage(){
-  const about=getAdminAbout();
-  const canEdit=window.schoolHubRole==="admin";
-  return `<div class="card"><div class="card-header"><div><h3>🏫 About Our School</h3><p style="color:#667085;font-size:12px;margin-top:4px">${canEdit?"Yahan school ke bare me update likhein. Teacher aur Students ise dekh sakte hain.":"School Admin dwara diya gaya school information."}</p></div></div><div style="padding:18px">${canEdit?`<div class="form-group"><label>School About / Information</label><textarea id="adminAboutText" rows="10" placeholder="School ke bare me likhein..." style="width:100%;padding:12px;border:1px solid #dce2eb;border-radius:10px;resize:vertical">${escapeHtml(about)}</textarea></div><button class="btn btn-primary" onclick="saveAdminAbout()">Save About</button>`:`<div style="white-space:pre-wrap;line-height:1.7;color:#344054">${about?escapeHtml(about):"School Admin ne abhi About information add nahi ki hai."}</div>`}</div></div>`;
-}
-function saveAdminAbout(){
-  if(window.schoolHubRole!=="admin"){alert("Only School Admin can update About.");return;}
-  const value=(document.getElementById("adminAboutText")?.value||"").trim();
-  localStorage.setItem(schoolScopedKey("adminAbout"),value);
-  alert("School About updated successfully. Ab Teacher aur Students ise dekh sakte hain.");
-}
-
 function renderOwnerSettings(){const o=getOwnerAccount()||{};document.getElementById('otherPage').innerHTML=ownerShell('⚙️ Owner Settings',`<p style="color:#667085;font-size:13px;margin-bottom:15px">Yahan sirf SchoolHub Owner ki apni details change hongi.</p><div class="form-grid"><div class="form-group"><label>Owner Name</label><input id="ownerSetName" value="${escapeHtml(o.name||'')}"></div><div class="form-group"><label>Mobile Number</label><input id="ownerSetMobile" value="${escapeHtml(o.mobile||'')}"></div><div class="form-group"><label>Gmail ID</label><input id="ownerSetEmail" type="email" value="${escapeHtml(o.email||'')}"></div><div class="form-group"><label>Change User ID</label><input id="ownerSetId" value="${escapeHtml(o.loginId||'')}"></div><div class="form-group"><label>Change Password</label><input id="ownerSetPassword" type="password" placeholder="Leave blank to keep current"></div><div class="form-group"><label>Confirm New Password</label><input id="ownerSetConfirm" type="password"></div></div><button class="btn btn-primary" onclick="saveOwnerSettings()">Save Owner Settings</button>`);}
 function saveOwnerSettings(){const o=getOwnerAccount();if(!o)return;const name=document.getElementById('ownerSetName').value.trim(),mobile=document.getElementById('ownerSetMobile').value.trim(),email=document.getElementById('ownerSetEmail').value.trim(),loginId=document.getElementById('ownerSetId').value.trim(),pw=document.getElementById('ownerSetPassword').value,cp=document.getElementById('ownerSetConfirm').value;if(!name||!mobile||!email||!loginId){alert('Please fill all owner details.');return;}if(pw&&(pw.length<6||pw!==cp)){alert('New password must be at least 6 characters and match confirm password.');return;}o.name=name;o.mobile=mobile;o.email=email;o.loginId=loginId;if(pw)o.password=pw;localStorage.setItem('schoolHubOwner',JSON.stringify(o));document.getElementById('topUser').innerText=name;alert('Owner settings updated successfully.');}
 function logoutOwnerAccount(){
@@ -2102,7 +2042,7 @@ function getCurrentPortalStudent(){if(window.schoolHubRole!=="student"&&window.s
 function isStudentPortal(){return window.schoolHubRole==="student"||window.schoolHubRole==="parent";}
 function updateRoleMenuVisibility(){
   const isTeacher=window.schoolHubRole==="teacher",isPortal=isStudentPortal();
-  document.querySelectorAll(".menu li").forEach(li=>{const action=String(li.getAttribute("onclick")||""),adminOnly=action.includes("showPage('teachers'")||action.includes("showPage('teacherLogin'");const portalAllowed=action.includes("showPage('dashboard'")||action.includes("showPage('homework'")||action.includes("showPage('attendance'")||action.includes("showPage('exams'")||action.includes("showPage('timetable'")||action.includes("showPage('notices'")||action.includes("showPage('about'")||action.includes("logoutUser");if(isPortal)li.style.display=portalAllowed?"":"none";else li.style.display=(isTeacher&&adminOnly)?"none":"";});
+  document.querySelectorAll(".menu li").forEach(li=>{const action=String(li.getAttribute("onclick")||""),adminOnly=action.includes("showPage('teachers'")||action.includes("showPage('teacherLogin'");const portalAllowed=action.includes("showPage('dashboard'")||action.includes("showPage('homework'")||action.includes("showPage('attendance'")||action.includes("showPage('exams'")||action.includes("showPage('timetable'")||action.includes("showPage('notices'")||action.includes("logoutUser");if(isPortal)li.style.display=portalAllowed?"":"none";else li.style.display=(isTeacher&&adminOnly)?"none":"";});
 }
 function getCurrentTeacher(){if(window.schoolHubRole!=="teacher")return null;const id=Number(window.schoolHubTeacherId||0);return (Array.isArray(getTeachers())?getTeachers():[]).find(t=>Number(t.id)===id)||null;}
 function teacherAssignedClass(){const t=getCurrentTeacher();if(!t)return null;const c=Number(t.classNo??t.teachingClass??t.class);return Number.isFinite(c)&&c>=1&&c<=12?c:null;}
@@ -2360,222 +2300,6 @@ homework:"Homework"
 }[type]||type;
 }
 
-
-/* DOWNLOAD / REPORT HELPERS */
-function downloadRowsAsExcel(rows,filename,sheetName){
-  rows=Array.isArray(rows)?rows:[];
-  if(!rows.length){alert("No data available to download.");return;}
-  const headers=[];
-  rows.forEach(r=>Object.keys(r||{}).forEach(k=>{if(!headers.includes(k))headers.push(k);}));
-  const data=[headers,...rows.map(r=>headers.map(k=>{
-    const v=r?.[k];
-    if(v===null||v===undefined)return "";
-    if(typeof v==="object")return JSON.stringify(v);
-    return v;
-  }))];
-  if(window.XLSX){
-    const ws=XLSX.utils.aoa_to_sheet(data);
-    ws["!cols"]=headers.map(h=>({wch:Math.min(45,Math.max(12,String(h).length+3))}));
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,(sheetName||"Data").slice(0,31));
-    XLSX.writeFile(wb,filename.replace(/\.(csv|xlsx)$/i,"")+".xlsx");
-    return;
-  }
-  const csv=data.map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
-  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=filename.replace(/\.xlsx$/i,"")+".csv";
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-function excelSafeRecord(obj,skip=[]){
-  const out={};
-  Object.keys(obj||{}).forEach(k=>{
-    if(skip.includes(k))return;
-    const v=obj[k];
-    if(typeof v==="function")return;
-    if(Array.isArray(v))out[k]=v.map(x=>typeof x==="object"?JSON.stringify(x):x).join(" | ");
-    else if(v&&typeof v==="object")out[k]=JSON.stringify(v);
-    else out[k]=v??"";
-  });
-  return out;
-}
-function classFilteredStudents(classNo,stream,section){
-  return getStudents().filter(s=>
-    Number(s.classNo)===Number(classNo)&&
-    (!stream||s.stream===stream)&&
-    (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
-  );
-}
-function downloadClassStudentsData(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  const students=classFilteredStudents(classNo,stream,section);
-  const rows=students.map(s=>{
-    const r=excelSafeRecord(s,["photo"]);
-    r["Photo Saved"]=s.photo?"Yes":"No";
-    r["Paid Fee"]=getStudentPaid(s.id);
-    r["Pending Fee"]=Math.max(0,Number(s.fee||0)-getStudentPaid(s.id));
-    return r;
-  });
-  downloadRowsAsExcel(rows,`Class_${classNo}_All_Students.xlsx`,"Students");
-}
-function downloadAllTeacherData(){
-  const teachers=Array.isArray(getTeachers())?getTeachers():[];
-  const rows=teachers.map(t=>{
-    const r=excelSafeRecord(t,["photo","documents"]);
-    r["Photo Saved"]=t.photo?"Yes":"No";
-    r["Documents Count"]=Array.isArray(t.documents)?t.documents.length:0;
-    r["Document Names"]=Array.isArray(t.documents)?t.documents.map(d=>d?.name||"").filter(Boolean).join(" | "):"";
-    return r;
-  });
-  downloadRowsAsExcel(rows,"All_Teacher_Data.xlsx","Teachers");
-}
-function buildFeeExportRows(classNo,stream,section,pendingOnly=false){
-  return classFilteredStudents(classNo,stream,section).map(s=>{
-    const total=Number(s.fee||0),paid=getStudentPaid(s.id),pending=Math.max(0,total-paid);
-    if(pendingOnly&&pending<=0)return null;
-    return {
-      "Student ID":s.id??"",
-      "Roll Number":s.roll??"",
-      "Student Name":s.name??"",
-      "Father Name":s.father??"",
-      "Class":s.classNo??"",
-      "Section":s.section??"",
-      "Stream":s.stream??"",
-      "Mobile":s.mobile??"",
-      "Total Fee":total,
-      "Paid Fee":paid,
-      "Pending Fee":pending,
-      "Payment Count":getStudentPayments(s.id).length,
-      "Payment History":getStudentPayments(s.id).map(p=>`${p.amount||0} | ${p.date||""} | ${p.mode||""} | ${p.receipt||""}`).join(" || ")
-    };
-  }).filter(Boolean);
-}
-function downloadClassFeesData(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  downloadRowsAsExcel(buildFeeExportRows(classNo,stream,section,false),`Class_${classNo}_All_Fees.xlsx`,"Fees");
-}
-function downloadClassPendingFeesData(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  downloadRowsAsExcel(buildFeeExportRows(classNo,stream,section,true),`Class_${classNo}_Pending_Fees.xlsx`,"Pending Fees");
-}
-function downloadClassResultsData(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  const students=classFilteredStudents(classNo,stream,section);
-  const rows=[];
-  students.forEach(s=>{
-    const exams=getExamResultsForStudent(s.id);
-    exams.forEach(e=>{
-      rows.push({
-        "Student ID":s.id??"",
-        "Roll Number":s.roll??"",
-        "Student Name":s.name??"",
-        "Father Name":s.father??"",
-        "Class":s.classNo??"",
-        "Section":s.section??"",
-        "Stream":s.stream??"",
-        "Session":e.session||"",
-        "Result Type":e.resultType||"",
-        "Exam Name":e.examName||"",
-        "Exam Date":e.examDate||"",
-        "Total Marks":getExamTotal(e),
-        "Obtained Marks":getExamObtained(e),
-        "Percentage":Number(getExamPercentage(e)||0).toFixed(2)+"%",
-        "Status":getExamPercentage(e)>=33?"PASS":"FAIL",
-        "Subjects":(e.subjects||[]).map(sub=>{
-          const n=normalizeExamSubject(sub);
-          return `${n.name}: ${getSubjectObtained(n)}/${getSubjectMax(n)}`;
-        }).join(" | ")
-      });
-    });
-  });
-  downloadRowsAsExcel(rows,`Class_${classNo}_All_Result_Data.xlsx`,"Results");
-}
-function downloadClassPendingResultsData(classNo,stream,section){
-  if(!requireTeacherClassAccess(classNo))return;
-  const students=classFilteredStudents(classNo,stream,section);
-  const rows=[];
-  students.forEach(s=>{
-    const exams=getExamResultsForStudent(s.id);
-    if(!exams || !exams.length){
-      rows.push({
-        "Student ID":s.id??"", "Roll Number":s.roll??"", "Student Name":s.name??"",
-        "Father Name":s.father??"", "Class":s.classNo??"", "Section":s.section??"",
-        "Stream":s.stream??"", "Result Status":"Pending"
-      });
-    }
-  });
-  downloadRowsAsExcel(rows,`Class_${classNo}_Pending_Result_Data.xlsx`,"Pending Results");
-}
-function openReportList(type){
-  const students=getStudents();
-  const records=getAttendance().filter(a=>a.date===today());
-  let filtered=students.slice(), title="Report";
-  if(type==="present"){filtered=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Present"));title="Today — Present Students";}
-  else if(type==="absent"){filtered=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Absent"));title="Today — Absent Students";}
-  else if(type==="leave"){filtered=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Leave"));title="Today — Leave Students";}
-  else if(type==="paid"){filtered=students.filter(s=>getStudentPaid(s.id)>0);title="Fee Paid Students";}
-  else if(type==="pending"){filtered=students.filter(s=>Math.max(0,Number(s.fee||0)-getStudentPaid(s.id))>0);title="Pending Fee Students";}
-  else if(type==="resultUpdated"){filtered=students.filter(s=>!!getExamForStudent(s.id));title="Result Updated Students";}
-  else if(type==="resultPending"){filtered=students.filter(s=>!getExamForStudent(s.id));title="Pending Result Students";}
-  document.getElementById("dashboardPage").style.display="none";
-  document.getElementById("otherPage").style.display="block";
-  document.getElementById("pageTitle").innerText=title;
-  document.getElementById("otherPage").innerHTML=`
-    <button class="back-btn" onclick="showPage('reports')">← Back to Reports</button>
-    <div class="card">
-      <div class="card-header"><div><h3>${escapeHtml(title)}</h3><p style="color:#777;font-size:12px;margin-top:4px">${filtered.length} Students</p></div></div>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>#</th><th>Student Name</th><th>Roll</th><th>Class</th><th>Section</th><th>Father Name</th><th>Mobile</th><th>Fee Pending</th><th>Latest Result</th></tr></thead>
-          <tbody>${filtered.length?filtered.map((s,i)=>{
-            const e=getExamForStudent(s.id);
-            return `<tr>
-              <td>${i+1}</td><td><strong>${escapeHtml(s.name||"-")}</strong></td><td>${escapeHtml(s.roll??i+1)}</td>
-              <td>Class ${escapeHtml(s.classNo??"-")}</td><td>${escapeHtml(s.section||"-")}</td>
-              <td>${escapeHtml(s.father||"-")}</td><td>${escapeHtml(s.mobile||"-")}</td>
-              <td class="fee-pending">₹${Math.max(0,Number(s.fee||0)-getStudentPaid(s.id)).toLocaleString("en-IN")}</td>
-              <td>${e?`${escapeHtml(e.examName||"Result")} • ${Number(getExamPercentage(e)||0).toFixed(1)}%`:"Pending"}</td>
-            </tr>`;
-          }).join(""):`<tr><td colspan="9"><div class="empty">No students found.</div></td></tr>`}</tbody>
-        </table>
-      </div>
-    </div>`;
-}
-
-/* SMART DASHBOARD ATTENDANCE CHART */
-function renderDashboardSmartAttendanceChart(){
-  const box=document.getElementById("dashboardSmartAttendanceChart");
-  if(!box)return;
-  const students=getStudents();
-  const records=getAttendance().filter(a=>a.date===today());
-  const present=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Present")).length;
-  const absent=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Absent")).length;
-  const leave=students.filter(s=>records.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Leave")).length;
-  const total=students.length;
-  const marked=present+absent+leave;
-  const pPct=marked?present/marked*100:0;
-  const aPct=marked?absent/marked*100:0;
-  const lPct=marked?leave/marked*100:0;
-  const pDeg=pPct*3.6, aDeg=pDeg+aPct*3.6;
-  const donut=marked?`conic-gradient(#15803d 0deg ${pDeg}deg,#dc2626 ${pDeg}deg ${aDeg}deg,#b77900 ${aDeg}deg 360deg)`:"conic-gradient(#e5e7eb 0deg 360deg)";
-  box.innerHTML=`
-    <div class="dashboard-smart-chart-head">
-      <h3>📈 Today's Smart Attendance</h3>
-      <span class="dashboard-smart-chart-date">${formatDate(today())}</span>
-    </div>
-    <div class="smart-chart-body">
-      <div class="smart-donut" style="background:${donut}">
-        <div class="smart-donut-center"><strong>${total}</strong><span>Total Students</span></div>
-      </div>
-      <div class="smart-chart-rows">
-        <div class="smart-chart-row"><span class="smart-chart-label">🟢 Present</span><div class="smart-chart-bar"><div class="smart-chart-fill present" style="width:${marked?pPct:0}%"></div></div><span class="smart-chart-count">${present}</span></div>
-        <div class="smart-chart-row"><span class="smart-chart-label">🔴 Absent</span><div class="smart-chart-bar"><div class="smart-chart-fill absent" style="width:${marked?aPct:0}%"></div></div><span class="smart-chart-count">${absent}</span></div>
-        <div class="smart-chart-row"><span class="smart-chart-label">🟡 Leave</span><div class="smart-chart-bar"><div class="smart-chart-fill leave" style="width:${marked?lPct:0}%"></div></div><span class="smart-chart-count">${leave}</span></div>
-      </div>
-    </div>`;
-}
 /* PAGE */
 
 function toggleSidebar(){
@@ -2681,6 +2405,10 @@ function showStudentPortalDashboard(){
           <div class="student-portal-muted">${window.schoolHubRole==="parent"?"Parent Portal":"Student Portal"}</div>
         </div>
       </div>
+    </div>
+    <div class="student-portal-actions" style="margin-bottom:16px">
+      <button class="student-portal-btn" onclick="showStudentPortalTimetable()">🕐 My Class Timetable</button>
+      <button class="student-portal-btn" onclick="showStudentPortalResults()">📝 My Results</button>
     </div>
     <div class="student-portal-grid">
       <div class="student-portal-card"><h3>💰 Fee Paid</h3><div class="student-portal-stat">${portalMoney(paid)}</div><div class="student-portal-muted">Total Fee: ${portalMoney(total)}</div></div>
@@ -2821,7 +2549,6 @@ if(isStudentPortal()){
   if(page==="exams"){showStudentPortalResults();return;}
   if(page==="timetable"){showStudentPortalTimetable();return;}
   if(page==="notices"){showStudentPortalNotices();return;}
-  if(page==="about"){document.getElementById("dashboardPage").style.display="none";document.getElementById("otherPage").style.display="block";document.getElementById("otherPage").innerHTML=renderAdminAboutPage();return;}
   if(page==="logout"){logoutUser();return;}
   return;
 }
@@ -2845,8 +2572,7 @@ timetable:"Timetable",
 gallery:"Gallery",
 notices:"Notices",
 reports:"Reports",
-settings:"Settings",
-about:"About"
+settings:"Settings"
 };
 
 document.getElementById("pageTitle").innerText=titles[page];
@@ -2869,11 +2595,6 @@ return;
 if(page==="homework"){
 openHomeworkClasses();
 return;
-}
-
-if(page==="about"){
-  document.getElementById("otherPage").innerHTML=renderAdminAboutPage();
-  return;
 }
 
 if(page==="gallery"){
@@ -2908,6 +2629,7 @@ document.getElementById("otherPage").innerHTML=getOtherPage(page);
 /* CLASS */
 
 function openClasses(type){
+  window._lastClassModule=type;
   if((type==="attendance"||type==="exams") && window.schoolHubRole==="teacher" && teacherAssignedClass()===null){
     document.getElementById("otherPage").innerHTML='<div class="card"><div class="empty"><h3>Class Not Assigned</h3><p>Teacher ko Attendance/Result ke liye class assign nahi ki gayi hai.</p></div></div>'; return;
   }
@@ -2986,12 +2708,61 @@ html+=`
 <div class="class-number">Class ${i}</div>
 <div class="class-info">${students.length} Students</div>
 <div class="open-text">Open Class →</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<button type="button" class="small-btn" onclick="event.stopPropagation();openClassTimetable(${i})">🕐 Timetable</button>
+</div>
 </div>
 </div>
 `;
 }
 
 document.getElementById("otherPage").innerHTML=html;
+}
+
+function openClassTimetable(classNo){
+  classNo=Number(classNo)||1;
+  if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(classNo)){
+    alert("Teacher sirf apni assigned class ka timetable manage kar sakta hai.");
+    return;
+  }
+  window.timetableSelectedClass=classNo;
+  const tt=getClassTimetable(classNo);
+  const canEdit=window.schoolHubRole==="admin"||window.schoolHubRole==="teacher";
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const rows=tt.map((r,i)=>`<tr>
+    <td><strong>${escapeHtml(r?.period??i+1)}</strong></td>
+    <td>${escapeHtml(r?.time||"-")}</td>
+    ${days.map((d,j)=>`<td>${escapeHtml((Array.isArray(r?.days)?r.days[j]:"")||"-")}</td>`).join("")}
+  </tr>`).join("");
+  const backPage=(window._lastClassModule&&["students","fees","attendance","exams"].includes(window._lastClassModule))
+    ? window._lastClassModule : "students";
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText=`Class ${classNo} Timetable`;
+  document.getElementById("otherPage").innerHTML=`
+    <button class="back-btn" onclick="openClasses('${backPage}')">← Back to Classes</button>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>🕐 Class ${classNo} Timetable</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">Is class ka daily schedule alag save hota hai.</p>
+        </div>
+        ${canEdit?`<button class="small-btn" onclick="editClassTimetable(${classNo})">✏️ Edit Timetable</button>`:""}
+      </div>
+      <div class="table-container">
+        <table style="min-width:1050px">
+          <thead><tr><th>Period</th><th>Time</th>${days.map(d=>`<th>${d}</th>`).join("")}</tr></thead>
+          <tbody>${rows||`<tr><td colspan="8"><div class="empty">No timetable added.</div></td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function editClassTimetable(classNo){
+  window.timetableSelectedClass=Number(classNo)||1;
+  const other=document.getElementById("otherPage");
+  if(other)other.innerHTML=getOtherPage("timetable");
+  document.getElementById("pageTitle").innerText=`Class ${window.timetableSelectedClass} Timetable`;
 }
 
 function openClass(type,classNo){
@@ -3810,10 +3581,7 @@ let html=`
 <h3>${title}</h3>
 <p style="color:#777;font-size:12px;margin-top:4px">All Students Profiles</p>
 </div>
-<div class="download-tools">
-<button class="small-btn" onclick="downloadClassStudentsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Students</button>
 <button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>
-</div>
 </div>
 
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
@@ -3915,6 +3683,8 @@ if(type==="exams"){
       ${subjectCells}
       <td style="text-align:center;font-weight:800">${e?escapeHtml(String(obtained))+" / "+escapeHtml(String(total)):"—"}</td>
       <td style="text-align:center;font-weight:800">${e?pct.toFixed(1)+"%":"—"}</td>
+       <td style="text-align:center;font-weight:800">${e?(pct>=33?"PASS":"FAIL"):"PENDING"}</td>
+       <td style="text-align:center;font-weight:800">${st.promoted?"PROMOTED":(st.previousClass?"PROMOTED":"—")}</td>
     </tr>`;
   }).join("");
 
@@ -3922,13 +3692,29 @@ if(type==="exams"){
   <div class="card">
     <div class="card-header">
       <div>
-        <h3>${title} - Result</h3>
-        <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
+        <div>
+          <h3>${title} - Result</h3>
+          <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
+        </div>
+        <button type="button" class="small-btn" onclick="openPromotionPanel(${classNo},'${stream||""}','${section||""}')">🎓 Promote / Pass</button>
       </div>
-      <div class="download-tools">
-        <button class="small-btn" onclick="downloadClassResultsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Students Data</button>
-        <button class="small-btn" style="background:#b77900" onclick="downloadClassPendingResultsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Pending Result Data</button>
+
+    <div id="finalPromotionPanel" class="card" style="margin:15px 0;background:#f8faff;border:1px solid #dbe7ff">
+      <div class="card-header" style="background:#f8faff">
+        <div>
+          <h3>🎓 Final Result & Promotion</h3>
+          <p style="color:#667085;font-size:12px;margin-top:4px">Final/Yearly result ke baad PASS students ko next class me promote karein.</p>
+        </div>
+        <button type="button" class="small-btn" onclick="openPromotionPanel(${classNo},'${stream||""}','${section||""}')">🎓 Promote / Pass</button>
       </div>
+      <div style="padding:12px 18px;color:#667085;font-size:12px">
+        Sirf PASS students promote honge. Class ${classNo} ke students ko Class ${classNo+1} me bheja jayega.
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+      <button type="button" class="small-btn" onclick="downloadAllStudentsResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Students Result</button>
+      <button type="button" class="small-btn" onclick="downloadPendingResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Pending Result</button>
     </div>
 
     <div class="result-excel-tools">
@@ -3950,7 +3736,7 @@ if(type==="exams"){
             <th>S.No.</th><th>Student Name</th><th>Roll Number</th>
             ${subjectNames.map(s=>`<th style="text-align:center">${escapeHtml(s)}<br><small style="font-weight:normal">Obtained / MM</small></th>`).join("")}
             <th style="text-align:center">Total</th>
-            <th style="text-align:center">%</th>
+            <th style="text-align:center">%</th><th style="text-align:center">Status</th><th style="text-align:center">Promotion</th>
           </tr>
         </thead>
         <tbody>${resultRows||`<tr><td colspan="${subjectNames.length+5}"><div class="empty">No Students Found</div></td></tr>`}</tbody>
@@ -3972,10 +3758,6 @@ let html=`
 <h3>${title}</h3>
 <p style="color:#777;font-size:12px;margin-top:4px">${getTypeTitle(type)} Details</p>
 </div>
-${type==="fees"?`<div class="download-tools">
-<button class="small-btn" onclick="downloadClassFeesData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Fees</button>
-<button class="small-btn" style="background:#b77900" onclick="downloadClassPendingFeesData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Pending Fees</button>
-</div>`:""}
 </div>
 
 <div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
@@ -4295,7 +4077,7 @@ if(type==="exams"){
     let resultHtml=`<div style="border:1px solid #e4e7ec;border-radius:10px;padding:10px;background:#fff">
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <div><div style="font-weight:800;color:#1769ff;font-size:12px;margin-bottom:3px">Session: ${escapeHtml(e.session||"2026-27")}</div><strong>${escapeHtml(e.examName)}</strong> <span style="color:#667085;font-size:12px">${formatDate(e.examDate)}</span>
-        <span class="badge blue" style="margin-left:5px">${e.resultType==="unit_test"?"Unit Test":"Exam"}</span></div>
+        <span class="badge blue" style="margin-left:5px">${e.resultType==="unit_test"?"Unit Test":(e.resultType==="final"?"Final Result":"Exam")}</span></div>
         <div><b>${obtained}/${total}</b> · ${percentage.toFixed(1)}% <span class="badge ${pass?"green":"red"}">${pass?"PASS":"FAIL"}</span></div>
       </div>
       <div class="table-container" style="margin-top:8px">
@@ -5106,10 +4888,7 @@ function renderTeacherPage(){
           <h3>👨‍🏫 Teacher Profiles</h3>
           <p style="color:#777;font-size:12px;margin-top:4px">${teachers.length} Teacher${teachers.length===1?'':'s'}</p>
         </div>
-        <div class="download-tools">
-<button class="small-btn" onclick="downloadAllTeacherData()">⬇️ Download All Teacher Data</button>
-<button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
-</div>
+        <button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
       </div>
       <div class="search-box">
         <input id="teacherSearch" placeholder="🔍 Search teacher, mobile, qualification or subject..." oninput="filterTeachers()">
@@ -5711,7 +5490,9 @@ function handleResultTypeChange(){
   const help=document.getElementById("resultColumnsHelp");
   if(help)help.innerText=type==="unit_test"
     ?"Unit Test: sirf MM aur Obtained. Zarurat ho to Add Column se extra marks column add karein."
-    :"Exam: MM aur Obtained. Theory / Practical ke liye Add Column karein.";
+    :type==="final"
+      ?"Final Result: final/annual marks. PASS students ko next class me promote kiya ja sakta hai."
+      :"Exam: MM aur Obtained. Theory / Practical ke liye Add Column karein.";
 }
 
 function addResultColumn(){
@@ -5997,6 +5778,146 @@ function closeExamModal(){
   resultColumns=[];
 }
 
+function isFinalResultRecord(e){
+  if(!e)return false;
+  const type=String(e.resultType||"").toLowerCase();
+  const name=String(e.examName||"").toLowerCase();
+  return type==="final" || /final|yearly|annual/.test(name);
+}
+
+function getFinalResultForStudent(studentId){
+  const results=getExamResultsForStudent(studentId);
+  const finals=results.filter(isFinalResultRecord);
+  return finals.length?finals[finals.length-1]:null;
+}
+
+function isStudentPassedFinal(studentId){
+  const e=getFinalResultForStudent(studentId);
+  return !!e && getExamPercentage(e)>=33;
+}
+
+function openPromotionPanel(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  classNo=Number(classNo)||1;
+  const students=getStudents().filter(s=>
+    Number(s.classNo)===classNo &&
+    (!stream||s.stream===stream) &&
+    (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
+  ).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+  const passed=students.filter(s=>isStudentPassedFinal(s.id));
+  const nextClass=classNo+1;
+  const panel=document.createElement("div");
+  panel.className="modal-bg";
+  panel.id="promotionModal";
+  panel.style.display="flex";
+  panel.innerHTML=`
+    <div class="modal" style="max-width:850px">
+      <div class="modal-header">
+        <div>
+          <h2>🎓 Class ${classNo} Final Result Promotion</h2>
+          <p style="color:#667085;font-size:12px;margin-top:4px">${passed.length} PASS students / ${students.length} total students</p>
+        </div>
+        <button class="close-btn" onclick="document.getElementById('promotionModal')?.remove()">×</button>
+      </div>
+      <div style="background:#eef4ff;border:1px solid #d7e5ff;border-radius:12px;padding:12px;margin-bottom:15px">
+        <b>Promotion Rule:</b> Sirf final result me ${">="} 33% wale students promote honge.
+        Class ${classNo} → Class ${nextClass>12?12:nextClass}.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px">
+        <button class="btn btn-primary" style="flex:1;min-width:220px" ${nextClass>12||!passed.length?"disabled":""}
+          onclick="promoteAllPassedStudents(${classNo},'${stream||""}','${section||""}')">✅ Promote / Pass All Students</button>
+        <button class="btn btn-outline" style="flex:1;min-width:220px;margin-top:0" onclick="promoteStudentsOneByOne(${classNo},'${stream||""}','${section||""}')">👤 Promote One by One</button>
+      </div>
+      <div id="promotionStudentList">
+        ${passed.length?passed.map(s=>{
+          const final=getFinalResultForStudent(s.id);
+          const pct=final?getExamPercentage(final):0;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #edf0f4;padding:10px 0">
+            <div><b>${escapeHtml(s.name)}</b><div style="font-size:12px;color:#667085">Roll ${escapeHtml(s.roll||"-")} · ${pct.toFixed(1)}% · PASS</div></div>
+            <button class="small-btn" onclick="promoteSingleStudent(${s.id},${classNo},'${stream||""}','${section||""}')">Promote → Class ${nextClass}</button>
+          </div>`;
+        }).join(""):`<div class="empty">No PASS student found. Final result save karein aur 33% ya usse zyada score wale students yahan aayenge.</div>`}
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+}
+
+function promoteSingleStudent(studentId,classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  classNo=Number(classNo)||1;
+  const nextClass=classNo+1;
+  if(nextClass>12){alert("Class 12 ke baad next class available nahi hai.");return;}
+  const students=getStudents();
+  const student=students.find(s=>Number(s.id)===Number(studentId));
+  if(!student)return;
+  if(Number(student.classNo)!==classNo){alert("Student already promoted or class changed.");return;}
+  if(!isStudentPassedFinal(student.id)){
+    alert("Sirf PASS student ko promote kiya ja sakta hai.");
+    return;
+  }
+  if(!confirm(`${student.name} ko Class ${nextClass} me promote karein?`))return;
+  student.previousClass=classNo;
+  student.classNo=nextClass;
+  student.promoted=true;
+  student.promotionDate=today();
+  student.promotionSession=selectedPromotionSession();
+  saveStudents(students);
+  document.getElementById("promotionModal")?.remove();
+  alert(`${student.name} successfully promoted to Class ${nextClass}.`);
+  openStudentsData("exams",classNo,stream,section);
+}
+
+function promoteAllPassedStudents(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  classNo=Number(classNo)||1;
+  const nextClass=classNo+1;
+  if(nextClass>12){alert("Class 12 ke baad next class available nahi hai.");return;}
+  const students=getStudents().filter(s=>
+    Number(s.classNo)===classNo &&
+    (!stream||s.stream===stream) &&
+    (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())
+  );
+  const passed=students.filter(s=>isStudentPassedFinal(s.id));
+  if(!passed.length){alert("Koi PASS student promote karne ke liye available nahi hai.");return;}
+  if(!confirm(`${passed.length} PASS students ko Class ${nextClass} me promote karein?`))return;
+  const session=selectedPromotionSession();
+  passed.forEach(s=>{
+    s.previousClass=classNo;
+    s.classNo=nextClass;
+    s.promoted=true;
+    s.promotionDate=today();
+    s.promotionSession=session;
+  });
+  saveStudents(getStudents());
+  document.getElementById("promotionModal")?.remove();
+  alert(`${passed.length} PASS students successfully promoted to Class ${nextClass}.`);
+  openClasses("exams");
+}
+
+function promoteStudentsOneByOne(classNo,stream,section){
+  const box=document.getElementById("promotionStudentList");
+  if(!box)return;
+  const students=getStudents().filter(s=>
+    Number(s.classNo)===Number(classNo) &&
+    (!stream||s.stream===stream) &&
+    (!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase()) &&
+    isStudentPassedFinal(s.id)
+  );
+  if(!students.length){box.innerHTML='<div class="empty">No PASS student available.</div>';return;}
+  box.innerHTML=students.map(s=>{
+    const final=getFinalResultForStudent(s.id);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #edf0f4;padding:10px 0">
+      <div><b>${escapeHtml(s.name)}</b><div style="font-size:12px;color:#667085">Roll ${escapeHtml(s.roll||"-")} · ${getExamPercentage(final).toFixed(1)}% · PASS</div></div>
+      <button class="small-btn" onclick="promoteSingleStudent(${s.id},${Number(classNo)},'${stream||""}','${section||""}')">Promote</button>
+    </div>`;
+  }).join("");
+}
+
+function selectedPromotionSession(){
+  const y=new Date().getFullYear();
+  return `${y}-${String((y+1)%100).padStart(2,"0")}`;
+}
+
 function deleteExam(id,classNo,stream,section){
   if(!requireTeacherClassAccess(classNo))return;
   if(!confirm("Delete this result?"))return;
@@ -6065,6 +5986,25 @@ function resultExcelNumber(v, fallback=0){
   if(v===null||v===undefined||String(v).trim()==="")return fallback;
   const n=Number(String(v).replace(/,/g,"").trim());
   return Number.isFinite(n)?n:fallback;
+}
+
+function downloadAllStudentsResultData(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+  if(!students.length){alert("No students found in this class.");return;}
+  const rows=[["Roll Number","Student Name","Class","Section","Result Name","Result Date","Total Marks","Obtained Marks","Percentage","Status","Promotion"]];
+  students.forEach(st=>{const e=getExamForStudent(st.id);const pct=e?getExamPercentage(e):0;rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"",e?.examName||e?.resultName||"",e?.date||e?.examDate||"",e?getExamTotal(e):"",e?getExamObtained(e):"",e?pct.toFixed(1)+"%":"",e?(pct>=33?"PASS":"FAIL"):"PENDING",st.promoted?"PROMOTED":(st.previousClass?"PROMOTED":"")]);});
+  const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  downloadFile("Class_"+classNo+"_All_Students_Result.csv",csv);
+}
+function downloadPendingResultData(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  const students=getStudents().filter(s=>Number(s.classNo)===Number(classNo)&&(!stream||s.stream===stream)&&(!section||String(s.section||"").trim().toLowerCase()===String(section||"").trim().toLowerCase())&&!getExamForStudent(s.id)).sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999));
+  if(!students.length){alert("Koi pending result student nahi hai.");return;}
+  const rows=[["Roll Number","Student Name","Class","Section","Result Status"]];
+  students.forEach(st=>rows.push([st.roll||"",st.name||"",st.classNo||classNo,st.section||"","PENDING RESULT"]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  downloadFile("Class_"+classNo+"_Pending_Result.csv",csv);
 }
 
 function downloadResultExcelTemplate(classNo,stream,section){
@@ -6736,10 +6676,6 @@ homeworkImageData=[];
 
 function getOtherPage(page){
 
-if(page==="timetable"){
-  return `<div class="card"><div class="empty"><h3>Timetable</h3><p>Timetable module is disabled from the menu.</p></div></div>`;
-}
-
 if(page==="teachers"){
 return `<div class="card"><div class="empty"><h3>Teachers</h3><p>Click Teachers in the menu to view teacher profiles.</p></div></div>`;
 }
@@ -6996,56 +6932,34 @@ function deleteNotice(index){
 if(page==="reports"){
 
 let students=getStudents();
-let attendance=getAttendance();
-let todayDate=today();
-let todayRecords=attendance.filter(a=>a.date===todayDate);
-let presentStudents=students.filter(s=>todayRecords.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Present"));
-let absentStudents=students.filter(s=>todayRecords.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Absent"));
-let leaveStudents=students.filter(s=>todayRecords.some(a=>Number(a.studentId)===Number(s.id)&&a.status==="Leave"));
-let paidStudents=students.filter(s=>getStudentPaid(s.id)>0);
-let pendingStudents=students.filter(s=>Math.max(0,Number(s.fee||0)-getStudentPaid(s.id))>0);
-let resultUpdatedStudents=students.filter(s=>!!getExamForStudent(s.id));
-let pendingResultStudents=students.filter(s=>!getExamForStudent(s.id));
 let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
 let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
-
-const reportCard=(label,value,type,action)=>`
-<div class="stat-card report-click-card ${type}" onclick="${action}">
-  <div class="stat-number">${value}</div>
-  <div class="stat-label">${label}</div>
-</div>`;
+let results=students.map(s=>getExamForStudent(s.id)).filter(Boolean);
+let pass=results.filter(e=>getExamPercentage(e)>=33).length;
 
 return `
-<div class="card">
-  <div class="card-header">
-    <div>
-      <h3>📊 Smart Reports</h3>
-      <p style="color:#777;font-size:12px;margin-top:4px">Har report card clickable hai — details dekhne ke liye card par click karein.</p>
-    </div>
-  </div>
-  <div class="stats" style="padding:18px;margin-bottom:0">
-    ${reportCard("Total Students",students.length,"blue","openReportList('all')")}
-    ${reportCard("Present Students",presentStudents.length,"green","openReportList('present')")}
-    ${reportCard("Absent Students",absentStudents.length,"red","openReportList('absent')")}
-    ${reportCard("Leave Students",leaveStudents.length,"yellow","openReportList('leave')")}
-    ${reportCard("Total Fees Paid",portalMoney(paid),"green","openReportList('paid')")}
-    ${reportCard("Pending Fees Students",pendingStudents.length,"yellow","openReportList('pending')")}
-    ${reportCard("Result Update Students",resultUpdatedStudents.length,"blue","openReportList('resultUpdated')")}
-    ${reportCard("Pending Result Students",pendingResultStudents.length,"red","openReportList('resultPending')")}
-  </div>
+<div class="stats">
+
+<div class="stat-card">
+<div class="stat-number">${students.length}</div>
+<div class="stat-label">Students</div>
 </div>
 
-<div class="card">
-  <div class="card-header">
-    <div>
-      <h3>💰 Fee Summary</h3>
-      <p style="color:#777;font-size:12px;margin-top:4px">Total Fee ₹${total.toLocaleString("en-IN")} • Paid ₹${paid.toLocaleString("en-IN")} • Pending ₹${Math.max(0,total-paid).toLocaleString("en-IN")}</p>
-    </div>
-  </div>
-  <div class="stats" style="padding:18px;margin-bottom:0">
-    ${reportCard("Paid Fee Students",paidStudents.length,"green","openReportList('paid')")}
-    ${reportCard("Pending Fee Students",pendingStudents.length,"yellow","openReportList('pending')")}
-  </div>
+<div class="stat-card">
+<div class="stat-number">${total?Math.round(paid/total*100):0}%</div>
+<div class="stat-label">Fee Collection</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number">${results.length}</div>
+<div class="stat-label">Results Added</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-number">${results.length?Math.round(pass/results.length*100):0}%</div>
+<div class="stat-label">Pass Percentage</div>
+</div>
+
 </div>
 `;
 }
@@ -7209,7 +7123,6 @@ function updateDashboard(){
   renderDashboardClassCards();
   updateDashboardNotice();
   updateDashboardBranding();
-  renderDashboardSmartAttendanceChart();
 }
 function updateDashboardNotice(){
   const school=localStorage.getItem("schoolName")||document.getElementById("displaySchool")?.innerText||"ABC Public School";
@@ -7670,8 +7583,6 @@ function backToDashboard(){
   document.getElementById("otherPage").style.display="none";
   updateDashboard();
 }
-
-try{renderOwnerAboutLogin();}catch(e){console.error("Owner About render error:",e);}
 </script>
 </body>
 </html>
