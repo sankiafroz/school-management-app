@@ -3238,168 +3238,89 @@ function printAttendanceReport(classNo,students,dates,records){
   <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
   
 <script>
-/* =========================================================
-   ADD-ONLY DELETE / RESTORE
-   Login/authentication code is intentionally untouched.
-   Applies only to Students, Teachers, Fees and Results.
-   ========================================================= */
 (function(){
-  function trashKey(){ return schoolScopedKey("schoolHubTrash"); }
+  function trashKey(){ return (typeof schoolScopedKey==="function") ? schoolScopedKey("schoolHubTrash") : "schoolHubTrash"; }
   function getTrash(){
     try{
       const x=JSON.parse(localStorage.getItem(trashKey())||"{}");
-      return {
-        students:Array.isArray(x.students)?x.students:[],
-        teachers:Array.isArray(x.teachers)?x.teachers:[],
-        fees:Array.isArray(x.fees)?x.fees:[],
-        results:Array.isArray(x.results)?x.results:[]
-      };
-    }catch(e){
-      return {students:[],teachers:[],fees:[],results:[]};
-    }
+      return {students:x.students||[],teachers:x.teachers||[],fees:x.fees||[],results:x.results||[]};
+    }catch(e){return {students:[],teachers:[],fees:[],results:[]};}
   }
-  function saveTrash(x){ localStorage.setItem(trashKey(),JSON.stringify(x)); }
+  function saveTrash(x){localStorage.setItem(trashKey(),JSON.stringify(x));}
+  function put(type,item){
+    const x=getTrash(); const copy=JSON.parse(JSON.stringify(item));
+    copy.__deletedAt=new Date().toISOString(); x[type].push(copy); saveTrash(x);
+  }
 
   window.openDeleteRestore=function(el){
-    document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active"));
-    if(el)el.classList.add("active");
-    document.getElementById("sidebar")?.classList.remove("open");
-    const dash=document.getElementById("dashboardPage");
-    const other=document.getElementById("otherPage");
-    if(dash)dash.style.display="none";
-    if(other)other.style.display="block";
-    const title=document.getElementById("pageTitle");
-    if(title)title.innerText="Delete / Restore";
-    renderDeleteRestore();
+    document.querySelectorAll(".menu li").forEach(x=>x.classList.remove("active")); if(el)el.classList.add("active"); document.getElementById("dashboardPage")?.style.setProperty("display","none"); document.getElementById("otherPage")?.style.setProperty("display","block"); document.getElementById("pageTitle").innerText="Delete / Restore"; render();
   };
 
-  function putTrash(type,item){
-    const tr=getTrash();
-    item=JSON.parse(JSON.stringify(item));
-    item.__deletedAt=new Date().toISOString();
-    tr[type].push(item);
-    saveTrash(tr);
-  }
-
-  function takeFromTrash(type,id){
-    const tr=getTrash();
-    const i=tr[type].findIndex(x=>String(x.id)===String(id));
-    if(i<0)return null;
-    const item=tr[type].splice(i,1)[0];
-    saveTrash(tr);
-    delete item.__deletedAt;
-    return item;
-  }
-
-  // Keep existing card buttons, but make their Delete action soft-delete.
   window.deleteStudent=function(id){
-    const s=getStudents().find(x=>Number(x.id)===Number(id));
-    if(!s)return;
-    if(window.schoolHubRole==="teacher" && !teacherCanAccessClass(s.classNo)){
-      alert("Teacher sirf apni assigned class ke students ko delete kar sakta hai.");
-      return;
-    }
+    const a=getStudents(), item=a.find(x=>Number(x.id)===Number(id)); if(!item)return;
+    if(window.schoolHubRole==="teacher" && typeof teacherCanAccessClass==="function" && !teacherCanAccessClass(item.classNo)) return alert("Teacher sirf assigned class ke student ko delete kar sakta hai.");
     if(!confirm("Student ko Delete/Trash me bhejna hai?"))return;
-    putTrash("students",s);
-    saveStudents(getStudents().filter(x=>Number(x.id)!==Number(id)));
-    updateDashboard();
-    openStudentsData(window.currentStudentType||"students",s.classNo,s.stream||"",s.section||"");
+    put("students",item); saveStudents(a.filter(x=>Number(x.id)!==Number(id)));
+    if(typeof updateDashboard==="function")updateDashboard();
+    if(typeof openStudentsData==="function")openStudentsData(window.currentStudentType||"students",item.classNo,item.stream||"",item.section||"");
   };
 
   window.deleteTeacher=function(id){
-    if(window.schoolHubRole!=="admin"){
-      alert("Only School Admin can delete teacher data.");
-      return;
-    }
-    const teacher=getTeachers().find(x=>Number(x.id)===Number(id));
-    if(!teacher)return;
+    if(window.schoolHubRole!=="admin")return alert("Only School Admin can delete teacher data.");
+    const a=getTeachers(), item=a.find(x=>Number(x.id)===Number(id)); if(!item)return;
     if(!confirm("Teacher ko Delete/Trash me bhejna hai?"))return;
-    putTrash("teachers",teacher);
-    saveTeachers(getTeachers().filter(x=>Number(x.id)!==Number(id)));
-    renderTeacherPage();
+    put("teachers",item); saveTeachers(a.filter(x=>Number(x.id)!==Number(id)));
+    if(typeof renderTeacherPage==="function")renderTeacherPage();
   };
 
   window.deleteFee=function(id,classNo,stream,section){
-    if(window.schoolHubRole==="teacher"){
-      alert("Teacher fee payment delete nahi kar sakta.");
-      return;
-    }
-    const fee=getFees().find(x=>Number(x.id)===Number(id));
-    if(!fee)return;
+    if(window.schoolHubRole==="teacher")return alert("Teacher fee payment delete nahi kar sakta.");
+    const a=getFees(), item=a.find(x=>Number(x.id)===Number(id)); if(!item)return;
     if(!confirm("Fee payment ko Delete/Trash me bhejna hai?"))return;
-    putTrash("fees",fee);
-    saveFees(getFees().filter(x=>Number(x.id)!==Number(id)));
-    updateDashboard();
-    openStudentsData("fees",classNo,stream,section);
+    put("fees",item); saveFees(a.filter(x=>Number(x.id)!==Number(id)));
+    if(typeof openStudentsData==="function")openStudentsData("fees",classNo,stream,section);
   };
 
   window.deleteExam=function(id,classNo,stream,section){
-    if(!requireTeacherClassAccess(classNo))return;
-    const exam=getExams().find(x=>Number(x.id)===Number(id));
-    if(!exam)return;
+    if(window.schoolHubRole!=="admin" && window.schoolHubRole!=="teacher")return alert("You cannot delete result data.");
+    const a=getExams(), item=a.find(x=>Number(x.id)===Number(id)); if(!item)return;
     if(!confirm("Result ko Delete/Trash me bhejna hai?"))return;
-    putTrash("results",exam);
-    saveExams(getExams().filter(x=>Number(x.id)!==Number(id)));
-    openStudentsData("exams",classNo,stream,section);
+    put("results",item); saveExams(a.filter(x=>Number(x.id)!==Number(id)));
+    if(typeof openStudentsData==="function")openStudentsData("exams",classNo,stream,section);
   };
 
   window.restoreDeletedRecord=function(type,id){
-    if(window.schoolHubRole!=="admin" && window.schoolHubRole!=="teacher"){
-      alert("Restore ke liye authorised login required hai.");
-      return;
-    }
-    const item=takeFromTrash(type,id);
-    if(!item)return;
-    if(type==="students"){ const a=getStudents(); a.push(item); saveStudents(a); }
-    if(type==="teachers"){
-      if(window.schoolHubRole!=="admin"){ putTrash(type,item); alert("Only School Admin can restore teacher data."); return; }
-      const a=getTeachers(); a.push(item); saveTeachers(a);
-    }
-    if(type==="fees"){ const a=getFees(); a.push(item); saveFees(a); }
-    if(type==="results"){ const a=getExams(); a.push(item); saveExams(a); }
-    renderDeleteRestore();
+    if(window.schoolHubRole!=="admin" && window.schoolHubRole!=="teacher")return alert("Authorised login required.");
+    if(type==="teachers" && window.schoolHubRole!=="admin")return alert("Only School Admin can restore teacher data.");
+    const x=getTrash(), i=x[type].findIndex(v=>String(v.id)===String(id)); if(i<0)return;
+    const item=x[type].splice(i,1)[0]; delete item.__deletedAt;
+    if(type==="students"){const a=getStudents();a.push(item);saveStudents(a);}
+    if(type==="teachers"){const a=getTeachers();a.push(item);saveTeachers(a);}
+    if(type==="fees"){const a=getFees();a.push(item);saveFees(a);}
+    if(type==="results"){const a=getExams();a.push(item);saveExams(a);}
+    saveTrash(x); render();
   };
 
   window.permanentDeleteRecord=function(type,id){
-    if(window.schoolHubRole!=="admin"){
-      alert("Permanent Delete sirf School Admin kar sakta hai.");
-      return;
-    }
+    if(window.schoolHubRole!=="admin")return alert("Permanent Delete sirf School Admin kar sakta hai.");
     if(!confirm("Permanent Delete ke baad data wapas nahi aayega. Continue?"))return;
-    const tr=getTrash();
-    tr[type]=tr[type].filter(x=>String(x.id)!==String(id));
-    saveTrash(tr);
-    renderDeleteRestore();
+    const x=getTrash(); x[type]=x[type].filter(v=>String(v.id)!==String(id)); saveTrash(x); render();
   };
 
-  function renderDeleteRestore(){
-    const area=document.getElementById("otherPage");
-    if(!area)return;
-    const tr=getTrash();
-    const block=(type,title,icon)=>{
-      const rows=tr[type]||[];
-      let html='<div class="card" style="margin-bottom:14px">';
-      html+='<div class="card-header"><h3>'+icon+' '+title+'</h3><span class="badge yellow">'+rows.length+'</span></div>';
-      if(rows.length){
-        html+='<div class="table-container"><table><thead><tr><th>Name / Info</th><th>Deleted On</th><th>Action</th></tr></thead><tbody>';
-        rows.forEach(x=>{
-          const name=x.name||x.studentName||x.title||("Record #"+x.id);
-          html+='<tr><td><strong>'+escapeHtml(name)+'</strong></td><td>'+escapeHtml(formatDate(x.__deletedAt||""))+'</td><td>';
-          html+='<button class="edit-btn" onclick="restoreDeletedRecord(\''+type+'\','+Number(x.id)+')">♻️ Restore</button> ';
-          html+='<button class="delete-btn" onclick="permanentDeleteRecord(\''+type+'\','+Number(x.id)+')">❌ Permanent Delete</button>';
-          html+='</td></tr>';
-        });
-        html+='</tbody></table></div>';
-      }else{
-        html+='<div class="empty">No deleted '+title.toLowerCase()+'.</div>';
-      }
-      return html+'</div>';
-    };
-    area.innerHTML='<div class="card"><div class="card-header"><div><h2>🗑️ Delete / Restore</h2><p style="color:#667085;font-size:12px;margin-top:4px">Delete kiya hua data yahan temporarily rahega.</p></div></div><p style="font-size:12px;color:#667085">Restore data ko wapas active karega. Permanent Delete sirf School Admin kar sakta hai.</p></div>'
-      +block("students","Students","👨‍🎓")
-      +block("teachers","Teachers","👨‍🏫")
-      +block("fees","Fees","💰")
-      +block("results","Results","📊");
+  function render(){
+    const area=document.getElementById("otherPage"); if(!area)return;
+    const x=getTrash();
+    const block=(type,title,icon)=>`<div class="card" style="margin-bottom:14px">
+      <div class="card-header"><h3>${icon} ${title}</h3><span class="badge yellow">${x[type].length}</span></div>
+      ${x[type].length?`<div class="table-container"><table><thead><tr><th>Name / Info</th><th>Deleted</th><th>Action</th></tr></thead><tbody>
+      ${x[type].map(v=>`<tr><td>${escapeHtml(v.name||v.studentName||v.title||("Record #"+v.id))}</td><td>${escapeHtml(formatDate(v.__deletedAt||""))}</td>
+      <td><button class="edit-btn" onclick="restoreDeletedRecord('${type}',${Number(v.id)})">♻️ Restore</button>
+      <button class="delete-btn" onclick="permanentDeleteRecord('${type}',${Number(v.id)})">❌ Permanent Delete</button></td></tr>`).join("")}
+      </tbody></table></div>`:`<div class="empty">No deleted ${title.toLowerCase()}.</div>`}
+    </div>`;
+    area.innerHTML=`<div class="card"><div class="card-header"><h2>🗑️ Delete / Restore</h2></div>
+      <p style="font-size:12px;color:#667085">Delete kiya hua data yahan temporarily rahega. Restore se wapas aayega.</p></div>
+      ${block("students","Students","👨‍🎓")}${block("teachers","Teachers","👨‍🏫")}${block("fees","Fees","💰")}${block("results","Results","📊")}`;
   }
 })();
 </script>
