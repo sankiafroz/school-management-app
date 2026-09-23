@@ -2492,6 +2492,22 @@ function downloadClassResultsData(classNo,stream,section){
   });
   downloadRowsAsExcel(rows,`Class_${classNo}_All_Result_Data.xlsx`,"Results");
 }
+function downloadClassPendingResultsData(classNo,stream,section){
+  if(!requireTeacherClassAccess(classNo))return;
+  const students=classFilteredStudents(classNo,stream,section);
+  const rows=[];
+  students.forEach(s=>{
+    const exams=getExamResultsForStudent(s.id);
+    if(!exams || !exams.length){
+      rows.push({
+        "Student ID":s.id??"", "Roll Number":s.roll??"", "Student Name":s.name??"",
+        "Father Name":s.father??"", "Class":s.classNo??"", "Section":s.section??"",
+        "Stream":s.stream??"", "Result Status":"Pending"
+      });
+    }
+  });
+  downloadRowsAsExcel(rows,`Class_${classNo}_Pending_Result_Data.xlsx`,"Pending Results");
+}
 function openReportList(type){
   const students=getStudents();
   const records=getAttendance().filter(a=>a.date===today());
@@ -3910,7 +3926,8 @@ if(type==="exams"){
         <p style="color:#777;font-size:12px;margin-top:4px">Sabhi students ek hi result register me. Student name par click karke manual result add/update karein.</p>
       </div>
       <div class="download-tools">
-        <button class="small-btn" onclick="downloadClassResultsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Result Data</button>
+        <button class="small-btn" onclick="downloadClassResultsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Students Data</button>
+        <button class="small-btn" style="background:#b77900" onclick="downloadClassPendingResultsData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Pending Result Data</button>
       </div>
     </div>
 
