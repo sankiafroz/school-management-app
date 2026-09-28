@@ -311,7 +311,217 @@ th{background:#fafbfd;color:#667085}
 .trash-item-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .trash-item-name{font-weight:800}.trash-item-meta{font-size:11px;color:#667085;margin-top:4px}
 </style>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js">
+
+/* ================================================================
+   SCHOOLHUB ADD-ON UPDATE
+   Teacher self attendance + Admin teacher attendance + Notice images
+   + Image crop helper. Existing features are intentionally preserved.
+   ================================================================ */
+(function(){
+  // ---------- Teacher Attendance ----------
+  function teacherAttendanceRecords(){
+    const a=getData('teacherAttendance');
+    return Array.isArray(a)?a:[];
+  }
+  function saveTeacherAttendanceRecords(a){ setData('teacherAttendance',Array.isArray(a)?a:[]); }
+  function currentTeacherId(){ return Number(window.schoolHubTeacherId||0); }
+  function teacherRecordForDate(id,date){
+    return teacherAttendanceRecords().find(r=>Number(r.teacherId??r.teacherID)===Number(id)&&String(r.date||'').slice(0,10)===String(date).slice(0,10));
+  }
+  function upsertTeacherAttendance(id,date,status,source){
+    const tid=Number(id||0); if(!tid||!date)return false;
+    const arr=teacherAttendanceRecords();
+    const idx=arr.findIndex(r=>Number(r.teacherId??r.teacherID)===tid&&String(r.date||'').slice(0,10)===String(date).slice(0,10));
+    const rec={id:idx>=0?arr[idx].id:Date.now()+Math.floor(Math.random()*100000),teacherId:tid,date:String(date).slice(0,10),status,markedBy:source||window.schoolHubRole||'admin',markedAt:new Date().toISOString()};
+    if(idx>=0)arr[idx]=rec; else arr.push(rec);
+    saveTeacherAttendanceRecords(arr); return true;
+  }
+  function deleteTeacherAttendanceRecord(id,date){
+    const arr=teacherAttendanceRecords().filter(r=>!(Number(r.teacherId??r.teacherID)===Number(id)&&String(r.date||'').slice(0,10)===String(date).slice(0,10)));
+    saveTeacherAttendanceRecords(arr);
+  }
+  window.upsertTeacherAttendance=upsertTeacherAttendance;
+
+  function teacherAttendanceRows(teacherId,fromDate,toDate){
+    const arr=teacherAttendanceRecords();
+    return arr.filter(r=>Number(r.teacherId??r.teacherID)===Number(teacherId)&&String(r.date||'').slice(0,10)>=fromDate&&String(r.date||'').slice(0,10)<=toDate).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  }
+  function isoDate(d){
+    const x=new Date(d); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+  }
+  function teacherAttendanceRange(kind){
+    const end=new Date(); end.setHours(0,0,0,0);
+    let start=new Date(end);
+    if(kind==='oneDay'){} else if(kind==='oneWeek'){start.setDate(start.getDate()-6)} else if(kind==='oneMonth'){start.setMonth(start.getMonth()-1);start.setDate(start.getDate()+1)} else if(kind==='lastMonth'){start=new Date(end.getFullYear(),end.getMonth()-1,1); const last=new Date(end.getFullYear(),end.getMonth(),0); return {from:isoDate(start),to:isoDate(last)};}
+    return {from:isoDate(start),to:isoDate(end)};
+  }
+
+  window.renderTeacherAttendancePage=function(){
+    const isTeacher=window.schoolHubRole==='teacher', isAdmin=window.schoolHubRole==='admin';
+    if(!isTeacher&&!isAdmin){document.getElementById('otherPage').innerHTML='<div class="card"><div class="empty">Teacher Attendance is available for Teacher and School Admin only.</div></div>';return;}
+    const teachers=Array.isArray(getTeachers())?getTeachers():[];
+    const me=getCurrentTeacher();
+    const todayDate=today();
+    const selectedTeacher=isTeacher?me:(teachers[0]||null);
+    const rows=selectedTeacher?teacherAttendanceRows(selectedTeacher.id,teacherAttendanceRange('oneMonth').from,teacherAttendanceRange('oneMonth').to):[];
+    const selectedId=selectedTeacher?Number(selectedTeacher.id):0;
+    const teacherOptions=teachers.map(t=>'<option value="'+Number(t.id)+'" '+(Number(t.id)===selectedId?'selected':'')+'>'+escapeHtml(t.name||'Teacher')+'</option>').join('');
+    document.getElementById('otherPage').innerHTML=
+      '<button class="back-btn" onclick="showPage(\'dashboard\')">← Back to Dashboard</button>'+
+      '<div class="card"><div class="card-header"><div><h3>👨‍🏫 Teacher Attendance</h3><p style="color:#777;font-size:12px;margin-top:4px">'+(isTeacher?'Aaj ki attendance mark karein aur apni history dekhein.':'Teachers ki attendance dekhna, lagana, edit aur delete karna.')+'</p></div></div>'+
+      '<div class="teacher-attendance-controls">'+
+      (isAdmin?'<div class="form-group"><label>Teacher</label><select id="teacherAttendanceTeacher" onchange="renderTeacherAttendancePage()">'+teacherOptions+'</select></div>':'')+
+      '<div class="form-group"><label>Date</label><input id="teacherAttendanceDate" type="date" value="'+todayDate+'" '+(isTeacher?'min="'+todayDate+'" max="'+todayDate+'"':'')+'></div>'+
+      '<div class="form-group"><label>Attendance</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px">'+
+      '<button class="small-btn" onclick="markTeacherSelfAttendance(\'Present\')">🟢 Present</button>'+
+      '<button class="delete-btn" onclick="markTeacherSelfAttendance(\'Absent\')">🔴 Absent</button>'+
+      (isAdmin?'<button class="btn btn-outline" onclick="deleteSelectedTeacherAttendance()">🗑️ Delete</button>':'')+
+      '</div></div></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px">'+
+      '<button class="small-btn" onclick="showTeacherAttendanceHistory(\'oneDay\')">One Day</button>'+
+      '<button class="small-btn" onclick="showTeacherAttendanceHistory(\'oneWeek\')">One Week</button>'+
+      '<button class="small-btn" onclick="showTeacherAttendanceHistory(\'oneMonth\')">One Month</button>'+
+      '<button class="small-btn" onclick="showTeacherAttendanceHistory(\'lastMonth\')">Last Month</button>'+
+      '<button class="small-btn" onclick="downloadTeacherAttendanceHistory()">⬇️ Download History</button>'+
+      '</div><div id="teacherAttendanceHistory">'+buildTeacherAttendanceHistoryTable(selectedId,'oneMonth')+'</div></div>';
+  };
+
+  function selectedTeacherId(){
+    if(window.schoolHubRole==='teacher')return currentTeacherId();
+    return Number(document.getElementById('teacherAttendanceTeacher')?.value||0);
+  }
+  function selectedTeacherDate(){return document.getElementById('teacherAttendanceDate')?.value||today();}
+  function buildTeacherAttendanceHistoryTable(id,kind){
+    if(!id)return '<div class="empty">No teacher selected.</div>';
+    const range=teacherAttendanceRange(kind||'oneMonth');
+    const recs=teacherAttendanceRows(id,range.from,range.to);
+    const t=(getTeachers()||[]).find(x=>Number(x.id)===Number(id));
+    const rows=recs.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+escapeHtml(formatDate(r.date))+'</td><td><span class="badge '+(r.status==='Present'?'green':'red')+'">'+escapeHtml(r.status)+'</span></td><td>'+escapeHtml(r.markedBy||'-')+'</td>'+(window.schoolHubRole==='admin'?'<td><button class="delete-btn" onclick="deleteTeacherAttendanceById('+Number(id)+',\''+String(r.date).slice(0,10)+'\')">Delete</button></td>':'')+'</tr>').join('');
+    return '<div class="card" style="padding:14px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>'+escapeHtml(t?.name||'Teacher')+'</strong><span style="color:#667085;font-size:12px">'+formatDate(range.from)+' to '+formatDate(range.to)+'</span></div><div class="table-container" style="margin-top:10px"><table><thead><tr><th>#</th><th>Date</th><th>Status</th><th>Marked By</th>'+(window.schoolHubRole==='admin'?'<th>Action</th>':'')+'</tr></thead><tbody>'+(rows||'<tr><td colspan="5"><div class="empty">No attendance records found.</div></td></tr>')+'</tbody></table></div></div>';
+  }
+  window.showTeacherAttendanceHistory=function(kind){
+    const box=document.getElementById('teacherAttendanceHistory'); if(box)box.innerHTML=buildTeacherAttendanceHistoryTable(selectedTeacherId(),kind);
+  };
+  window.markTeacherSelfAttendance=function(status){
+    const id=selectedTeacherId(); if(!id){alert('Teacher not found.');return;}
+    let date=selectedTeacherDate();
+    if(window.schoolHubRole==='teacher' && date!==today()){alert('Teacher sirf aaj ki attendance laga sakta hai.');return;}
+    if(!['Present','Absent'].includes(status))return;
+    if(window.schoolHubRole==='teacher' && id!==currentTeacherId()){alert('Aap sirf apni attendance laga sakte hain.');return;}
+    upsertTeacherAttendance(id,date,status,window.schoolHubRole==='teacher'?'teacher':'admin');
+    alert('Teacher attendance '+status+' saved for '+formatDate(date)+'.');
+    if(window.schoolHubRole==='admin')renderTeacherAttendancePage(); else {showPage('teacherAttendance');}
+  };
+  window.deleteSelectedTeacherAttendance=function(){
+    if(window.schoolHubRole!=='admin')return;
+    const id=selectedTeacherId(),date=selectedTeacherDate(); if(!id||!date)return;
+    if(!confirm('Delete teacher attendance for '+formatDate(date)+'?'))return;
+    deleteTeacherAttendanceRecord(id,date); renderTeacherAttendancePage();
+  };
+  window.deleteTeacherAttendanceById=function(id,date){
+    if(window.schoolHubRole!=='admin')return;
+    if(!confirm('Delete attendance for '+formatDate(date)+'?'))return;
+    deleteTeacherAttendanceRecord(id,date); renderTeacherAttendancePage();
+  };
+  window.downloadTeacherAttendanceHistory=function(){
+    const id=selectedTeacherId(); if(!id)return;
+    const range=teacherAttendanceRange('oneMonth'), recs=teacherAttendanceRows(id,range.from,range.to), t=(getTeachers()||[]).find(x=>Number(x.id)===id);
+    const rows=[['Teacher Name','Date','Status','Marked By']].concat(recs.map(r=>[t?.name||'',r.date,r.status,r.markedBy||'']));
+    const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'); downloadFile('Teacher_Attendance_'+(t?.name||'Teacher').replace(/[^a-z0-9]+/gi,'_')+'.csv',csv);
+  };
+
+  // ---------- Add Teacher Attendance menu + routing without replacing existing modules ----------
+  function ensureTeacherAttendanceMenu(){
+    const menu=document.querySelector('.menu'); if(!menu)return;
+    let li=document.getElementById('teacherAttendanceMenuItem');
+    if(!li){
+      li=document.createElement('li'); li.id='teacherAttendanceMenuItem'; li.setAttribute('onclick',"showPage('teacherAttendance',this)"); menu.insertBefore(li,menu.querySelector('.logout')||null);
+    }
+    li.innerHTML=window.schoolHubRole==='teacher'?'🧑‍🏫 My Attendance':'👨‍🏫 Teacher Attendance';
+    li.style.display=(window.schoolHubRole==='admin'||window.schoolHubRole==='teacher')?'':'none';
+  }
+  const __oldUpdateRoleMenuVisibility=window.updateRoleMenuVisibility;
+  window.updateRoleMenuVisibility=function(){ if(typeof __oldUpdateRoleMenuVisibility==='function')__oldUpdateRoleMenuVisibility(); ensureTeacherAttendanceMenu(); };
+  const __oldOpenApplication=window.openApplication;
+  window.openApplication=function(){ const r=__oldOpenApplication.apply(this,arguments); ensureTeacherAttendanceMenu(); return r; };
+  const __oldShowPage=window.showPage;
+  window.showPage=function(page,element){
+    if(page==='teacherAttendance'){
+      document.querySelectorAll('.menu li').forEach(x=>x.classList.remove('active')); if(element)element.classList.add('active');
+      document.getElementById('sidebar')?.classList.remove('open');
+      document.getElementById('pageTitle').innerText=window.schoolHubRole==='teacher'?'My Attendance':'Teacher Attendance';
+      document.getElementById('dashboardPage').style.display='none'; document.getElementById('otherPage').style.display='block';
+      renderTeacherAttendancePage(); return;
+    }
+    return __oldShowPage.apply(this,arguments);
+  };
+
+  // ---------- Notice board image upload for Admin + Teacher ----------
+  function canManageNotice(){return window.schoolHubRole==='admin'||window.schoolHubRole==='teacher';}
+  function renderNoticePageNew(){
+    const notices=getData('schoolNotices'); const arr=Array.isArray(notices)?notices:[];
+    return '<div class="card"><div class="card-header"><div><h3>📢 Notice Board</h3><p style="color:#777;font-size:12px;margin-top:4px">'+arr.length+' Current & Previous Notice'+(arr.length===1?'':'s')+'</p></div>'+(canManageNotice()?'<button class="small-btn" onclick="openNoticeModal()">+ New Notice</button>':'')+'</div>'+
+      (arr.length?arr.map((n,i)=>'<div class="notice"><strong>'+escapeHtml(n.title||'Untitled Notice')+'</strong><span>'+escapeHtml(n.text||'')+'</span>'+(n.image?'<div style="margin-top:10px"><img src="'+escapeHtml(n.image)+'" style="max-width:100%;max-height:260px;border-radius:10px;object-fit:contain;border:1px solid #e5eaf1"></div>':'')+'<div style="margin-top:6px;color:#98a2b3;font-size:11px">'+(n.date?escapeHtml(formatDate(n.date)):'Date not available')+'</div>'+(canManageNotice()?'<div style="margin-top:8px"><button class="edit-btn" onclick="editNotice('+i+')">Edit</button> <button class="delete-btn" onclick="deleteNotice('+i+')">Delete</button></div>':'')+'</div>').join(''):'<div class="empty"><h3>No notices yet</h3><p>Click “+ New Notice” to add a notice.</p></div>')+'</div>';
+  }
+  window.renderNoticePageNew=renderNoticePageNew;
+  const __oldGetOtherPage=window.getOtherPage;
+  window.getOtherPage=function(page){if(page==='notices')return renderNoticePageNew(); return __oldGetOtherPage.apply(this,arguments);};
+  window.openNoticeModal=function(index=null){
+    if(!canManageNotice()){alert('Only School Admin or Teacher can manage notices.');return;}
+    const notices=getData('schoolNotices'); const arr=Array.isArray(notices)?notices:[]; const n=index!==null&&arr[index]?arr[index]:{title:'',text:'',image:''};
+    document.getElementById('noticeEditModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend','<div class="modal-bg" id="noticeEditModal" style="display:flex"><div class="modal"><div class="modal-header"><h2>'+(index===null?'Add New Notice':'Edit Notice')+'</h2><button class="close-btn" onclick="closeNoticeModal()">×</button></div><div class="form-group"><label>Notice Title *</label><input id="noticeTitleInput" value="'+escapeHtml(n.title||'')+'"></div><div class="form-group"><label>Notice Details *</label><textarea id="noticeTextInput">'+escapeHtml(n.text||'')+'</textarea></div><div class="form-group"><label>Notice Image (Optional)</label><input id="noticeImageInput" type="file" accept="image/*" onchange="cropImageFromInput(event,\'noticeImage\')"><div id="noticeImagePreview" style="margin-top:10px">'+(n.image?'<img src="'+escapeHtml(n.image)+'" style="max-width:220px;max-height:160px;object-fit:contain;border-radius:8px">':'')+'</div><input type="hidden" id="noticeImageData" value="'+escapeHtml(n.image||'')+'"><button type="button" class="small-btn" style="margin-top:8px" onclick="openCropForCurrentNoticeImage()">✂️ Crop Image</button></div><button class="btn btn-primary" onclick="saveNotice('+ (index===null?'null':index) +')">Save Notice</button></div></div>');
+  };
+  window.saveNotice=function(index){
+    if(!canManageNotice())return;
+    const title=document.getElementById('noticeTitleInput')?.value.trim(), text=document.getElementById('noticeTextInput')?.value.trim(), image=document.getElementById('noticeImageData')?.value||'';
+    if(!title||!text){alert('Please enter notice title and details.');return;}
+    const arr=getData('schoolNotices'); const notices=Array.isArray(arr)?arr:[];
+    const old=index!==null&&notices[index]?notices[index]:{};
+    const item={...old,title,text,image,date:old.date||today(),postedBy:old.postedBy||window.schoolHubRole};
+    if(index===null)notices.unshift(item); else notices[index]=item;
+    setData('schoolNotices',notices); closeNoticeModal(); document.getElementById('otherPage').innerHTML=getOtherPage('notices'); updateDashboardNotice();
+  };
+  window.editNotice=function(index){openNoticeModal(index);};
+  window.deleteNotice=function(index){if(!canManageNotice())return;if(!confirm('Delete this notice?'))return;const a=getData('schoolNotices');const arr=Array.isArray(a)?a:[];arr.splice(index,1);setData('schoolNotices',arr);document.getElementById('otherPage').innerHTML=getOtherPage('notices');updateDashboardNotice();};
+
+  // ---------- Image cropper ----------
+  let cropState=null;
+  function openCropModal(dataUrl,callback){
+    cropState={src:dataUrl,callback}; document.getElementById('schoolHubCropModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend','<div class="modal-bg" id="schoolHubCropModal" style="display:flex;z-index:99999"><div class="modal" style="max-width:620px"><div class="modal-header"><h2>✂️ Crop Image</h2><button class="close-btn" onclick="closeSchoolHubCrop()">×</button></div><div style="text-align:center;background:#f5f7fa;padding:12px;border-radius:10px"><canvas id="schoolHubCropCanvas" style="max-width:100%;max-height:360px;background:#111;border-radius:8px"></canvas></div><div class="form-group" style="margin-top:10px"><label>Zoom</label><input id="schoolHubCropZoom" type="range" min="1" max="3" step="0.05" value="1" oninput="drawSchoolHubCrop()"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-outline" onclick="closeSchoolHubCrop()">Cancel</button><button class="btn btn-primary" onclick="applySchoolHubCrop()">Crop & Use</button></div></div></div>');
+    const img=new Image(); img.onload=()=>{cropState.img=img;cropState.zoom=1;drawSchoolHubCrop();}; img.src=dataUrl;
+  }
+  window.closeSchoolHubCrop=function(){document.getElementById('schoolHubCropModal')?.remove();cropState=null;};
+  window.drawSchoolHubCrop=function(){
+    if(!cropState?.img)return; const c=document.getElementById('schoolHubCropCanvas'); if(!c)return; const ctx=c.getContext('2d'); const img=cropState.img; const zoom=Number(document.getElementById('schoolHubCropZoom')?.value||1); const size=Math.min(img.width,img.height)/zoom; const sx=(img.width-size)/2,sy=(img.height-size)/2; const max=520, scale=Math.min(1,max/size); c.width=Math.max(1,Math.round(size*scale));c.height=c.width;ctx.drawImage(img,sx,sy,size,size,0,0,c.width,c.height);
+  };
+  window.applySchoolHubCrop=function(){
+    if(!cropState?.img)return; const c=document.getElementById('schoolHubCropCanvas'); const out=document.createElement('canvas');out.width=900;out.height=900;const ctx=out.getContext('2d');const img=cropState.img;const zoom=Number(document.getElementById('schoolHubCropZoom')?.value||1);const size=Math.min(img.width,img.height)/zoom;const sx=(img.width-size)/2,sy=(img.height-size)/2;ctx.drawImage(img,sx,sy,size,size,0,0,900,900);const data=out.toDataURL('image/jpeg',0.88);const cb=cropState.callback;closeSchoolHubCrop();if(typeof cb==='function')cb(data);
+  };
+  window.cropImageFromInput=function(event,target){const file=event?.target?.files?.[0];if(!file)return;const r=new FileReader();r.onload=e=>openCropModal(e.target.result,data=>{if(target==='noticeImage'){const h=document.getElementById('noticeImageData');if(h)h.value=data;const p=document.getElementById('noticeImagePreview');if(p)p.innerHTML='<img src="'+data+'" style="max-width:220px;max-height:160px;object-fit:contain;border-radius:8px">';}});r.readAsDataURL(file);if(event.target)event.target.value='';};
+  window.openCropForCurrentNoticeImage=function(){const d=document.getElementById('noticeImageData')?.value;if(d)openCropModal(d,data=>{document.getElementById('noticeImageData').value=data;document.getElementById('noticeImagePreview').innerHTML='<img src="'+data+'" style="max-width:220px;max-height:160px;object-fit:contain;border-radius:8px">';});else alert('Pehle image select karein.');};
+
+  // Student/Teacher photo crop override.
+  window.previewStudentPhoto=function(event){const file=event?.target?.files?.[0];if(!file)return;const r=new FileReader();r.onload=e=>openCropModal(e.target.result,data=>{studentPhotoData=data;const p=document.getElementById('studentPhotoPreview');if(p)p.innerHTML='<img class="profile-photo" src="'+data+'">';});r.readAsDataURL(file);event.target.value='';};
+  window.previewTeacherPhoto=function(event){const file=event?.target?.files?.[0];if(!file)return;const r=new FileReader();r.onload=e=>openCropModal(e.target.result,data=>{teacherPhotoData=data;const p=document.getElementById('teacherPhotoPreview');if(p)p.innerHTML='<img class="profile-photo" src="'+data+'">';});r.readAsDataURL(file);event.target.value='';};
+
+  // Homework image crop override; each selected image is cropped before use.
+  window.previewHomeworkImages=function(event){const files=[...(event?.target?.files||[])].filter(f=>f.type&&f.type.startsWith('image/'));if(!files.length)return;homeworkImageData=[];let idx=0;const next=()=>{if(idx>=files.length){const area=document.getElementById('homeworkImagePreview');if(area)area.innerHTML=homeworkImageData.map((img,i)=>'<div style="position:relative"><img src="'+img.data+'" style="width:100px;height:75px;object-fit:cover;border:1px solid #dce2eb;border-radius:8px"><div style="font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeHtml(img.name)+'</div><button type="button" class="small-btn" onclick="recropHomeworkImage('+i+')">✂️ Crop</button></div>').join('');event.target.value='';return;}const file=files[idx++];const r=new FileReader();r.onload=e=>openCropModal(e.target.result,data=>{homeworkImageData.push({name:file.name,data});next();});r.readAsDataURL(file);};next();};
+  window.recropHomeworkImage=function(i){const item=homeworkImageData?.[i];if(!item)return;openCropModal(item.data,data=>{item.data=data;const area=document.getElementById('homeworkImagePreview');if(area)area.innerHTML=homeworkImageData.map((img,j)=>'<div style="position:relative"><img src="'+img.data+'" style="width:100px;height:75px;object-fit:cover;border:1px solid #dce2eb;border-radius:8px"><div style="font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeHtml(img.name)+'</div><button type="button" class="small-btn" onclick="recropHomeworkImage('+j+')">✂️ Crop</button></div>').join('');});};
+
+  // Gallery crop override. All gallery images remain admin-only, as before.
+  function cropFilesSequential(files,done){const out=[];let i=0;const next=()=>{if(i>=files.length){done(out);return;}const f=files[i++];const r=new FileReader();r.onload=e=>openCropModal(e.target.result,data=>{out.push(data);next();});r.readAsDataURL(f);};next();}
+  window.saveGalleryLogo=function(event){if(!isSchoolAdmin()){alert('Only School Admin can upload images.');return;}const file=event?.target?.files?.[0];if(!file)return;const r=new FileReader();r.onload=e=>openCropModal(e.target.result,data=>{try{localStorage.setItem('schoolLogo',data);updateDashboardBranding();const other=document.getElementById('otherPage');if(other&&document.getElementById('pageTitle')?.innerText==='Gallery')other.innerHTML=getOtherPage('gallery');}catch(err){alert('Logo save failed. Please use a smaller image.');}});r.readAsDataURL(file);event.target.value='';};
+  window.saveGalleryDashboardImages=function(event){if(!isSchoolAdmin()){alert('Only School Admin can upload images.');return;}const files=[...(event?.target?.files||[])].filter(f=>f.type&&f.type.startsWith('image/'));if(!files.length)return;const old=getData('schoolGalleryImages');const existing=Array.isArray(old)?old.filter(Boolean):[];const selected=files.slice(0,Math.max(0,5-existing.length));if(!selected.length){alert('Maximum 5 dashboard images are already added.');event.target.value='';return;}cropFilesSequential(selected,out=>{try{setData('schoolGalleryImages',existing.concat(out).slice(0,5));window.dashboardSlideIndex=0;updateDashboardBranding();const other=document.getElementById('otherPage');if(other&&document.getElementById('pageTitle')?.innerText==='Gallery')other.innerHTML=getOtherPage('gallery');}catch(e){alert('Dashboard images save failed.');}});event.target.value='';};
+  window.saveGalleryAllImages=function(event){if(!isSchoolAdmin()){alert('Only School Admin can upload images.');return;}const files=[...(event?.target?.files||[])].filter(f=>f.type&&f.type.startsWith('image/'));if(!files.length)return;const old=getData('schoolAllImages');const existing=Array.isArray(old)?old.filter(Boolean):[];cropFilesSequential(files,out=>{try{setData('schoolAllImages',existing.concat(out).filter(Boolean));const other=document.getElementById('otherPage');if(other&&document.getElementById('pageTitle')?.innerText==='Gallery')other.innerHTML=getOtherPage('gallery');}catch(e){alert('Gallery images save failed.');}});event.target.value='';};
+
+  // Initial menu sync after this script is loaded.
+  setTimeout(ensureTeacherAttendanceMenu,50);
+})();
+
+</script>
 </head>
 
 <body>
