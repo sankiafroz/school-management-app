@@ -312,59 +312,6 @@ th{background:#fafbfd;color:#667085}
 .trash-item-name{font-weight:800}.trash-item-meta{font-size:11px;color:#667085;margin-top:4px}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<!-- Firebase SDKs + SchoolHub Firebase connection -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyA0ku8FTYY5izmBdrNVgANM2-J4AuNsCs0",
-    authDomain: "schoolhub-69028.firebaseapp.com",
-    projectId: "schoolhub-69028",
-    storageBucket: "schoolhub-69028.firebasestorage.app",
-    messagingSenderId: "168426055594",
-    appId: "1:168426055594:web:e3ccb0eccddd21daefedd3"
-  };
-
-  let firebaseApp = null;
-  let firebaseAuth = null;
-  let firebaseDb = null;
-  let firebaseReady = false;
-
-  try {
-    firebaseApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
-    firebaseAuth = firebase.auth();
-    firebaseDb = firebase.firestore();
-    firebaseReady = true;
-    window.firebaseApp = firebaseApp;
-    window.firebaseAuth = firebaseAuth;
-    window.firebaseDb = firebaseDb;
-    window.firebaseReady = true;
-    console.info("SchoolHub Firebase connected:", firebaseConfig.projectId);
-  } catch (error) {
-    console.error("SchoolHub Firebase initialization failed:", error);
-    window.firebaseReady = false;
-  }
-</script>
-
-<script>
-// Safe Firebase helpers. Existing SchoolHub login/dashboard logic remains unchanged.
-function schoolHubFirebaseUser(){
-  try { return window.firebaseAuth ? window.firebaseAuth.currentUser : null; } catch(e){ return null; }
-}
-function schoolHubFirestore(){
-  return window.firebaseDb || null;
-}
-async function schoolHubSaveDocument(collection,id,data){
-  if(!window.firebaseDb) throw new Error("Firebase Firestore is not initialized.");
-  return window.firebaseDb.collection(collection).doc(String(id)).set(data,{merge:true});
-}
-async function schoolHubGetDocument(collection,id){
-  if(!window.firebaseDb) throw new Error("Firebase Firestore is not initialized.");
-  const snap=await window.firebaseDb.collection(collection).doc(String(id)).get();
-  return snap.exists ? snap.data() : null;
-}
-</script>
 </head>
 
 <body>
