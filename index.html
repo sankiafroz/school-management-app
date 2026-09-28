@@ -2524,7 +2524,6 @@ function showStudentPortalDashboard(){
       </div>
     </div>
     <div class="student-portal-actions" style="margin-bottom:16px">
-      <button class="student-portal-btn" onclick="showStudentPortalTimetable()">🕐 My Class Timetable</button>
       <button class="student-portal-btn" onclick="showStudentPortalResults()">📝 My Results</button>
     </div>
     <div class="student-portal-grid">
@@ -2754,7 +2753,15 @@ function openClasses(type){
 let html=`
 <div class="card">
 <div class="card-header">
+<div>
 <h3>${getTypeTitle(type)} - Select Class</h3>
+<p style="color:#777;font-size:12px;margin-top:4px">Class-wise data ke liye class card ke button ka use karein.</p>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+${type==="students"?`<button type="button" class="small-btn" onclick="downloadStudentsAllData()">⬇️ Download All Students Data</button>`:""}
+${type==="exams"?`<button type="button" class="small-btn" onclick="downloadResultsAllData()">⬇️ Download All Result</button>`:""}
+${type==="attendance"?`<button type="button" class="small-btn" onclick="downloadAttendanceAllData('all')">⬇️ Download All Attendance</button>`:""}
+</div>
 </div>
 </div>
 `;
@@ -2825,9 +2832,9 @@ html+=`
 <div class="class-number">Class ${i}</div>
 <div class="class-info">${students.length} Students</div>
 <div class="open-text">Open Class →</div>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-<button type="button" class="small-btn" onclick="event.stopPropagation();openClassTimetable(${i})">🕐 Timetable</button>
-</div>
+${type==="students"?`<button type="button" class="small-btn" style="margin-top:12px" onclick="event.stopPropagation();downloadStudentsClassData(${i})">⬇️ Download Class Data</button>`:""}
+${type==="exams"?`<button type="button" class="small-btn" style="margin-top:12px" onclick="event.stopPropagation();downloadAllStudentsResultData(${i},'','')">⬇️ Download Class-wise Result</button>`:""}
+${type==="attendance"?`<button type="button" class="small-btn" style="margin-top:12px" onclick="event.stopPropagation();downloadAttendanceAllData('class',${i})">⬇️ Download Class-wise Attendance</button>`:""}
 </div>
 </div>
 `;
@@ -2958,6 +2965,8 @@ function renderAttendanceRegister(){
 <button class="small-btn" onclick="markAllPresent(${classNo})">🟢 Mark All Present</button>
 <button class="small-btn" style="background:#64748b" onclick="openHolidayModal(${classNo})">🔵 Mark Holiday</button>
 <button class="small-btn" style="background:#475569" onclick="markAllSunday(${classNo})">📅 Mark All Sunday</button>
+<button class="small-btn" style="background:#15803d" onclick="downloadAttendanceAllData('all')">⬇️ Download All Attendance</button>
+<button class="small-btn" style="background:#15803d" onclick="downloadAttendanceAllData('class',${classNo})">⬇️ Download Class-wise Attendance</button>
 <button class="small-btn" style="background:#15803d" onclick="openAttendanceDownload(${classNo})">⬇️ Download Attendance</button>
 </div>
     </div>
@@ -3702,8 +3711,12 @@ ${renderDeleteRestoreCard("student")}
 <button class="small-btn" onclick="openAddStudent(${classNo},'${stream||""}','${section||""}')">+ Add Student</button>
 </div>
 
-<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4">
-👨‍🎓 <strong>Students:</strong> ${students.length}
+<div style="padding:18px;background:#f8faff;border-bottom:1px solid #edf0f4;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+<div>👨‍🎓 <strong>Students:</strong> ${students.length}</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button type="button" class="small-btn" onclick="downloadStudentsAllData()">⬇️ Download All Students Data</button>
+<button type="button" class="small-btn" onclick="downloadStudentsClassData(${classNo})">⬇️ Download Class-wise Data</button>
+</div>
 </div>
 
 <div class="search-box">
@@ -3837,7 +3850,8 @@ if(type==="exams"){
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
       <button type="button" class="small-btn" onclick="downloadResultExcelTemplate(${classNo},'${stream||""}','${section||""}')">📊 Download Excel Sheet</button>
-      <button type="button" class="small-btn" onclick="downloadAllStudentsResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download All Result</button>
+      <button type="button" class="small-btn" onclick="downloadResultsAllData()">⬇️ Download All Result</button>
+      <button type="button" class="small-btn" onclick="downloadAllStudentsResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Class-wise Result</button>
       <button type="button" class="small-btn" onclick="downloadPendingResultData(${classNo},'${stream||""}','${section||""}')">⬇️ Download Pending Result</button>
       <button type="button" class="small-btn" onclick="openPromotionPanel(${classNo},'${stream||""}','${section||""}')">🎓 Promote to Next Class</button>
     </div>
@@ -5011,7 +5025,10 @@ function renderTeacherPage(){
           <h3>👨‍🏫 Teacher Profiles</h3>
           <p style="color:#777;font-size:12px;margin-top:4px">${teachers.length} Teacher${teachers.length===1?'':'s'}</p>
         </div>
-        <button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="small-btn" onclick="downloadTeachersAllData()">⬇️ Download All Teachers Data</button>
+<button class="small-btn" onclick="openTeacherModal()">+ Add Teacher</button>
+</div>
       </div>
       <div class="search-box">
         <input id="teacherSearch" placeholder="🔍 Search teacher, mobile, qualification or subject..." oninput="filterTeachers()">
@@ -7088,34 +7105,73 @@ function deleteNotice(index){
 if(page==="reports"){
 
 let students=getStudents();
-let paid=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
-let total=students.reduce((a,s)=>a+Number(s.fee||0),0);
-let results=students.map(s=>getExamForStudent(s.id)).filter(Boolean);
-let pass=results.filter(e=>getExamPercentage(e)>=33).length;
+let teachers=Array.isArray(getTeachers())?getTeachers():[];
+let todayDate=today();
+let attendanceRecords=getAttendance();
+
+let present=students.filter(s=>attendanceRecords.some(a=>Number(a.studentId)===Number(s.id)&&String(a.date||"").slice(0,10)===todayDate&&a.status==="Present")).length;
+let absent=students.filter(s=>attendanceRecords.some(a=>Number(a.studentId)===Number(s.id)&&String(a.date||"").slice(0,10)===todayDate&&a.status==="Absent")).length;
+let leave=students.filter(s=>attendanceRecords.some(a=>Number(a.studentId)===Number(s.id)&&String(a.date||"").slice(0,10)===todayDate&&a.status==="Leave")).length;
+
+let totalFee=students.reduce((a,s)=>a+Number(s.fee||0),0);
+let collectedFee=students.reduce((a,s)=>a+getStudentPaid(s.id),0);
+let pendingFee=Math.max(0,totalFee-collectedFee);
+
+let completeResult=students.filter(s=>!!getFinalResultForStudent(s.id)).length;
+let pendingResult=Math.max(0,students.length-completeResult);
+
+/* Teacher attendance is read from existing teacherAttendance data when available.
+   If no teacher attendance records exist, teacher objects can still provide a
+   status field without changing any existing teacher data. */
+let teacherAttendance=getData("teacherAttendance");
+if(!Array.isArray(teacherAttendance))teacherAttendance=[];
+let presentTeacher=teachers.filter(t=>{
+  const rec=teacherAttendance.find(a=>Number(a.teacherId??a.teacherID)===Number(t.id)&&String(a.date||"").slice(0,10)===todayDate);
+  return (rec?.status||t.attendanceStatus||t.status||"").toString().toLowerCase()==="present";
+}).length;
+let absentTeacher=teachers.filter(t=>{
+  const rec=teacherAttendance.find(a=>Number(a.teacherId??a.teacherID)===Number(t.id)&&String(a.date||"").slice(0,10)===todayDate);
+  const st=(rec?.status||t.attendanceStatus||t.status||"").toString().toLowerCase();
+  return st==="absent";
+}).length;
 
 return `
-<div class="stats">
-
-<div class="stat-card">
-<div class="stat-number">${students.length}</div>
-<div class="stat-label">Students</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">${total?Math.round(paid/total*100):0}%</div>
-<div class="stat-label">Fee Collection</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">${results.length}</div>
-<div class="stat-label">Results Added</div>
-</div>
-
-<div class="stat-card">
-<div class="stat-number">${results.length?Math.round(pass/results.length*100):0}%</div>
-<div class="stat-label">Pass Percentage</div>
-</div>
-
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h3>📊 Reports</h3>
+      <p style="color:#777;font-size:12px;margin-top:4px">All classes ka combined report — ${formatDate(todayDate)}</p>
+    </div>
+  </div>
+  <div class="dashboard-metrics" style="padding:18px">
+    <button class="dashboard-metric green" onclick="openReportStudentList('present')">
+      <small>Present Students</small><strong>${present}</strong>
+    </button>
+    <button class="dashboard-metric red" onclick="openReportStudentList('absent')">
+      <small>Absent Students</small><strong>${absent}</strong>
+    </button>
+    <button class="dashboard-metric yellow" onclick="openReportStudentList('leave')">
+      <small>Leave Students</small><strong>${leave}</strong>
+    </button>
+    <button class="dashboard-metric yellow" onclick="openReportStudentList('feePending')">
+      <small>Fees Pending</small><strong>₹${pendingFee.toLocaleString("en-IN")}</strong>
+    </button>
+    <button class="dashboard-metric green" onclick="openReportStudentList('feeCollected')">
+      <small>Fees Collected</small><strong>₹${collectedFee.toLocaleString("en-IN")}</strong>
+    </button>
+    <button class="dashboard-metric red" onclick="openReportStudentList('resultPending')">
+      <small>Result Pending</small><strong>${pendingResult}</strong>
+    </button>
+    <button class="dashboard-metric blue" onclick="openReportStudentList('resultComplete')">
+      <small>Complete Result</small><strong>${completeResult}</strong>
+    </button>
+    <button class="dashboard-metric green" onclick="openReportTeacherList('present')">
+      <small>Present Teachers</small><strong>${presentTeacher}</strong>
+    </button>
+    <button class="dashboard-metric red" onclick="openReportTeacherList('absent')">
+      <small>Absent Teachers</small><strong>${absentTeacher}</strong>
+    </button>
+  </div>
 </div>
 `;
 }
@@ -7154,6 +7210,137 @@ return `
 return "";
 }
 
+
+
+/* ADD-ONLY DOWNLOAD / REPORT HELPERS */
+function schoolHubCsv(rows){
+  return "\uFEFF"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+}
+
+function downloadStudentsAllData(){
+  const students=getStudents();
+  if(!students.length){alert("No students found.");return;}
+  const rows=[["S.No.","Roll Number","Student Name","Father Name","Mother Name","Mobile","Aadhaar","PEN","Address","DOB","Age","Gender","Caste","Religion","Class","Section","Stream","Total Fee"]];
+  students.slice().sort((a,b)=>Number(a.classNo||99)-Number(b.classNo||99)||Number(a.roll||999999)-Number(b.roll||999999)).forEach((s,i)=>{
+    rows.push([i+1,s.roll??"",s.name??"",s.father??"",s.mother??"",s.mobile??"",s.aadhaar??"",s.pan??s.PAN??s.studentPAN??"",s.address??"",s.dob??s.DOB??"",s.age??"",s.gender??"",s.caste??"",s.religion??"",s.classNo??"",s.section??"",s.stream??"",s.fee??0]);
+  });
+  downloadFile("All_Students_Data.csv",schoolHubCsv(rows));
+}
+
+function downloadStudentsClassData(classNo){
+  classNo=Number(classNo);
+  const students=getClassStudents(classNo);
+  if(!students.length){alert("No students found in Class "+classNo+".");return;}
+  const rows=[["S.No.","Roll Number","Student Name","Father Name","Mother Name","Mobile","Aadhaar","PEN","Address","DOB","Age","Gender","Caste","Religion","Class","Section","Stream","Total Fee"]];
+  students.slice().sort((a,b)=>Number(a.roll||999999)-Number(b.roll||999999)).forEach((s,i)=>{
+    rows.push([i+1,s.roll??"",s.name??"",s.father??"",s.mother??"",s.mobile??"",s.aadhaar??"",s.pan??s.PAN??s.studentPAN??"",s.address??"",s.dob??s.DOB??"",s.age??"",s.gender??"",s.caste??"",s.religion??"",s.classNo??classNo,s.section??"",s.stream??"",s.fee??0]);
+  });
+  downloadFile("Class_"+classNo+"_Students_Data.csv",schoolHubCsv(rows));
+}
+
+function downloadTeachersAllData(){
+  const teachers=Array.isArray(getTeachers())?getTeachers():[];
+  if(!teachers.length){alert("No teachers found.");return;}
+  const rows=[["S.No.","Teacher Name","Mobile","Gmail","Qualification","Teaching Class","Section","Subjects","Teacher Login ID","Password"]];
+  teachers.forEach((t,i)=>{
+    let subjects=Array.isArray(t.subjects)?t.subjects.filter(Boolean):[];
+    if(!subjects.length&&t.subject)subjects=[t.subject];
+    rows.push([i+1,t.name??"",t.mobile??"",t.email??"",t.qualification??"",t.classNo??t.teachingClass??"",t.section??"",subjects.join(", "),t.teacherId??"",t.password??""]);
+  });
+  downloadFile("All_Teachers_Data.csv",schoolHubCsv(rows));
+}
+
+function downloadResultsAllData(){
+  const students=getStudents();
+  if(!students.length){alert("No students found.");return;}
+  const rows=[["Roll Number","Student Name","Class","Section","Result Type","Result Name","Result Date","Subject","Maximum Marks","Obtained Marks","Total Marks","Total Obtained","Percentage","Status","Promotion"]];
+  students.slice().sort((a,b)=>Number(a.classNo||99)-Number(b.classNo||99)||Number(a.roll||999999)-Number(b.roll||999999)).forEach(st=>{
+    const results=getExamResultsForStudent(st.id);
+    if(!results.length){
+      rows.push([st.roll??"",st.name??"",st.classNo??"",st.section??"","PENDING","","","","","","","","","PENDING RESULT",st.promoted?"PROMOTED":""]);
+      return;
+    }
+    results.forEach(e=>{
+      const pct=getExamPercentage(e);
+      const status=isFinalResultRecord(e)?(pct>=33?"PASS":"FAIL"):(pct>=33?"PASS":"");
+      const subs=Array.isArray(e.subjects)?e.subjects:[];
+      if(!subs.length){
+        rows.push([st.roll??"",st.name??"",st.classNo??"",st.section??"",e.resultType??"",e.examName??"",e.examDate??"","",getExamTotal(e),getExamObtained(e),getExamTotal(e),getExamObtained(e),pct.toFixed(1)+"%",status,st.promoted?"PROMOTED":""]);
+      }else{
+        subs.forEach(x=>{
+          const n=normalizeExamSubject(x);
+          rows.push([st.roll??"",st.name??"",st.classNo??"",st.section??"",e.resultType??"",e.examName??"",e.examDate??"",n.name??"",getSubjectMax(n),getSubjectObtained(n),getExamTotal(e),getExamObtained(e),pct.toFixed(1)+"%",status,st.promoted?"PROMOTED":""]);
+        });
+      }
+    });
+  });
+  downloadFile("All_Students_Result.csv",schoolHubCsv(rows));
+}
+
+function downloadAttendanceAllData(scope,classNo){
+  const students=scope==="class"?getClassAttendanceStudents(Number(classNo)):getStudents().slice().sort((a,b)=>Number(a.classNo||99)-Number(b.classNo||99)||Number(a.roll||999999)-Number(b.roll||999999));
+  if(!students.length){alert("No students found.");return;}
+  const records=getAttendance();
+  const dates=[...new Set(records.filter(r=>students.some(s=>Number(s.id)===Number(r.studentId))).map(r=>String(r.date||"").slice(0,10)).filter(Boolean))].sort();
+  if(!dates.length){
+    alert("No attendance records found.");
+    return;
+  }
+  const rows=[["Roll No.","Student Name","Class","Section",...dates.map(formatDate)]];
+  students.forEach((s,i)=>{
+    const row=[attendanceRoll(s,i),s.name??"",s.classNo??"",s.section??""];
+    dates.forEach(dt=>{
+      const rec=getAttendanceRecordForStudentDate(records,s,dt);
+      const raw=String(getAttendanceRecordStatus(rec)||"").trim();
+      const code=attendanceStatusCode(raw);
+      row.push(code==="H"?String(rec?.holidayName||rec?.holiday||"Holiday"):code||raw||"");
+    });
+    rows.push(row);
+  });
+  const suffix=scope==="class"?"Class_"+Number(classNo):"All_Classes";
+  downloadFile(suffix+"_Attendance.csv",schoolHubCsv(rows));
+}
+
+function openReportStudentList(type){
+  const students=getStudents();
+  let filtered=students.slice();
+  const att=getAttendance(), dt=today();
+  let title="Students Report";
+  if(type==="present"){filtered=students.filter(s=>att.some(a=>Number(a.studentId)===Number(s.id)&&String(a.date||"").slice(0,10)===dt&&a.status==="Present"));title="Present Students";}
+  if(type==="absent"){filtered=students.filter(s=>att.some(a=>Number(a.studentId)===Number(s.id)&&String(a.date||"").slice(0,10)===dt&&a.status==="Absent"));title="Absent Students";}
+  if(type==="leave"){filtered=students.filter(s=>att.some(a=>Number(a.studentId)===Number(s.id)&&String(a.date||"").slice(0,10)===dt&&a.status==="Leave"));title="Leave Students";}
+  if(type==="feePending"){filtered=students.filter(s=>Math.max(0,Number(s.fee||0)-getStudentPaid(s.id))>0);title="Fees Pending Students";}
+  if(type==="feeCollected"){filtered=students.filter(s=>getStudentPaid(s.id)>0);title="Fees Collected Students";}
+  if(type==="resultPending"){filtered=students.filter(s=>!getFinalResultForStudent(s.id));title="Result Pending Students";}
+  if(type==="resultComplete"){filtered=students.filter(s=>!!getFinalResultForStudent(s.id));title="Complete Result Students";}
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText=title;
+  const rows=filtered.map((s,i)=>{
+    const paid=getStudentPaid(s.id), total=Number(s.fee||0), pending=Math.max(0,total-paid);
+    const rec=att.find(a=>Number(a.studentId)===Number(s.id)&&String(a.date||"").slice(0,10)===dt);
+    return `<tr><td>${i+1}</td><td>${escapeHtml(s.roll??"")}</td><td>${escapeHtml(s.name||"")}</td><td>${escapeHtml(s.classNo||"")}</td><td>${escapeHtml(s.section||"-")}</td><td>₹${paid.toLocaleString("en-IN")}</td><td>₹${pending.toLocaleString("en-IN")}</td><td>${escapeHtml(rec?.status||"-")}</td></tr>`;
+  }).join("");
+  document.getElementById("otherPage").innerHTML=`<button class="back-btn" onclick="showPage('reports')">← Back to Reports</button><div class="card"><div class="card-header"><h3>${escapeHtml(title)} (${filtered.length})</h3></div><div class="table-container"><table style="min-width:900px"><thead><tr><th>S.No.</th><th>Roll</th><th>Student Name</th><th>Class</th><th>Section</th><th>Fee Collected</th><th>Fee Pending</th><th>Today Attendance</th></tr></thead><tbody>${rows||`<tr><td colspan="8"><div class="empty">No students found.</div></td></tr>`}</tbody></table></div></div>`;
+}
+
+function openReportTeacherList(type){
+  const teachers=Array.isArray(getTeachers())?getTeachers():[];
+  const data=getData("teacherAttendance");
+  const records=Array.isArray(data)?data:[];
+  const dt=today();
+  const filtered=teachers.filter(t=>{
+    const rec=records.find(a=>Number(a.teacherId??a.teacherID)===Number(t.id)&&String(a.date||"").slice(0,10)===dt);
+    const status=(rec?.status||t.attendanceStatus||t.status||"").toString().toLowerCase();
+    return type==="present"?status==="present":status==="absent";
+  });
+  const title=type==="present"?"Present Teachers":"Absent Teachers";
+  document.getElementById("dashboardPage").style.display="none";
+  document.getElementById("otherPage").style.display="block";
+  document.getElementById("pageTitle").innerText=title;
+  const rows=filtered.map((t,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(t.name||"")}</td><td>${escapeHtml(t.mobile||"")}</td><td>${escapeHtml(t.classNo??t.teachingClass??"-")}</td><td>${escapeHtml(t.section||"-")}</td></tr>`).join("");
+  document.getElementById("otherPage").innerHTML=`<button class="back-btn" onclick="showPage('reports')">← Back to Reports</button><div class="card"><div class="card-header"><h3>${title} (${filtered.length})</h3></div><div class="table-container"><table><thead><tr><th>S.No.</th><th>Teacher Name</th><th>Mobile</th><th>Class</th><th>Section</th></tr></thead><tbody>${rows||`<tr><td colspan="5"><div class="empty">No ${type} teacher attendance found for today.</div></td></tr>`}</tbody></table></div></div>`;
+}
 
 /* GLOBAL TIMETABLE / NOTICE ACTIONS
    These functions must be global because the HTML buttons use onclick="...".
